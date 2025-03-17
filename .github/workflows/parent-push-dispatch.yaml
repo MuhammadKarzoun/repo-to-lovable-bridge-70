@@ -1,0 +1,35 @@
+name: Notify Parent Repository
+
+on:
+  push:
+    branches:
+      - main # or any branch you want to listen to
+
+jobs:
+  notify-parent:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract Submodule Name
+        id: extract
+        run: |
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
+          echo "submodule=$REPO_NAME" >> $GITHUB_OUTPUT
+
+      - name: Notify Parent Repository (Octobots)
+        run: |
+          curl -X POST https://api.github.com/repos/KarzounApps/octobots/dispatches \
+          -H "Accept: application/vnd.github.everest-preview+json" \
+          -H "Authorization: Bearer ${{ secrets.GH_ACTION_TOKEN }}" \
+          --data '{
+            "event_type": "sync-updated-ui-submodule",
+            "client_payload": {
+              "submodule": "${{ steps.extract.outputs.submodule }}",
+              "tag": "${{ github.ref_name }}"
+            }
+          }'    
+                
+          
+
+
+          
