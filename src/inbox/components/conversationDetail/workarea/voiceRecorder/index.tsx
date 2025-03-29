@@ -8,8 +8,9 @@ import RecordRTC, { RecordRTCPromisesHandler } from 'recordrtc';
 import Alert from '@octobots/ui/src/utils/Alert';
 import uploadHandler from '@octobots/ui/src/utils/uploadHandler';
 import Icon from '@octobots/ui/src/components/Icon';
+import { generateRandomString } from '@octobots/ui/src/utils';
 
-export const MyAudioRecorder: React.FC<AudioRecorderProps> = ({
+export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
     onSend,
     onCancel,
     maxDuration = 300, // 5 minutes in seconds
@@ -151,7 +152,7 @@ export const MyAudioRecorder: React.FC<AudioRecorderProps> = ({
             fetch(audioUrl)
                 .then(response => response.blob())
                 .then(blob => {
-                    const mp3File = new File([blob], 'recording.mp3', {
+                    const mp3File = new File([blob], `${generateRandomString(4)}_${Date.now()}.mp3`, {
                         type: 'audio/mp3',
                         lastModified: Date.now(),
                     });

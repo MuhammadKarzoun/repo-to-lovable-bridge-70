@@ -204,12 +204,11 @@ class WorkArea extends React.Component<FinalProps, State> {
         updateQuery: (prev, { subscriptionData }) => {
           const message = subscriptionData.data.conversationMessageStatusChanged;
           const kind = currentConversation.integration.kind;
-          // console.log("🚀 ~ WorkArea ~ conversationMessageStatusChanged ~ message:", message)
 
           if (!prev) {
             return;
           }
-
+          
           // current user"s message is being showed after insert message
           // mutation. So to prevent from duplication we are ignoring current
           // user"s messages from subscription

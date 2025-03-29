@@ -75,13 +75,8 @@ class CreateIntegration extends React.Component<Props, State> {
     const { integrations, searchValue, allIntegrations } = this.state;
     const { totalCount, queryParams, customLink } = this.props;
 
-    console.log('integrations................', allIntegrations);
-
     const datas = [] as any;
     const rows = [...integrations];
-    console.log('rows', rows);
-
-
 
     while (rows.length > 0) {
       datas.push(

@@ -21,7 +21,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import {
   getPluginConfig,
-  isEnabled,
+  // isEnabled,
   loadDynamicComponent
 } from '@octobots/ui/src/utils/core';
 import {
@@ -53,7 +53,7 @@ import { urlify } from '@octobots/ui/src/utils/urlParser';
 import xss from 'xss';
 import { ReplyComponent } from './styles';
 import WhatsappTemplates from '@octobots/ui-whatsapp/src/containers/WhatsappTemplates';
-import { MyAudioRecorder } from './voiceRecorder';
+import { VoiceRecorder } from './voiceRecorder';
 
 
 type Props = {
@@ -338,19 +338,8 @@ const RespondBox = (props: Props) => {
   };
 
   const onAudioUpload = (response: any) => {
-    console.log("🚀 ~ onAudioUpload ~ response:", response)
-    // setState((prevState) => ({
-    //   ...prevState,
-    //   attachments: [
-    //     ...prevState.attachments,
-    //     { ...response }
-    //   ]
-    // }));
-    //setState((prevState) => ({ ...prevState, isActiveRecord: false }));
-    //setTimeout(() => {
     addMessage(response);
     setState((prevState) => ({ ...prevState, isActiveRecord: false }));
-    //}, 3000);
   };
 
   function renderIndicator() {
@@ -412,7 +401,7 @@ const RespondBox = (props: Props) => {
     if (state.isActiveRecord) {
       return (
         <RecordMask id='recordmask'>
-          <MyAudioRecorder
+          <VoiceRecorder
             onSend={onAudioUpload}
             onCancel={() => setState({ ...state, isActiveRecord: false })}
             maxDuration={300}
