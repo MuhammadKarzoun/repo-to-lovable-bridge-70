@@ -14,6 +14,7 @@ import {
   Mask,
   MaskWrapper,
   PreviewImg,
+  RecordMask,
   RespondBoxStyled,
   SmallEditor
 } from '@octobots/ui-inbox/src/inbox/styles';
@@ -51,7 +52,8 @@ import AttachmentComp from '@octobots/ui/src/components/Attachment';
 import { urlify } from '@octobots/ui/src/utils/urlParser';
 import xss from 'xss';
 import { ReplyComponent } from './styles';
-import WhatsappTemplates  from '@octobots/ui-whatsapp/src/containers/WhatsappTemplates';
+import WhatsappTemplates from '@octobots/ui-whatsapp/src/containers/WhatsappTemplates';
+import { MyAudioRecorder } from './voiceRecorder';
 
 
 type Props = {
@@ -76,6 +78,7 @@ type Props = {
 
 type State = {
   isInactive: boolean;
+  isActiveRecord: boolean;
   isHiddenDynamicMask: boolean;
   isInternal: boolean;
   sending: boolean;
@@ -112,6 +115,7 @@ const RespondBox = (props: Props) => {
   const [content, setContent] = useState('');
   const [state, setState] = useState<State>({
     isInactive: !checkIsActive(props.conversation),
+    isActiveRecord: false,
     isHiddenDynamicMask: false,
     isInternal: props.showInternal || false,
     sending: false,
@@ -293,18 +297,17 @@ const RespondBox = (props: Props) => {
     return ret > 0 ? ret : 0;
   };
 
-  const addMessage = () => {
+  const addMessage = (isAudio?: any) => {
     const { isInternal, attachments, extraInfo } = state;
     const message = {
       conversationId: conversation._id,
-      content: cleanText(content) || ' ',
+      content: cleanText(content) || '',
       extraInfo,
       contentType: 'text',
       internal: isInternal,
-      attachments,
+      attachments: isAudio ? [isAudio] : attachments,
       mentionedUserIds: getParsedMentions(useGenerateJSON(content)) as string[],
       ...(replyExist && { replyForMsgId: replyExist._id })
-
     };
 
     setState((prevState) => ({ ...prevState, sending: true }));
@@ -332,6 +335,22 @@ const RespondBox = (props: Props) => {
       `showInternalState-${props.conversation._id}`,
       String(state.isInternal)
     );
+  };
+
+  const onAudioUpload = (response: any) => {
+    console.log("🚀 ~ onAudioUpload ~ response:", response)
+    // setState((prevState) => ({
+    //   ...prevState,
+    //   attachments: [
+    //     ...prevState.attachments,
+    //     { ...response }
+    //   ]
+    // }));
+    //setState((prevState) => ({ ...prevState, isActiveRecord: false }));
+    //setTimeout(() => {
+    addMessage(response);
+    setState((prevState) => ({ ...prevState, isActiveRecord: false }));
+    //}, 3000);
   };
 
   function renderIndicator() {
@@ -383,6 +402,22 @@ const RespondBox = (props: Props) => {
             'Customer is offline Click to hide and send messages and they will receive them the next time they are online'
           )}
         </Mask>
+      );
+    }
+
+    return null;
+  }
+
+  function renderRecordMask() {
+    if (state.isActiveRecord) {
+      return (
+        <RecordMask id='recordmask'>
+          <MyAudioRecorder
+            onSend={onAudioUpload}
+            onCancel={() => setState({ ...state, isActiveRecord: false })}
+            maxDuration={300}
+          />
+        </RecordMask>
       );
     }
 
@@ -559,6 +594,12 @@ const RespondBox = (props: Props) => {
 
         {loadDynamicComponent('inboxEditorAction', props, true)}
 
+        <label>
+          <Tip text={__('Record audio')}>
+            <Icon icon='microphone-2' onClick={() => setState({ ...state, isActiveRecord: true })} />
+          </Tip>
+        </label>
+
         <label style={{ marginInlineEnd: '10px' }}>
           <Tip text={__('Attach file')}>
             <Icon icon='paperclip' />
@@ -642,6 +683,7 @@ const RespondBox = (props: Props) => {
 
     return (
       <MaskWrapper>
+        {renderRecordMask()}
         {renderMask()}
         {!isInternal && !isHiddenDynamicMask && dynamicComponent}
         <RespondBoxStyled
