@@ -39,7 +39,7 @@ const ResponseTemplate = (props: Props) => {
   );
 
   return (
-    <ResponseTemplateStyled>
+    <ResponseTemplateStyled style={{ display: 'flex' }}>
       <Popover
         placement="left-end"
         closeAfterSelect={true}
