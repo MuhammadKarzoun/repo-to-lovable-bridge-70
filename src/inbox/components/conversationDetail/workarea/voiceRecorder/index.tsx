@@ -196,21 +196,18 @@ export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
   return (
     <div className="flex flex-col gap-2 w-full">
       {!isRecording && !audioUrl && (
-        <div
+        <button
+          type="button"
           onClick={handleCancel}
           onKeyDown={(e) => e.key === 'Escape' && handleCancel()}
-          role="button"
-          tabIndex={0}
           style={{ position: 'absolute', top: '10px', insetInlineEnd: '10px' }}
         >
           <Icon icon="times" size={20} />
-        </div>
-
+        </button>
       )}
 
       {isRecording && (
         <>
-
           <Waveform
             analyser={analyser.current}
             isRecording={isRecording}
