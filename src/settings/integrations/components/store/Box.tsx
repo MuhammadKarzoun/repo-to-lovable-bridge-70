@@ -132,7 +132,7 @@ class Row extends React.Component<Props, State> {
       'instagram': '/images/integrations/instagram.png',
     }
     const { name } = integration;
-    const Styleobj = { backgroundColor: '#FFDB45', color: '#000', padding: '5px 20px', borderRadius: '6px', fontWeight: '600' }
+    const Styleobj = { backgroundColor: '#f1b500', color: '#000', padding: '5px 20px', borderRadius: '6px', fontWeight: '600' }
     const moreBtnStyle = { position: "absolute", left: "4px", fontWeight: "bold", background: "transparent", border: "none", fontSize: "18px", top: "0px" }
     const menuStyles = {
       position: 'absolute',

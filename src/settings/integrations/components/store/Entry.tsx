@@ -70,7 +70,7 @@ function renderCreate(createUrl, kind, isAvailable) {
   if ((!createUrl && !kind) || !isAvailable) {
     return null;
   }
-  const Styleobj = { backgroundColor:'#FFDB45',color:'#000',padding:'5px 20px',borderRadius:'6px',fontWeight:'600'}
+  const Styleobj = { backgroundColor:'#f1b500',color:'#000',padding:'5px 20px',borderRadius:'6px',fontWeight:'600'}
 
   const trigger = <button style={{...Styleobj, position:'static',fontSize:"13px"}}><Icon icon="plus-circle" /> {" "} {__("Add")}</button>;
 
