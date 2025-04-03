@@ -159,23 +159,21 @@ export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
                     uploadHandler({
                         files: {
                             length: 1,
-                            item: (index: number) => index === 0 ? mp3File : null,
+                            item: (index: number) => (index === 0 ? mp3File : null),
                             0: mp3File,
                             [Symbol.iterator]: function* () {
-                                yield this[0];
-                            }
+                                yield mp3File;
+                            },
                         },
                         beforeUpload: () => { },
                         afterUpload: ({ response, fileInfo, status }) => {
                             onSend({ url: response, ...fileInfo });
-
                             if (status === 'ok') {
                                 Alert.info('Looking good!');
                             } else {
                                 Alert.error(response);
                             }
                         },
-
                         afterRead: ({ result, fileInfo }) => { },
                     });
 
@@ -196,14 +194,18 @@ export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
     return (
         <div className="flex flex-col gap-2 w-full">
             {!isRecording && !audioUrl && (
-                <div onClick={handleCancel} style={{ position: 'absolute', top: '10px', insetInlineEnd: '10px' }}>
-                    <Icon icon='times' size={20} />
-                </div>
+                <button
+                    type="button"
+                    onClick={handleCancel}
+                    onKeyDown={(e) => e.key === 'Escape' && handleCancel()}
+                    style={{ position: 'absolute', top: '10px', insetInlineEnd: '10px' }}
+                >
+                    <Icon icon="times" size={20} />
+                </button>
             )}
 
             {isRecording && (
                 <>
-
                     <Waveform
                         analyser={analyser.current}
                         isRecording={isRecording}
