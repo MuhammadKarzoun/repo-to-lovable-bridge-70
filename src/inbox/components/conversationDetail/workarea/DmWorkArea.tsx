@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   AddMessageMutationVariables,
   IConversation,
@@ -19,8 +19,28 @@ import Message from '@octobots/ui-inbox/src/inbox/components/conversationDetail/
 import RespondBox from '../../../containers/conversationDetail/RespondBox';
 import TypingIndicator from './TypingIndicator';
 import { __ } from 'coreui/utils';
-// import { isEnabled } from '@octobots/ui/src/utils/core';
-// import { IBrand } from '@octobots/ui/src/brands/types';
+import styled from 'styled-components';
+import { modernColors, borderRadius } from '../../../../styles/theme';
+
+const ModernContentBox = styled(ContentBox)`
+  background-color: ${modernColors.contentBackground};
+  border-radius: ${borderRadius.md};
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+const ModernConversationWrapper = styled(ConversationWrapper)`
+  flex: 1;
+  background-color: ${modernColors.background};
+  overflow-y: auto;
+`;
+
+const ModernContenFooter = styled(ContenFooter)`
+  background-color: ${modernColors.contentBackground};
+  border-top: 1px solid ${modernColors.border};
+`;
 
 type Props = {
   queryParams?: any;
@@ -48,7 +68,6 @@ type Props = {
   msg?: string;
   updateMsg: (id: string, content: string, action: string) => void;
   hideMask: boolean;
-  // brands: IBrand[];
 };
 
 const WorkArea: React.FC<Props> = React.memo((props) => {
@@ -57,7 +76,6 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
     conversationMessages,
     content,
     updateMsg,
-    // brands,
     hideMask,
     msg,
     addMessage,
@@ -67,8 +85,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
     loadMoreMessages,
   } = props;
 
-  const [attachmentPreview, setAttachmentPreview] =
-    useState<IAttachmentPreview | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<IAttachmentPreview | null>(null);
   const [replyForMsgId, setReplyForMsgId] = useState<IMessage | null>(null);
   const conversationWrapperRef = useRef<HTMLDivElement>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -130,7 +147,6 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
       messages: IMessage[],
       conversationFirstMessage: IMessage,
       updateMsg: (id: string, content: string, action: string) => void,
-      // brands: IBrand[],
       brandId?: string,
     ) => {
       let tempId: string | undefined;
@@ -248,40 +264,38 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
   ]);
 
   // Jump to a specific message after a delay
-useEffect(() => {
-  if (msg && conversationMessages.some((m) => m._id === msg)) {
-    const timeout = setTimeout(() => {
-      jumpToReleventDiv(msg);
-    }, 2000);
-    return () => clearTimeout(timeout);
-  }
-}, [msg, conversationMessages, jumpToReleventDiv]);
-
+  useEffect(() => {
+    if (msg && conversationMessages.some((m) => m._id === msg)) {
+      const timeout = setTimeout(() => {
+        jumpToReleventDiv(msg);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [msg, conversationMessages, jumpToReleventDiv]);
 
   return (
     <>
       <ActionBar currentConversation={currentConversation} />
 
-      <ContentBox>
-      <ConversationWrapper
+      <ModernContentBox>
+        <ModernConversationWrapper
           ref={conversationWrapperRef as unknown as React.RefObject<any>}
           onScroll={handleScroll}
         >
           <RenderConversationWrapper>
             {renderConversation()}
           </RenderConversationWrapper>
-        </ConversationWrapper>
-      </ContentBox>
+        </ModernConversationWrapper>
+      </ModernContentBox>
 
       {currentConversation._id && (
-        <ContenFooter>
+        <ModernContenFooter>
           {typingInfo && <TypingIndicator>{typingInfo}</TypingIndicator>}
           {renderRespondBox()}
-        </ContenFooter>
+        </ModernContenFooter>
       )}
     </>
   );
 });
    
-
 export default WorkArea;

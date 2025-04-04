@@ -9,37 +9,48 @@ import {
   Idle,
   MainInfo,
   MessageContent,
+  MessagePreview,
   RowContent,
   RowItem,
   SmallTextOneLine,
+  CustomerInfo,
+  AssigneesContainer,
 } from "./styles";
-import {
-  CustomerName,
-  EllipsisContent,
-  Flex as FlexRoot,
-} from "@octobots/ui/src/styles/main";
 import {
   cleanIntegrationKind,
   readFile,
   renderFullName,
 } from "@octobots/ui/src/utils";
 
-import { CallLabel } from "@octobots/ui-inbox/src/inbox/styles";
-import FormControl from "@octobots/ui/src/components/form/Control";
-import { IBrand } from "@octobots/ui/src/brands/types";
 import { IConversation } from "@octobots/ui-inbox/src/inbox/types";
 import { ICustomer } from "@octobots/ui-contacts/src/customers/types";
-import { IIntegration } from "@octobots/ui-inbox/src/settings/integrations/types";
 import { IUser } from "@octobots/ui/src/auth/types";
-import IntegrationIcon from "@octobots/ui-inbox/src/settings/integrations/components/IntegrationIcon";
-import NameCard from "@octobots/ui/src/components/nameCard/NameCard";
 import React, { useEffect, useState } from "react";
-import Tags from "@octobots/ui/src/components/Tags";
+import FormControl from "@octobots/ui/src/components/form/Control";
 import Tip from "@octobots/ui/src/components/Tip";
-import strip from "strip";
-import withCurrentUser from "@octobots/ui/src/auth/containers/withCurrentUser";
+import Tags from "@octobots/ui/src/components/Tags";
+// import withCurrentUser from "@octobots/ui/src/auth/containers/withCurrentUser";
+import Avatar from "../../../components/common/Avatar";
+import styled from "styled-components";
+import { modernColors, typography, spacing } from "../../../styles/theme";
+import Badge from "../../../components/common/Badge";
+import { IIntegration } from '@octobots/ui-inbox/src/settings/integrations/types';
 
 dayjs.extend(relativeTime);
+
+const CustomerName = styled.div`
+  font-weight: ${typography.fontWeights.medium};
+  color: ${modernColors.textPrimary};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  
+  time {
+    font-size: ${typography.fontSizes.sm};
+    color: ${modernColors.textSecondary};
+    font-weight: ${typography.fontWeights.normal};
+  }
+`;
 
 type Props = {
   conversation: IConversation;
@@ -85,7 +96,7 @@ const ConversationItem: React.FC<Props> = (props) => {
     );
   };
 
-  const isIdleContent = (integration: IIntegration, updatedAt: Date, idleTimeConfig: number, lastMsgFrom?: string) => {
+  const isIdleContent = (integration, updatedAt: Date, idleTimeConfig: number, lastMsgFrom?: string) => {
     const kind = integration.kind;
 
     if (
@@ -95,7 +106,7 @@ const ConversationItem: React.FC<Props> = (props) => {
       conversation.status === "closed" ||
       conversation.status === "pending"
     ) {
-      return ;
+      return;
     }
 
     const now = new Date();
@@ -103,13 +114,9 @@ const ConversationItem: React.FC<Props> = (props) => {
 
     const [idle, setIdle] = useState(idleTimePassed);
 
-    //console.log("🚀 ~ isIdle ~ idleTimeConfig:", idleTimePassed, idleTimeConfig, lastMsgFrom)
-
-    // use one function for closure interval in function, not in react component
     useEffect(() => {
       const interval = setInterval(() => {
         setIdle((oldValue) => {
-          // use fountion for access real value without depend on it in useEffect
           const newValue = oldValue + (1 / 60);
           if (newValue >= idleTimeConfig) {
             clearInterval(interval);
@@ -121,7 +128,6 @@ const ConversationItem: React.FC<Props> = (props) => {
       return () => {
         clearInterval(interval);
       };
-      // pass [] for remove rerender problem
     }, []);
 
     return (
@@ -129,19 +135,19 @@ const ConversationItem: React.FC<Props> = (props) => {
       <Tip placement="left" text="Idle">
         <Idle />
       </Tip>
-    )
+    );
   };
 
   const showMessageContent = (kind: string, content: string) => {
     if (kind === "callpro") {
       return (
-        <CallLabel type={(content || "").toLocaleLowerCase()}>
+        <span style={{ color: content.toLowerCase() === "answered" ? modernColors.success : modernColors.danger }}>
           {content}
-        </CallLabel>
+        </span>
       );
     }
 
-    return strip(content);
+    return content ? content.replace(/<[^>]*>?/gm, '') : '';
   };
 
   const {
@@ -162,7 +168,7 @@ const ConversationItem: React.FC<Props> = (props) => {
   const isRead = readUserIds && readUserIds.indexOf(currentUser._id) > -1;
   const isExistingCustomer = customer && customer._id;
   const isChecked = selectedIds.includes(conversation._id);
-  const brand = integration.brand || ({} as IBrand);
+  const brand = integration.brand || {};
 
   return (
     <RowItem onClick={onClickHandler} $isActive={isActive} $isRead={isRead}>
@@ -171,55 +177,50 @@ const ConversationItem: React.FC<Props> = (props) => {
         <FlexContent>
           <MainInfo>
             {isExistingCustomer && (
-              <NameCard.Avatar
-                size={36}
-                letterCount={1}
+              <Avatar 
                 customer={customer}
-                icon={<IntegrationIcon integration={integration} />}
+                size={40}
+                status={customer.isOnline ? 'online' : 'offline'}
               />
             )}
-            <FlexContent>
+            <CustomerInfo>
               <CustomerName>
-                <EllipsisContent>
+                <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {isExistingCustomer && renderFullName(customer)}
-                </EllipsisContent>
+                </div>
                 <time>
                   {(dayjs(updatedAt || createdAt) || ({} as any)).fromNow(true)}
                 </time>
               </CustomerName>
 
               <SmallTextOneLine>
-                to {brand.name} via{" "}
-                {integration.kind === "callpro"
-                  ? integration.name
-                  : cleanIntegrationKind(integration && integration.kind)}
+                {brand.name && `${brand.name} via `}
+                {integration.name}
               </SmallTextOneLine>
-            </FlexContent>
+            </CustomerInfo>
           </MainInfo>
 
           <MessageContent>
-            <EllipsisContent>
+            <MessagePreview>
               {showMessageContent(integration.kind, content || "")}
-            </EllipsisContent>
-            <FlexRoot>
-              {messageCount > 1 && <Count>{messageCount}</Count>}
+            </MessagePreview>
+            <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xs }}>
+              {messageCount > 1 && <Badge variant="primary" count={messageCount} />}
               {assignedUser && (
-                <Tip
-                  key={assignedUser._id}
-                  placement="top"
-                  text={assignedUser.details && assignedUser.details.fullName}
-                >
-                  <AssigneeImg
-                    src={
-                      assignedUser.details &&
-                      (assignedUser.details.avatar
-                        ? readFile(assignedUser.details.avatar, 36)
-                        : "/images/avatar-colored.jpeg")
-                    }
-                  />
-                </Tip>
+                <AssigneesContainer>
+                  <Tip
+                    key={assignedUser._id}
+                    placement="top"
+                    text={assignedUser.details && assignedUser.details.fullName}
+                  >
+                    <Avatar 
+                      user={assignedUser}
+                      size={24}
+                    />
+                  </Tip>
+                </AssigneesContainer>
               )}
-            </FlexRoot>
+            </div>
           </MessageContent>
           <Tags tags={tags} limit={3} />
         </FlexContent>
@@ -229,4 +230,4 @@ const ConversationItem: React.FC<Props> = (props) => {
   );
 };
 
-export default withCurrentUser(ConversationItem);
+export default ConversationItem;

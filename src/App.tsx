@@ -1,6 +1,6 @@
-import { PluginLayout } from '@octobots/ui/src/styles/main';
 import React from 'react';
 import GeneralRoutes from './generalRoutes';
+import { PluginLayout } from '@octobots/ui/src/styles/main';
 import { AppProvider } from 'coreui/appContext';
 import { dummyUser } from '@octobots/ui/src/constants/dummy-data';
 import '@octobots/ui/src/styles/global-styles.ts';
@@ -10,6 +10,7 @@ import '@nateradebaugh/react-datetime/css/react-datetime.css';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import { GlobalStyles } from './styles/theme';
 
 dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
@@ -17,6 +18,7 @@ dayjs.extend(relativeTime);
 const App = () => {
   return (
     <PluginLayout>
+      <GlobalStyles />
       <AppProvider currentUser={dummyUser}>
         <GeneralRoutes />
       </AppProvider>

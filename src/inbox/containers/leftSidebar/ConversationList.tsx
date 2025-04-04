@@ -20,14 +20,14 @@ import React from "react";
 import { generateParams } from "@octobots/ui-inbox/src/inbox/utils";
 import { gql } from "@apollo/client";
 import { graphql } from "@apollo/client/react/hoc";
+import { useNavigate, useLocation } from "react-router-dom";
 
 type Props = {
-  currentUser?: IUser;
-  history: any;
+  currentUser: IUser;
   currentConversationId?: string;
+  queryParams: any;
   toggleRowCheckbox: (conversation: IConversation[], checked: boolean) => void;
   selectedConversations: IConversation[];
-  queryParams: any;
   counts?: any;
   location: any;
   navigate: any;
@@ -68,7 +68,7 @@ const ConversationListContainer: React.FC<FinalProps> = (props) => {
         },
       });
     }
-  });
+  }, [queryParams.isModalOpen, currentUser, conversationsQuery, totalCountQuery, updateCountsForNewMessage]);
 
   const getTotalCount = () => {
     let totalCount = totalCountQuery.conversationsTotalCount || 0;
@@ -80,9 +80,9 @@ const ConversationListContainer: React.FC<FinalProps> = (props) => {
       if (queryParams.segment && counts.bySegment) {
         totalCount += counts.bySegment[queryParams.segment] || 0;
       }
-      if (queryParams.integrationType && counts.byIntegrationTypes) {
+      if (queryParams.integrationId && counts.byIntegration) {
         totalCount +=
-          counts.byIntegrationTypes[queryParams.integrationType] || 0;
+          counts.byIntegration[queryParams.integrationId] || 0;
       }
       if (queryParams.tag && counts.byTags) {
         const tags = queryParams.tag.split(",");
@@ -100,7 +100,9 @@ const ConversationListContainer: React.FC<FinalProps> = (props) => {
 
   // on change conversation
   const onChangeConversation = (conversation: IConversation) => {
-    routerUtils.setParams(navigate, location, { _id: conversation._id });
+    if (navigate && location) {
+      routerUtils.setParams(navigate, location, { _id: conversation._id });
+    }
   };
 
   const onLoadMore = () => {
@@ -147,9 +149,12 @@ const ConversationListContainer: React.FC<FinalProps> = (props) => {
         updateQuery: () => {
           conversationsQuery.refetch();
         },
+        onError: (error) => {
+          console.error("Subscription error:", error);
+        },
       });
     }
-  });
+  }, [queryParams.isModalOpen, conversationsQuery, conversations]);
 
   const updatedProps = {
     ...props,
@@ -179,7 +184,20 @@ const generateOptions = (queryParams) => ({
   limit: queryParams.limit ? parseInt(queryParams.limit, 10) : 10,
 });
 
-export default withProps<Props>(
+const WithRouterProps = (props) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  return (
+    <ConversationListContainerWithRouter 
+      {...props} 
+      navigate={navigate} 
+      location={location} 
+    />
+  );
+};
+
+const ConversationListContainerWithRouter = withProps<Props>(
   compose(
     graphql<Props, ConversationsQueryResponse, ConvesationsQueryVariables>(
       gql(queries.sidebarConversations),
@@ -189,9 +207,6 @@ export default withProps<Props>(
           variables: generateParams(queryParams),
           notifyOnNetworkStatusChange: true,
           fetchPolicy: "network-only",
-          // every minute
-          // commented this line because it was causing the page to refresh every minute and it was glitchy
-          // pollInterval: 60000
         }),
       }
     ),
@@ -207,3 +222,5 @@ export default withProps<Props>(
     )
   )(ConversationListContainerWithRefetch)
 );
+
+export default WithRouterProps;

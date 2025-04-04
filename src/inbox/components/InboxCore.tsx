@@ -6,6 +6,8 @@ import React from "react";
 import { __ } from "coreui/utils";
 import asyncComponent from "@octobots/ui/src/components/AsyncComponent";
 import { loadDynamicComponent } from "@octobots/ui/src/utils/core";
+import styled from "styled-components";
+import { modernColors, spacing } from "../../styles/theme";
 
 const Sidebar = asyncComponent(
   () =>
@@ -13,6 +15,15 @@ const Sidebar = asyncComponent(
       /* webpackChunkName:"Inbox-Sidebar" */ "../containers/leftSidebar/Sidebar"
     )
 );
+
+const ModernHeightedWrapper = styled(HeightedWrapper)`
+  background-color: ${modernColors.background};
+`;
+
+const ModernContents = styled(Contents)`
+  padding: ${spacing.lg};
+  gap: ${spacing.lg};
+`;
 
 type Props = {
   queryParams: any;
@@ -24,7 +35,12 @@ type Props = {
 const Inbox = (props: Props) => {
   const { currentConversationId, queryParams, msg, currentUserId } = props;
 
-  const menuInbox = [{ title: "Team Inbox", link: "/inbox/index" }, {title: "Dashboard Apps", link: "/inbox/dashboard-apps" }, {title: "My tasks", link: `/taks?assignedUserIds=${currentUserId}` }, {title: "My tickets", link: `/ticket?assignedUserIds=${currentUserId}` }];
+  const menuInbox = [
+    { title: "Team Inbox", link: "/inbox/index" }, 
+    { title: "My tasks", link: `/taks?assignedUserIds=${currentUserId}` }, 
+    { title: "My tickets", link: `/ticket?assignedUserIds=${currentUserId}` }
+  ];
+  
   const ReportsFormButton = loadDynamicComponent("reportsCommonFormButton", {
     serviceName: "inbox",
     reportTemplateType: "inbox",
@@ -32,20 +48,20 @@ const Inbox = (props: Props) => {
   });
 
   return (
-    <HeightedWrapper>
+    <ModernHeightedWrapper>
       <Header
         title={"Conversation"}
         queryParams={queryParams}
         submenu={menuInbox}
       />
-      <Contents>
+      <ModernContents>
         <Sidebar
           queryParams={queryParams}
           currentConversationId={currentConversationId}
         />
         <ConversationDetail currentId={currentConversationId} msg={msg} />
-      </Contents>
-    </HeightedWrapper>
+      </ModernContents>
+    </ModernHeightedWrapper>
   );
 };
 

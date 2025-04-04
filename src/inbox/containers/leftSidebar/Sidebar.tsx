@@ -20,10 +20,19 @@ import { InboxManagementActionConsumer } from "../InboxCore";
 import React from "react";
 import { gql } from "@apollo/client";
 import { graphql } from "@apollo/client/react/hoc";
+import { useNavigate, useLocation } from "react-router-dom";
+
+import { loadErrorMessages, loadDevMessages } from "@apollo/client/dev";
+
+
+loadDevMessages();
+loadErrorMessages();
 
 type Props = {
   queryParams: any;
   currentConversationId?: string;
+  navigate: (path: string) => void;
+  location: any;
 };
 
 type FinalProps = Props & ResolveAllMutationResponse;
@@ -71,7 +80,7 @@ class Sidebar extends React.Component<FinalProps> {
       });
     }
 
-    const { currentConversationId, queryParams } = this.props;
+    const { currentConversationId, queryParams, navigate, location } = this.props;
     const content = ({ bulk, toggleBulk, emptyBulk }: IBulkContentProps) => {
       return (
         <AppConsumer>
@@ -90,6 +99,7 @@ class Sidebar extends React.Component<FinalProps> {
                   resolveAll={this.resolveAll(
                     notifyConsumersOfManagementAction
                   )}
+                  history={{ location, navigate }}
                 />
               )}
             </InboxManagementActionConsumer>
@@ -102,7 +112,14 @@ class Sidebar extends React.Component<FinalProps> {
   }
 }
 
-export default withProps<Props>(
+const WithRouterProps = (props) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  return <SidebarWithProps {...props} navigate={navigate} location={location} />;
+};
+
+const SidebarWithProps = withProps<Props>(
   compose(
     graphql<Props, ResolveAllMutationResponse, ResolveAllMutationVariables>(
       gql(mutations.resolveAll),
@@ -113,3 +130,5 @@ export default withProps<Props>(
     )
   )(Sidebar)
 );
+
+export default WithRouterProps;

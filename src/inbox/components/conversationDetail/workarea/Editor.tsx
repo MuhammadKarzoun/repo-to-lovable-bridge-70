@@ -6,6 +6,90 @@ import {
   RichTextEditor,
 } from '@octobots/ui/src/components/richTextEditor/TEditor';
 import TemplateList from './TemplateList';
+import styled from 'styled-components';
+import { modernColors, borderRadius, spacing, typography, transitions } from '../../../../styles/theme';
+
+const EditorContainer = styled.div`
+  position: relative;
+  
+  .RichEditor-root {
+    border: none;
+    background-color: transparent;
+    
+    &:focus-within {
+      outline: none;
+    }
+  }
+  
+  .RichEditor-editor {
+    min-height: 100px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0;
+    
+    .public-DraftEditor-content {
+      min-height: 100px;
+      max-height: 200px;
+    }
+  }
+  
+  .RichEditor-controls {
+    border-top: 1px solid ${modernColors.border};
+    padding: ${spacing.xs} ${spacing.sm};
+    background-color: ${modernColors.messageBackground};
+  }
+  
+  .RichEditor-styleButton {
+    padding: ${spacing.xs} ${spacing.sm};
+    margin-right: ${spacing.xs};
+    border-radius: ${borderRadius.sm};
+    
+    &:hover {
+      background-color: ${modernColors.hover};
+    }
+    
+    &.RichEditor-activeButton {
+      background-color: ${modernColors.active};
+      color: ${modernColors.primary};
+    }
+  }
+`;
+
+const TemplateListContainer = styled.div`
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  box-shadow: 0 -4px 12px ${modernColors.shadow};
+  border-radius: ${borderRadius.md} ${borderRadius.md} 0 0;
+  overflow: hidden;
+  background-color: ${modernColors.contentBackground};
+  border: 1px solid ${modernColors.border};
+  border-bottom: none;
+`;
+
+const PlainTextEditorContainer = styled.div`
+  position: relative;
+  
+  textarea {
+    width: 100%;
+    min-height: 100px;
+    max-height: 200px;
+    resize: none;
+    border: none;
+    outline: none;
+    padding: 0;
+    font-family: ${typography.fontFamily};
+    font-size: ${typography.fontSizes.md};
+    line-height: ${typography.lineHeights.normal};
+    background-color: transparent;
+    
+    &::placeholder {
+      color: ${modernColors.textSecondary};
+    }
+  }
+`;
 
 type EditorProps = {
   currentConversation: string;
@@ -115,35 +199,54 @@ const Editor = forwardRef(
         return null;
       }
 
-      // Set suggestionState to SuggestionList.
       return (
-        <TemplateList
-          onSelect={onSelectTemplate}
-          suggestionsState={templatesState}
-        />
+        <TemplateListContainer>
+          <TemplateList
+            onSelect={onSelectTemplate}
+            suggestionsState={templatesState}
+          />
+        </TemplateListContainer>
       );
     };
 
+    // Determine if we should use rich text based on integration kind
+    const shouldUseRichText = () => {
+      // Integrations that don't support rich text
+      const plainTextIntegrations = [
+        'whatsapp',
+        'instagram-messenger',
+        'facebook-messenger',
+        'telegram',
+        'viber',
+        'line',
+        'telnyx'
+      ];
+      
+      return !plainTextIntegrations.some(type => integrationKind.includes(type));
+    };
+
     return (
-      <div>
+      <EditorContainer>
         {renderTemplates()}
-        <RichTextEditor
-          ref={ref}
-          name={currentConversation}
-          placeholder={placeholder}
-          integrationKind={integrationKind}
-          showMentions={showMentions}
-          mentionSuggestion={mentionSuggestion}
-          content={content}
-          onChange={onChange}
-          autoGrow={true}
-          autoGrowMinHeight={100}
-          autoGrowMaxHeight="55vh"
-          limit={limit}
-          onCtrlEnter={onCtrlEnter}
-        />
-      </div>
+          <RichTextEditor
+            ref={ref}
+            name={currentConversation}
+            placeholder={placeholder}
+            integrationKind={integrationKind}
+            showMentions={showMentions}
+            mentionSuggestion={mentionSuggestion}
+            content={content}
+            onChange={onChange}
+            autoGrow={true}
+            autoGrowMinHeight={100}
+            autoGrowMaxHeight="55vh"
+            limit={limit}
+            onCtrlEnter={onCtrlEnter}
+            toolbar={shouldUseRichText() ? undefined : [] }
+          />
+      </EditorContainer>
     );
   },
 );
+
 export default Editor;

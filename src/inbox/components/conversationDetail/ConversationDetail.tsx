@@ -16,6 +16,21 @@ import React from 'react';
 import Sidebar from '../../containers/conversationDetail/Sidebar';
 import SidebarLoader from './sidebar/SidebarLoader';
 import WorkArea from './workarea/WorkArea';
+import styled from 'styled-components';
+import { modernColors, borderRadius } from '../../../styles/theme';
+
+const ModernMainContent = styled(MainContent)`
+  background-color: ${modernColors.contentBackground};
+  border-radius: ${borderRadius.md};
+  overflow: hidden;
+  box-shadow: 0 1px 3px ${modernColors.shadow};
+`;
+
+const ModernContentBox = styled(ContentBox)`
+  background-color: ${modernColors.contentBackground};
+  border-radius: ${borderRadius.md};
+  overflow: hidden;
+`;
 
 type Props = {
   currentConversation: IConversation;
@@ -75,9 +90,9 @@ export default class ConversationDetail extends React.Component<Props> {
 
     if (loading) {
       return (
-        <ContentBox>
+        <ModernContentBox>
           <ConversationDetailLoader />
-        </ContentBox>
+        </ModernContentBox>
       );
     }
 
@@ -152,7 +167,7 @@ export default class ConversationDetail extends React.Component<Props> {
   render() {
     return (
       <React.Fragment>
-        <MainContent>{this.renderContent()}</MainContent>
+        <ModernMainContent>{this.renderContent()}</ModernMainContent>
         {this.renderSidebar()}
       </React.Fragment>
     );

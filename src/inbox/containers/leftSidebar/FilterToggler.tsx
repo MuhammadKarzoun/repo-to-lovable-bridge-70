@@ -8,6 +8,8 @@ type Props = {
   toggleName: string;
   manageUrl?: string;
   children: React.ReactNode;
+  isOpen: boolean;
+  toggle: (params: { isOpen: boolean }) => void;
 };
 
 const STORAGE_KEY = 'octobots_additional_sidebar_config';
