@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import {
   modernColors,
@@ -65,58 +65,36 @@ const TabFilter: React.FC<TabFilterProps> = ({
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("all");
+
+  useEffect(() => {
+    setActiveTab(queryParams.tab);
+  }, [queryParams]);
 
   const handleTabClick = (tab: string) => {
     // Clear existing filters first
+    routerUtils.removeParams(
+      navigate,
+      location,
+      ...[
+        "tab",
+        "assignedUserId",
+        "unassigned",
+        "participating",
+        "status",
+        "myAssigned",
+      ]
+    );
 
     routerUtils.setParams(navigate, location, {
       tab,
-      assignedUserId: undefined,
-      unassigned: undefined,
-      participating: undefined,
+      assignedUserId: tab === "myAssigned" ? currentUser._id : undefined,
+      unassigned: tab === "unassigned" ? "true" : undefined,
+      participating: tab === "myParticipated" ? "true" : undefined,
       status: undefined,
       myAssigned: undefined,
     });
-
-    // Apply specific filters based on tab
-    switch (tab) {
-      case "myAssigned":
-        routerUtils.setParams(navigate, location, {
-          assignedUserId: currentUser._id,
-        });
-        break;
-      case "unassigned":
-        routerUtils.setParams(navigate, location, {
-          unassigned: "true",
-        });
-        break;
-      case "myParticipated":
-        routerUtils.setParams(navigate, location, {
-          participating: "true",
-        });
-        break;
-      case "all":
-      default:
-        // No additional filters needed
-        break;
-    }
   };
-  console.log("queryParams", queryParams);
-
-  const getActiveTab = () => {
-    if (queryParams.assignedUserId === currentUser._id) {
-      return "myAssigned";
-    }
-    if (queryParams.unassigned === "true") {
-      return "unassigned";
-    }
-    if (queryParams.participating === "true") {
-      return "myParticipated";
-    }
-    return "all";
-  };
-
-  const activeTab = getActiveTab();
 
   return (
     <TabsContainer>
