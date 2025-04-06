@@ -1,14 +1,21 @@
-import Button from '@octobots/ui/src/components/Button';
-import ConversationItem from '../../containers/leftSidebar/ConversationItem';
-import { ConversationItems } from './styles';
-import EmptyState from '@octobots/ui/src/components/EmptyState';
-import { IConversation } from '@octobots/ui-inbox/src/inbox/types';
-import React from 'react';
-import { __ } from '@octobots/ui/src/utils/core';
-import styled from 'styled-components';
-import { modernColors, borderRadius, spacing, typography, transitions } from '../../../styles/theme';
-import ModernButton from '../../../components/common/Button';
+import Button from "@octobots/ui/src/components/Button";
+import ConversationItem from "../../containers/leftSidebar/ConversationItem";
+import { ConversationItems } from "./styles";
+import EmptyState from "@octobots/ui/src/components/EmptyState";
+import { IConversation } from "@octobots/ui-inbox/src/inbox/types";
+import React from "react";
+import { __ } from "@octobots/ui/src/utils/core";
+import styled from "styled-components";
+import {
+  modernColors,
+  borderRadius,
+  spacing,
+  typography,
+  transitions,
+} from "../../../styles/theme";
+import ModernButton from "../../../components/common/Button";
 import { IUser } from "@octobots/ui/src/auth/types";
+import WhatsappTemplates from "@octobots/ui-whatsapp/src/containers/WhatsappTemplates";
 
 const EmptyStateWrapper = styled.div`
   display: flex;
@@ -17,23 +24,35 @@ const EmptyStateWrapper = styled.div`
   justify-content: center;
   padding: ${spacing.xl};
   text-align: center;
-  
+
   img {
     width: 120px;
     height: 120px;
     margin-bottom: ${spacing.lg};
   }
-  
+
   h4 {
     font-size: ${typography.fontSizes.lg};
     font-weight: ${typography.fontWeights.medium};
     margin-bottom: ${spacing.md};
     color: ${modernColors.textPrimary};
   }
-  
+
   p {
     color: ${modernColors.textSecondary};
     margin-bottom: ${spacing.lg};
+  }
+
+  button {
+    background-color: #0d6efd;
+    width: 200px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    i {
+      color: #fff;
+    }
   }
 `;
 
@@ -47,11 +66,11 @@ const LoadMoreButton = styled.button`
   text-align: center;
   cursor: pointer;
   transition: all ${transitions.fast};
-  
+
   &:hover {
     background-color: ${modernColors.hover};
   }
-  
+
   i {
     margin-right: ${spacing.xs};
   }
@@ -82,20 +101,20 @@ export default class ConversationList extends React.Component<Props> {
     return (
       <LoadMoreButton onClick={onLoadMore}>
         <i className="icon-redo"></i>
-        {loading ? __('Loading...') : __('Load more')}
+        {loading ? __("Loading...") : __("Load more")}
       </LoadMoreButton>
     );
   }
 
   render() {
-    const { 
-      conversations, 
-      currentConversationId, 
-      selectedConversations, 
-      onChangeConversation, 
-      toggleRowCheckbox, 
+    const {
+      conversations,
+      currentConversationId,
+      selectedConversations,
+      onChangeConversation,
+      toggleRowCheckbox,
       loading,
-      currentUser
+      currentUser,
     } = this.props;
 
     if (!loading && conversations.length === 0) {
@@ -104,9 +123,8 @@ export default class ConversationList extends React.Component<Props> {
           <img src="/images/actions/6.svg" alt="No conversations" />
           <h4>{__("No conversations yet")}</h4>
           <p>{__("When you receive messages, they'll appear here")}</p>
-          <ModernButton variant="primary" icon="plus-circle">
-            {__("Start a conversation")}
-          </ModernButton>
+          <h4>{__("Start a conversation")}</h4>
+          <WhatsappTemplates buttonFrom="global" />
         </EmptyStateWrapper>
       );
     }
@@ -114,14 +132,14 @@ export default class ConversationList extends React.Component<Props> {
     return (
       <React.Fragment>
         <ConversationItems id="conversations">
-          {conversations.map(conv => (
+          {conversations.map((conv) => (
             <ConversationItem
               key={conv._id}
               conversation={conv}
               toggleCheckbox={toggleRowCheckbox}
               onClick={onChangeConversation}
               selectedIds={(selectedConversations || []).map(
-                conversation => conversation._id
+                (conversation) => conversation._id
               )}
               currentConversationId={currentConversationId}
               currentUser={currentUser}
