@@ -1,7 +1,15 @@
-import { colors, dimensions } from '@octobots/ui/src/styles';
-import styled from 'styled-components';
-import styledTS from 'styled-components-ts';
-import { modernColors, borderRadius, spacing, shadows, transitions, typography, zIndex } from '../../../styles/theme';
+import { colors, dimensions } from "@octobots/ui/src/styles";
+import styled from "styled-components";
+import styledTS from "styled-components-ts";
+import {
+  modernColors,
+  borderRadius,
+  spacing,
+  shadows,
+  transitions,
+  typography,
+  zIndex,
+} from "../../../styles/theme";
 
 // Main sidebar container
 const SidebarContainer = styled.div`
@@ -10,6 +18,7 @@ const SidebarContainer = styled.div`
   background-color: ${modernColors.sidebarBackground};
   border-right: 1px solid ${modernColors.border};
   overflow: hidden;
+  border-radius: 12px;
 `;
 
 // Sidebar navigation (left narrow sidebar)
@@ -28,7 +37,7 @@ const SidebarNav = styled.div`
 const LogoContainer = styled.div`
   padding: ${spacing.md};
   margin-bottom: ${spacing.xl};
-  
+
   img {
     width: 40px;
     height: 40px;
@@ -47,17 +56,19 @@ const NavItem = styled.div<{ $active?: boolean }>`
   margin-bottom: ${spacing.md};
   cursor: pointer;
   position: relative;
-  color: ${props => props.$active ? modernColors.sidebarText : modernColors.sidebarTextMuted};
-  background-color: ${props => props.$active ? modernColors.sidebarItemActive : 'transparent'};
+  color: ${(props) =>
+    props.$active ? modernColors.sidebarText : modernColors.sidebarTextMuted};
+  background-color: ${(props) =>
+    props.$active ? modernColors.sidebarItemActive : "transparent"};
   transition: all ${transitions.fast};
-  
+
   &:hover {
     background-color: ${modernColors.sidebarItemHover};
     color: ${modernColors.sidebarText};
   }
-  
+
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     left: -${spacing.md};
     top: 50%;
@@ -66,10 +77,10 @@ const NavItem = styled.div<{ $active?: boolean }>`
     height: 24px;
     background-color: ${modernColors.primary};
     border-radius: 0 ${borderRadius.sm} ${borderRadius.sm} 0;
-    opacity: ${props => props.$active ? 1 : 0};
+    opacity: ${(props) => (props.$active ? 1 : 0)};
     transition: opacity ${transitions.fast};
   }
-  
+
   i {
     font-size: 20px;
   }
@@ -123,7 +134,7 @@ const SidebarActions = styled.div`
   display: flex;
   align-items: center;
   gap: ${spacing.sm};
-  
+
   .date-popover {
     max-width: 470px;
     width: 500px;
@@ -138,7 +149,7 @@ const SidebarActions = styled.div`
 const SearchInput = styled.div`
   position: relative;
   margin: ${spacing.md} ${spacing.lg};
-  
+
   input {
     width: 100%;
     padding: ${spacing.sm} ${spacing.md} ${spacing.sm} 40px;
@@ -147,14 +158,14 @@ const SearchInput = styled.div`
     font-size: ${typography.fontSizes.md};
     background-color: ${modernColors.background};
     transition: all ${transitions.fast};
-    
+
     &:focus {
       outline: none;
       border-color: ${modernColors.primary};
       box-shadow: 0 0 0 2px ${modernColors.primary}20;
     }
   }
-  
+
   i {
     position: absolute;
     left: ${spacing.md};
@@ -171,12 +182,12 @@ const FilterBar = styled.div`
   padding: 0 ${spacing.md};
   margin-bottom: ${spacing.md};
   overflow-x: auto;
-  
+
   &::-webkit-scrollbar {
     height: 0;
     display: none;
   }
-  
+
   -ms-overflow-style: none;
   scrollbar-width: none;
 `;
@@ -189,13 +200,15 @@ const FilterItem = styled.div<{ $active?: boolean }>`
   font-weight: ${typography.fontWeights.medium};
   white-space: nowrap;
   cursor: pointer;
-  background-color: ${props => props.$active ? modernColors.primary : modernColors.messageBackground};
-  color: ${props => props.$active ? 'white' : modernColors.textSecondary};
+  background-color: ${(props) =>
+    props.$active ? modernColors.primary : modernColors.messageBackground};
+  color: ${(props) => (props.$active ? "white" : modernColors.textSecondary)};
   transition: all ${transitions.fast};
   margin-right: ${spacing.sm};
-  
+
   &:hover {
-    background-color: ${props => props.$active ? modernColors.primary : modernColors.hover};
+    background-color: ${(props) =>
+      props.$active ? modernColors.primary : modernColors.hover};
   }
 `;
 
@@ -230,24 +243,24 @@ const RowContent = styledTS<{ $isChecked?: boolean }>(styled.div)`
   flex-direction: column;
   width: 100%;
   position: relative;
-  padding-left: ${props => props.$isChecked ? '40px' : '0'};
+  padding-left: ${(props) => (props.$isChecked ? "40px" : "0")};
   transition: padding ${transitions.fast};
   
   ${CheckBox} {
-    opacity: ${props => props.$isChecked ? 1 : 0};
+    opacity: ${(props) => (props.$isChecked ? 1 : 0)};
   }
 `;
 
 // Flex content container
 const FlexContent = styled.div`
   width: 100%;
-  
+
   .tags {
     display: flex;
     flex-wrap: wrap;
     gap: ${spacing.xs};
     margin-top: ${spacing.xs};
-    
+
     > span {
       margin-right: ${spacing.xs};
     }
@@ -320,21 +333,24 @@ const RowItem = styledTS<{
   padding: ${spacing.md};
   margin-bottom: ${spacing.sm};
   border-radius: ${borderRadius.lg};
-  background-color: ${props => 
-    props.$isActive ? modernColors.active : 
-    props.$isRead ? modernColors.contentBackground : 
-    modernColors.unread
-  };
+  background-color: ${(props) =>
+    props.$isActive
+      ? modernColors.active
+      : props.$isRead
+        ? modernColors.contentBackground
+        : modernColors.unread};
   cursor: pointer;
   transition: all ${transitions.fast};
-  box-shadow: ${props => props.$isActive ? shadows.md : 'none'};
+  box-shadow: ${(props) => (props.$isActive ? shadows.md : "none")};
   
-  ${props => !props.$isRead && `
+  ${(props) =>
+    !props.$isRead &&
+    `
     border-left: 3px solid ${modernColors.primary};
   `}
   
   &:hover {
-    background-color: ${props => props.$isActive ? modernColors.active : modernColors.hover};
+    background-color: ${(props) => (props.$isActive ? modernColors.active : modernColors.hover)};
     
     ${CheckBox} {
       opacity: 1;
@@ -362,7 +378,7 @@ const AssigneeImg = styled.div`
   overflow: hidden;
   margin-left: ${spacing.xs};
   border: 2px solid ${modernColors.contentBackground};
-  
+
   img {
     width: 100%;
     height: 100%;
@@ -381,6 +397,8 @@ const LeftContent = styledTS<{ $isOpen?: boolean }>(styled.div)`
   display: flex;
   height: 100%;
   transition: all ${transitions.normal};
+  width:100%;
+  padding-inline:4px;
 `;
 
 // Additional sidebar (filters)
@@ -409,8 +427,8 @@ const ToggleButton = styledTS<{ $isActive?: boolean }>(styled.button)`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${props => props.$isActive ? modernColors.primary : modernColors.textSecondary};
-  background-color: ${props => props.$isActive ? modernColors.active : 'transparent'};
+  color: ${(props) => (props.$isActive ? modernColors.primary : modernColors.textSecondary)};
+  background-color: ${(props) => (props.$isActive ? modernColors.active : "transparent")};
   cursor: pointer;
   transition: all ${transitions.fast};
   
@@ -424,7 +442,7 @@ const ToggleButton = styledTS<{ $isActive?: boolean }>(styled.button)`
 const GroupTitle = styledTS<{ $isOpen?: boolean }>(styled.div)`
   font-weight: ${typography.fontWeights.medium};
   padding: ${spacing.md} ${spacing.lg};
-  color: ${props => props.$isOpen ? modernColors.primary : modernColors.textPrimary};
+  color: ${(props) => (props.$isOpen ? modernColors.primary : modernColors.textPrimary)};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -438,7 +456,7 @@ const GroupTitle = styledTS<{ $isOpen?: boolean }>(styled.div)`
   span i {
     margin-left: ${spacing.xs};
     transition: transform ${transitions.fast};
-    transform: ${props => props.$isOpen ? 'rotate(180deg)' : 'rotate(0)'};
+    transform: ${(props) => (props.$isOpen ? "rotate(180deg)" : "rotate(0)")};
   }
   
   a {
@@ -452,7 +470,7 @@ const GroupTitle = styledTS<{ $isOpen?: boolean }>(styled.div)`
 
 // Filter group content
 const GroupContent = styled.div<{ $isOpen?: boolean }>`
-  max-height: ${props => props.$isOpen ? '500px' : '0'};
+  max-height: ${(props) => (props.$isOpen ? "500px" : "0")};
   overflow: hidden;
   transition: max-height ${transitions.normal};
 `;
@@ -467,7 +485,7 @@ const GroupContent = styled.div<{ $isOpen?: boolean }>`
 //   color: ${props => props.$active ? modernColors.primary : modernColors.textSecondary};
 //   background-color: ${props => props.$active ? modernColors.active : 'transparent'};
 //   transition: all ${transitions.fast};
-  
+
 //   &:hover {
 //     background-color: ${modernColors.hover};
 //     color: ${modernColors.textPrimary};

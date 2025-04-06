@@ -1,35 +1,44 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
-import { Popover } from '@headlessui/react';
-import Icon from '@octobots/ui/src/components/Icon';
-import { modernColors, borderRadius, spacing, typography, transitions } from '../../styles/theme';
+import React, { useState } from "react";
+import styled from "styled-components";
+import { Popover } from "@headlessui/react";
+import Icon from "@octobots/ui/src/components/Icon";
+import {
+  modernColors,
+  borderRadius,
+  spacing,
+  typography,
+  transitions,
+} from "../../styles/theme";
 
 const PopoverButton = styled.button<{ $isActive?: boolean }>`
   display: flex;
   align-items: center;
   gap: ${spacing.xs};
   padding: ${spacing.sm} ${spacing.md};
-  background-color: ${props => props.$isActive ? modernColors.active : modernColors.messageBackground};
+  background-color: ${(props) =>
+    props.$isActive ? modernColors.active : modernColors.messageBackground};
   border: none;
   border-radius: ${borderRadius.md};
-  color: ${props => props.$isActive ? modernColors.primary : modernColors.textPrimary};
+  color: ${(props) =>
+    props.$isActive ? modernColors.primary : modernColors.textPrimary};
   font-size: ${typography.fontSizes.md};
   cursor: pointer;
   transition: all ${transitions.fast};
-  
+
   &:hover {
     background-color: ${modernColors.hover};
   }
-  
+
   &[aria-expanded="true"] {
     background-color: ${modernColors.active};
   }
-  
+
   i {
-    color: ${props => props.$isActive ? modernColors.primary : modernColors.textSecondary};
+    color: ${(props) =>
+      props.$isActive ? modernColors.primary : modernColors.textSecondary};
     transition: transform ${transitions.fast};
   }
-  
+
   &[aria-expanded="true"] i {
     transform: rotate(180deg);
   }
@@ -79,7 +88,7 @@ const ClearButton = styled.button`
   padding: ${spacing.sm} ${spacing.md};
   border-radius: ${borderRadius.md};
   transition: all ${transitions.fast};
-  
+
   &:hover {
     background-color: ${modernColors.hover};
     color: ${modernColors.textPrimary};
@@ -95,11 +104,11 @@ const ApplyButton = styled.button`
   padding: ${spacing.sm} ${spacing.md};
   border-radius: ${borderRadius.md};
   transition: all ${transitions.fast};
-  
+
   &:hover {
     background-color: ${modernColors.primary}dd;
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -123,45 +132,51 @@ const FilterPopover: React.FC<FilterPopoverProps> = ({
   children,
   onClear,
   onApply,
-  showFooter = true
+  showFooter = true,
 }) => {
   return (
-    <Popover className="relative">
+    <Popover>
       {({ open }) => (
         <>
           <Popover.Button as={PopoverButton} $isActive={isActive || open}>
             {icon && <Icon icon={icon} />}
             {label}
-            <Icon icon={open ? 'angle-up' : 'angle-down'} />
+            <Icon icon={open ? "angle-up" : "angle-down"} />
           </Popover.Button>
-          
+
           <Popover.Panel as={PopoverPanel}>
             {({ close }) => (
               <>
                 <PopoverHeader>
                   {label}
-                  <Icon icon="times" onClick={() => close()} style={{ cursor: 'pointer' }} />
+                  <Icon
+                    icon="times"
+                    onClick={() => close()}
+                    style={{ cursor: "pointer" }}
+                  />
                 </PopoverHeader>
-                
-                <PopoverContent>
-                  {children}
-                </PopoverContent>
-                
+
+                <PopoverContent>{children}</PopoverContent>
+
                 {showFooter && (
                   <PopoverFooter>
                     {onClear && (
-                      <ClearButton onClick={() => {
-                        onClear();
-                        close();
-                      }}>
+                      <ClearButton
+                        onClick={() => {
+                          onClear();
+                          close();
+                        }}
+                      >
                         Clear
                       </ClearButton>
                     )}
                     {onApply && (
-                      <ApplyButton onClick={() => {
-                        onApply();
-                        close();
-                      }}>
+                      <ApplyButton
+                        onClick={() => {
+                          onApply();
+                          close();
+                        }}
+                      >
                         Apply
                       </ApplyButton>
                     )}
