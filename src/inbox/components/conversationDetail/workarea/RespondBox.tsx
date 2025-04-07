@@ -610,14 +610,14 @@ const RespondBox = (props: Props) => {
         {/* { renderVideoRoom()} */}
         <SendButtonContainer>
           <SendButton onClick={onSendDebouncedClickHandler}>
-            <Send size={16} color="white" />
+            <Send size={20} color="white" />
           </SendButton>
         </SendButtonContainer>
         {loadDynamicComponent("inboxEditorAction", props, true)}
 
         <label style={{ marginInlineEnd: "10px" }}>
           <Tip text={__("Attach file")}>
-            <Icon icon="paperclip" size={16} />
+            <Icon icon="paperclip" size={20} />
             <input type="file" onChange={handleFileInput} multiple={true} />
           </Tip>
         </label>
