@@ -229,7 +229,7 @@ const ConversationItems = styled.ul`
 // Checkbox for conversation selection
 const CheckBox = styled.div`
   position: absolute;
-  left: ${spacing.md};
+  inset-inline-start: ${spacing.md};
   top: 50%;
   transform: translateY(-50%);
   opacity: 0;
