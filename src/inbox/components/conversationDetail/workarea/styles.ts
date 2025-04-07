@@ -1,8 +1,14 @@
-import { colors, dimensions } from '@octobots/ui/src/styles';
-import styled from 'styled-components';
-import { modernColors, borderRadius, spacing, typography, transitions } from '../../../../styles/theme';
+import { colors, dimensions } from "@octobots/ui/src/styles";
+import styled from "styled-components";
+import {
+  modernColors,
+  borderRadius,
+  spacing,
+  typography,
+  transitions,
+} from "../../../../styles/theme";
 
-import styledTS from 'styled-components-ts';
+import styledTS from "styled-components-ts";
 
 const ConversationWrapper = styled.div`
   height: 100%;
@@ -36,7 +42,7 @@ const AssignTrigger = styledTS<{ $active?: boolean }>(styled.div)`
   border-radius: ${borderRadius.md};
   cursor: pointer;
   transition: all ${transitions.fast};
-  background-color: ${props => props.$active ? modernColors.active : 'transparent'};
+  background-color: ${(props) => (props.$active ? modernColors.active : "transparent")};
   
   &:hover {
     background-color: ${modernColors.hover};
@@ -82,13 +88,13 @@ const ReplyComponent = styled.div`
   background-color: ${modernColors.messageBackground};
   border-radius: ${borderRadius.md};
   margin-bottom: ${spacing.md};
-  
+
   .reply-head {
     font-weight: ${typography.fontWeights.medium};
     color: ${modernColors.textSecondary};
     margin-right: ${spacing.md};
   }
-  
+
   .reply-content {
     flex: 1;
     padding: ${spacing.sm} ${spacing.md};
@@ -100,11 +106,11 @@ const ReplyComponent = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  
+
   .reply-close {
     display: flex;
     align-items: center;
-    
+
     button {
       background: none;
       border: none;
@@ -116,7 +122,7 @@ const ReplyComponent = styled.div`
       align-items: center;
       justify-content: center;
       border-radius: ${borderRadius.circle};
-      
+
       &:hover {
         background-color: ${modernColors.hover};
         color: ${modernColors.danger};
@@ -124,13 +130,73 @@ const ReplyComponent = styled.div`
     }
   }
 `;
+const SendButtonContainer = styled.div`
+  /* width: 3rem; */
+  height: 3rem;
+  display: grid;
+  place-items: center;
+`;
+const SendButton = styled.button`
+  border: none;
+  outline: none;
+  background: #1f97ff;
+  display: grid;
+  place-items: center;
+  /* width: 2.2rem; */
+  height: 2.2rem;
+  border-radius: 10px;
+  padding-inline: 1rem;
+  transition: all 0.2s ease-in-out;
+  &:hover {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+`;
+const RespondBoxContainer = styled.div`
+  border: 1px solid #dedede;
+  border-radius: 20px;
+  padding: 1rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+const RespondTypeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: #dedede;
+  border-radius: 10px;
+  padding: 4px;
+  width: auto;
+`;
+
+const RespondTypeButton = styled.button<{ isSelected: boolean }>`
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  background: ${({ isSelected }) => (isSelected ? "#fff" : "#dedede")};
+  margin-inline: 4px;
+`;
+const StyledTextArea = styled.textarea`
+  border: none;
+  outline: none;
+  width: 100%;
+  height: 100%;
+  padding-top: 5px;
+`;
 
 export {
+  StyledTextArea,
+  RespondTypeButton,
+  RespondTypeContainer,
+  RespondBoxContainer,
+  SendButton,
+  SendButtonContainer,
   ConversationWrapper,
   RenderConversationWrapper,
   ActionBarLeft,
   AssignTrigger,
   AssignText,
   MailSubject,
-  ReplyComponent
+  ReplyComponent,
 };

@@ -86,8 +86,13 @@ const WithCurrentId: React.FC<IProps> = (props) => {
 
         return (
           <WithRefetchHandling>
-              <InboxCore queryParams={queryParams} currentConversationId={_id} msg={msg} currentUserId={currentUser._id} />
-            </WithRefetchHandling>
+            <InboxCore
+              queryParams={queryParams}
+              currentConversationId={_id}
+              msg={msg}
+              currentUserId={currentUser._id}
+            />
+          </WithRefetchHandling>
         );
       }}
     </AppConsumer>
@@ -97,8 +102,14 @@ const WithCurrentId: React.FC<IProps> = (props) => {
 const WithRouterProps = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  return <WithCurrentIdWithRouter {...props} navigate={navigate} location={location} />;
+
+  return (
+    <WithCurrentIdWithRouter
+      {...props}
+      navigate={navigate}
+      location={location}
+    />
+  );
 };
 
 const WithCurrentIdWithRouter = compose(

@@ -1,25 +1,25 @@
-import * as compose from 'lodash.flowright';
-import * as routerUtils from '@octobots/ui/src/utils/router';
+import * as compose from "lodash.flowright";
+import * as routerUtils from "@octobots/ui/src/utils/router";
 
-import { Alert, confirm, withProps } from '@octobots/ui/src/utils';
+import { Alert, confirm, withProps } from "@octobots/ui/src/utils";
 import {
   CopyMutationResponse,
   CountQueryResponse,
   LeadIntegrationsQueryResponse,
   RemoveMutationResponse,
-} from '@octobots/ui-leads/src/types';
-import { MutationVariables } from '@octobots/ui/src/types';
-import { mutations, queries } from '@octobots/ui-leads/src/graphql';
+} from "@octobots/ui-leads/src/types";
+import { MutationVariables } from "@octobots/ui/src/types";
+import { mutations, queries } from "@octobots/ui-leads/src/graphql";
 
-import { ArchiveIntegrationResponse } from '@octobots/ui-inbox/src/settings/integrations/types';
-import Bulk from '@octobots/ui/src/components/Bulk';
-import { INTEGRATION_KINDS } from '@octobots/ui/src/constants/integrations';
-import List from '../components/List';
-import React from 'react';
-import { generatePaginationParams } from '@octobots/ui/src/utils/router';
-import { gql } from '@apollo/client';
-import { graphql } from '@apollo/client/react/hoc';
-import { mutations as integrationMutations } from '@octobots/ui-inbox/src/settings/integrations/graphql/index';
+import { ArchiveIntegrationResponse } from "@octobots/ui-inbox/src/settings/integrations/types";
+import Bulk from "@octobots/ui/src/components/Bulk";
+import { INTEGRATION_KINDS } from "@octobots/ui/src/constants/integrations";
+import List from "../components/List";
+import React from "react";
+import { generatePaginationParams } from "@octobots/ui/src/utils/router";
+import { gql } from "@apollo/client";
+import { graphql } from "@apollo/client/react/hoc";
+import { mutations as integrationMutations } from "@octobots/ui-inbox/src/settings/integrations/graphql/index";
 
 type Props = {
   queryParams: any;
@@ -41,7 +41,7 @@ class ListContainer extends React.Component<FinalProps> {
 
     const shouldRefetchList = routerUtils.getParam(
       location,
-      'popUpRefetchList',
+      "popUpRefetchList"
     );
 
     if (shouldRefetchList) {
@@ -80,7 +80,7 @@ class ListContainer extends React.Component<FinalProps> {
 
     const remove = (integrationId: string) => {
       const message =
-        'If you delete a form, all previous submissions and contacts gathered through this form will also be deleted. Are you sure?';
+        "If you delete a form, all previous submissions and contacts gathered through this form will also be deleted. Are you sure?";
 
       confirm(message).then(() => {
         removeMutation({
@@ -90,7 +90,7 @@ class ListContainer extends React.Component<FinalProps> {
             // refresh queries
             this.refetch();
 
-            Alert.success('You successfully deleted a form.');
+            Alert.success("You successfully deleted a form.");
           })
           .catch((e) => {
             Alert.error(e.message);
@@ -100,11 +100,11 @@ class ListContainer extends React.Component<FinalProps> {
 
     const archive = (integrationId: string, status: boolean) => {
       let message = `If you archive this form, the live form on your website or octobots messenger will no longer be visible. But you can still see the contacts and submissions you've received.`;
-      let action = 'archived';
+      let action = "archived";
 
       if (!status) {
-        message = 'You are going to unarchive this form. Are you sure?';
-        action = 'unarchived';
+        message = "You are going to unarchive this form. Are you sure?";
+        action = "unarchived";
       }
 
       confirm(message).then(() => {
@@ -132,7 +132,7 @@ class ListContainer extends React.Component<FinalProps> {
           // refresh queries
           this.refetch();
 
-          Alert.success('You successfully copied a form.');
+          Alert.success("You successfully copied a form.");
         })
         .catch((e) => {
           Alert.error(e.message);
@@ -173,7 +173,7 @@ export default withProps<Props>(
         status?: string;
       }
     >(gql(queries.integrations), {
-      name: 'integrationsQuery',
+      name: "integrationsQuery",
       options: ({ queryParams }) => {
         return {
           variables: {
@@ -194,20 +194,20 @@ export default withProps<Props>(
     graphql<Props, RemoveMutationResponse, MutationVariables>(
       gql(mutations.integrationRemove),
       {
-        name: 'removeMutation',
-      },
+        name: "removeMutation",
+      }
     ),
     graphql<Props, ArchiveIntegrationResponse>(
       gql(integrationMutations.integrationsArchive),
       {
-        name: 'archiveIntegration',
-      },
+        name: "archiveIntegration",
+      }
     ),
     graphql(gql(mutations.formCopy), {
-      name: 'copyMutation',
+      name: "copyMutation",
     }),
     graphql<Props, CountQueryResponse>(gql(queries.integrationsTotalCount), {
-      name: 'integrationsTotalCountQuery',
+      name: "integrationsTotalCountQuery",
       options: ({ queryParams }) => ({
         variables: {
           kind: INTEGRATION_KINDS.FORMS,
@@ -216,6 +216,6 @@ export default withProps<Props>(
           status: queryParams.status,
         },
       }),
-    }),
-  )(ListContainer),
+    })
+  )(ListContainer)
 );

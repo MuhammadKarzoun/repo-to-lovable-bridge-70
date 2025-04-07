@@ -68,7 +68,13 @@ const ConversationListContainer: React.FC<FinalProps> = (props) => {
         },
       });
     }
-  }, [queryParams.isModalOpen, currentUser, conversationsQuery, totalCountQuery, updateCountsForNewMessage]);
+  }, [
+    queryParams.isModalOpen,
+    currentUser,
+    conversationsQuery,
+    totalCountQuery,
+    updateCountsForNewMessage,
+  ]);
 
   const getTotalCount = () => {
     let totalCount = totalCountQuery.conversationsTotalCount || 0;
@@ -81,8 +87,7 @@ const ConversationListContainer: React.FC<FinalProps> = (props) => {
         totalCount += counts.bySegment[queryParams.segment] || 0;
       }
       if (queryParams.integrationId && counts.byIntegration) {
-        totalCount +=
-          counts.byIntegration[queryParams.integrationId] || 0;
+        totalCount += counts.byIntegration[queryParams.integrationId] || 0;
       }
       if (queryParams.tag && counts.byTags) {
         const tags = queryParams.tag.split(",");
@@ -187,12 +192,12 @@ const generateOptions = (queryParams) => ({
 const WithRouterProps = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   return (
-    <ConversationListContainerWithRouter 
-      {...props} 
-      navigate={navigate} 
-      location={location} 
+    <ConversationListContainerWithRouter
+      {...props}
+      navigate={navigate}
+      location={location}
     />
   );
 };
