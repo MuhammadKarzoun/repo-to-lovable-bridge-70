@@ -254,7 +254,6 @@ const Editor = forwardRef(
           autoGrowMaxHeight="55vh"
           limit={limit}
           onCtrlEnter={onCtrlEnter}
-          toolbar={props.showMentions ? undefined : []}
         />
       </EditorContainer>
     );
