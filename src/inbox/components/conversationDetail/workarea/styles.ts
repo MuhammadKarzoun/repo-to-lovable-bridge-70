@@ -179,7 +179,7 @@ const RespondTypeButton = styled.button<{ isSelected: boolean }>`
   margin-inline: 4px;
 `;
 const ActionIconContainer = styled.label`
-  width: 2.5rem;
+  width: auto;
   height: 2.5rem;
   border-radius: 10px;
   background-color: #f0f0f0;
