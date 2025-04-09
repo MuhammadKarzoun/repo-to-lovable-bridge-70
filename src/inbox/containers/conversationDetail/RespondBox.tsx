@@ -1,22 +1,22 @@
-import * as compose from 'lodash.flowright';
+import * as compose from "lodash.flowright";
 
 import {
   AddMessageMutationVariables,
   IConversation,
-} from '@octobots/ui-inbox/src/inbox/types';
-import { gql, useLazyQuery } from '@apollo/client';
-import { readFile, withProps } from '@octobots/ui/src/utils';
+} from "@octobots/ui-inbox/src/inbox/types";
+import { gql, useLazyQuery } from "@apollo/client";
+import { readFile, withProps } from "@octobots/ui/src/utils";
 
-import { AppConsumer } from 'coreui/appContext';
-import { IAttachmentPreview } from '@octobots/ui/src/types';
-import { IUser } from '@octobots/ui/src/auth/types';
-import React from 'react';
-import RespondBox from '../../components/conversationDetail/workarea/RespondBox';
-import { ResponseTemplatesQueryResponse } from '../../../settings/responseTemplates/types';
-import { UsersQueryResponse } from '@octobots/ui/src/auth/types';
-import debounce from 'lodash/debounce';
-import { graphql } from '@apollo/client/react/hoc';
-import { queries } from '@octobots/ui-inbox/src/inbox/graphql';
+import { AppConsumer } from "coreui/appContext";
+import { IAttachmentPreview } from "@octobots/ui/src/types";
+import { IUser } from "@octobots/ui/src/auth/types";
+import React from "react";
+import RespondBox from "../../components/conversationDetail/workarea/RespondBox";
+import { ResponseTemplatesQueryResponse } from "../../../settings/responseTemplates/types";
+import { UsersQueryResponse } from "@octobots/ui/src/auth/types";
+import debounce from "lodash/debounce";
+import { graphql } from "@apollo/client/react/hoc";
+import { queries } from "@octobots/ui-inbox/src/inbox/graphql";
 
 type Props = {
   conversation: IConversation;
@@ -90,25 +90,32 @@ const RespondBoxContainer = (props: FinalProps) => {
 
   const sendMessage = (
     variables: AddMessageMutationVariables,
-    callback: (error: Error) => void,
+    callback: (error: Error) => void
   ) => {
-    const { conversationId, content, attachments, internal, contentType, replyForMsgId, template } =
-      variables;
+    const {
+      conversationId,
+      content,
+      attachments,
+      internal,
+      contentType,
+      replyForMsgId,
+      template,
+    } = variables;
 
     let optimisticResponse;
 
     optimisticResponse = {
-      __typename: 'Mutation',
+      __typename: "Mutation",
       conversationMessageAdd: {
-        __typename: 'ConversationMessage',
-        _id: (Math.random() + '' + Date.now()).slice(2),
+        __typename: "ConversationMessage",
+        _id: (Math.random() + "" + Date.now()).slice(2),
         content,
         contentType,
         attachments,
         internal,
         mentionedUserIds: [],
         conversationId,
-        customerId: (Math.random() + '' + Date.now()).slice(2),
+        customerId: (Math.random() + "" + Date.now()).slice(2),
         userId: currentUser._id,
         createdAt: new Date(),
         messengerAppData: null,
@@ -123,12 +130,12 @@ const RespondBoxContainer = (props: FinalProps) => {
         mid: Math.random().toString(),
         replyForMsgId: replyForMsgId ? replyForMsgId._id : null,
         template,
-        status: 'sending',
+        status: "sending",
         errorMsg: null,
         isForwarded: false,
         reaction: null,
         hideMsg: false,
-        replyForMsg: null
+        replyForMsg: null,
       },
     };
 
@@ -148,7 +155,7 @@ const RespondBoxContainer = (props: FinalProps) => {
     sendMessage,
     responseTemplates: responseTemplatesQuery.responseTemplates || [],
     mentionSuggestion: { getVariables, fetchMentions, extractFunction },
-    refetchResponseTemplates
+    refetchResponseTemplates,
   };
 
   return <RespondBox {...updatedProps} />;
@@ -160,7 +167,7 @@ const withQuery = () =>
       graphql<Props, ResponseTemplatesQueryResponse>(
         gql(queries.responseTemplateList),
         {
-          name: 'responseTemplatesQuery',
+          name: "responseTemplatesQuery",
           options: () => {
             return {
               variables: {
@@ -168,9 +175,9 @@ const withQuery = () =>
               },
             };
           },
-        },
-      ),
-    )(RespondBoxContainer),
+        }
+      )
+    )(RespondBoxContainer)
   );
 
 class Wrapper extends React.Component<
@@ -185,7 +192,7 @@ class Wrapper extends React.Component<
 
     this.withQuery = withQuery();
 
-    this.state = { searchValue: '' };
+    this.state = { searchValue: "" };
   }
 
   search = (searchValue: string) => this.setState({ searchValue });

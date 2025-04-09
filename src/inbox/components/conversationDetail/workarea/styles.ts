@@ -1,3 +1,4 @@
+import { display } from "./../../../../../../../node_modules/@octobots/ui/node_modules/chart.js/dist/plugins/plugin.subtitle.d";
 import { colors, dimensions } from "@octobots/ui/src/styles";
 import styled from "styled-components";
 import {
@@ -177,16 +178,54 @@ const RespondTypeButton = styled.button<{ isSelected: boolean }>`
   background: ${({ isSelected }) => (isSelected ? "#fff" : "#dedede")};
   margin-inline: 4px;
 `;
-const StyledTextArea = styled.textarea`
-  border: none;
-  outline: none;
-  width: 100%;
-  height: 100%;
-  padding-top: 5px;
-`;
+const ActionIconContainer = styled.label`
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #f0f0f0;
+  display: grid;
+  place-items: center;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
 
+  .headlessui-popover-tooltip {
+    display: grid;
+    place-items: center;
+  }
+
+  i {
+    font-size: 1.2rem;
+    &::before {
+      margin: 7px;
+    }
+  }
+  button {
+    padding-inline: 10px;
+  }
+  &:hover {
+    background-color: #bbe0ff;
+
+    .microphone-2 {
+      color: #fff;
+    }
+  }
+`;
+const CheckBoxContainer = styled.div`
+  span {
+    display: flex;
+    align-items: center;
+  }
+`;
+const ButtonsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
 export {
-  StyledTextArea,
+  ButtonsContainer,
+  CheckBoxContainer,
+  ActionIconContainer,
   RespondTypeButton,
   RespondTypeContainer,
   RespondBoxContainer,

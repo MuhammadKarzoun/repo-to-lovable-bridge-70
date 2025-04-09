@@ -14,13 +14,14 @@ import {
   Mask,
   MaskWrapper,
   PreviewImg,
+  RecordMask,
   RespondBoxStyled,
   SmallEditor,
 } from "@octobots/ui-inbox/src/inbox/styles";
 import React, { useEffect, useRef, useState } from "react";
 import {
   getPluginConfig,
-  isEnabled,
+  // isEnabled,
   loadDynamicComponent,
 } from "@octobots/ui/src/utils/core";
 import {
@@ -50,17 +51,13 @@ import AttachmentComp from "@octobots/ui/src/components/Attachment";
 import { urlify } from "@octobots/ui/src/utils/urlParser";
 import xss from "xss";
 import {
+  ActionIconContainer,
+  ButtonsContainer,
+  CheckBoxContainer,
   ReplyComponent,
-  RespondBoxContainer,
-  RespondTypeButton,
-  RespondTypeContainer,
-  SendButton,
-  SendButtonContainer,
-  StyledTextArea,
 } from "./styles";
 import WhatsappTemplates from "@octobots/ui-whatsapp/src/containers/WhatsappTemplates";
-import { FontSize } from "@octobots/ui/src/components/richTextEditor/extensions";
-import { Send } from "lucide-react";
+import { VoiceRecorder } from "./voiceRecorder";
 
 type Props = {
   conversation: IConversation;
@@ -84,6 +81,7 @@ type Props = {
 
 type State = {
   isInactive: boolean;
+  isActiveRecord: boolean;
   isHiddenDynamicMask: boolean;
   isInternal: boolean;
   sending: boolean;
@@ -107,7 +105,7 @@ const RespondBox = (props: Props) => {
 
   const [replyExist, setReplyExist] = useState<IMessage | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isNote, setIsNote] = useState(false);
+
   useEffect(() => {
     if (replyForMsgId) {
       setReplyExist(replyForMsgId);
@@ -120,6 +118,7 @@ const RespondBox = (props: Props) => {
   const [content, setContent] = useState("");
   const [state, setState] = useState<State>({
     isInactive: !checkIsActive(props.conversation),
+    isActiveRecord: false,
     isHiddenDynamicMask: false,
     isInternal: props.showInternal || false,
     sending: false,
@@ -300,15 +299,15 @@ const RespondBox = (props: Props) => {
     return ret > 0 ? ret : 0;
   };
 
-  const addMessage = () => {
+  const addMessage = (isAudio?: any) => {
     const { isInternal, attachments, extraInfo } = state;
     const message = {
       conversationId: conversation._id,
-      content: cleanText(content) || " ",
+      content: cleanText(content) || "",
       extraInfo,
       contentType: "text",
       internal: isInternal,
-      attachments,
+      attachments: isAudio ? [isAudio] : attachments,
       mentionedUserIds: getParsedMentions(useGenerateJSON(content)) as string[],
       ...(replyExist && { replyForMsgId: replyExist._id }),
     };
@@ -338,6 +337,11 @@ const RespondBox = (props: Props) => {
       `showInternalState-${props.conversation._id}`,
       String(state.isInternal)
     );
+  };
+
+  const onAudioUpload = (response: any) => {
+    addMessage(response);
+    setState((prevState) => ({ ...prevState, isActiveRecord: false }));
   };
 
   function renderIndicator() {
@@ -387,6 +391,22 @@ const RespondBox = (props: Props) => {
             "Customer is offline Click to hide and send messages and they will receive them the next time they are online"
           )}
         </Mask>
+      );
+    }
+
+    return null;
+  }
+
+  function renderRecordMask() {
+    if (state.isActiveRecord) {
+      return (
+        <RecordMask id="recordmask">
+          <VoiceRecorder
+            onSend={onAudioUpload}
+            onCancel={() => setState({ ...state, isActiveRecord: false })}
+            maxDuration={300}
+          />
+        </RecordMask>
       );
     }
 
@@ -489,69 +509,21 @@ const RespondBox = (props: Props) => {
         });
       }
     };
-    const shouldUseRichText = () => {
-      // Integrations that don't support rich text
-      const plainTextIntegrations = [
-        "whatsapp",
-        "instagram-messenger",
-        "facebook-messenger",
-        "telegram",
-        "viber",
-        "line",
-        "telnyx",
-      ];
-
-      return !plainTextIntegrations.some((type) =>
-        conversation.integration.kind.includes(type)
-      );
-    };
     return (
-      <div onDragOver={handleDragOver} onDrop={handleDrop}>
-        <RespondBoxContainer>
-          {!(kind.includes("nylas") || kind === "gmail") && (
-            <RespondTypeContainer>
-              <RespondTypeButton
-                isSelected={!isNote}
-                type="button"
-                onClick={() => setIsNote(false)}
-              >
-                {__("Reply")}
-              </RespondTypeButton>
-              <RespondTypeButton
-                isSelected={isNote}
-                type="button"
-                onClick={() => setIsNote(true)}
-              >
-                {__("Internal note")}
-              </RespondTypeButton>
-            </RespondTypeContainer>
-          )}
-          {isNote || shouldUseRichText() ? (
-            <Editor
-              ref={forwardedRef}
-              currentConversation={conversation._id}
-              integrationKind={conversation.integration.kind}
-              onChange={onEditorContentChange}
-              placeholder={placeholder}
-              content={content}
-              showMentions={isInternal}
-              mentionSuggestion={props.mentionSuggestion}
-              responseTemplates={responseTemplates}
-              limit={
-                conversation.integration.kind === "telnyx" ? 160 : undefined
-              }
-              onCtrlEnter={addMessage}
-            />
-          ) : (
-            <StyledTextArea
-              placeholder={placeholder}
-              onChange={(e) => setContent(e.target.value)}
-              value={content}
-              rows={3}
-            />
-          )}
-          {renderButtons()}
-        </RespondBoxContainer>
+      <div onDragOver={handleDragOver} onDrop={handleDrop} style={{}}>
+        <Editor
+          ref={forwardedRef}
+          currentConversation={conversation._id}
+          integrationKind={conversation.integration.kind}
+          onChange={onEditorContentChange}
+          placeholder={placeholder}
+          content={content}
+          showMentions={isInternal}
+          mentionSuggestion={props.mentionSuggestion}
+          responseTemplates={responseTemplates}
+          limit={conversation.integration.kind === "telnyx" ? 160 : undefined}
+          onCtrlEnter={addMessage}
+        />
       </div>
     );
   }
@@ -564,7 +536,7 @@ const RespondBox = (props: Props) => {
     }
 
     return (
-      <>
+      <CheckBoxContainer>
         {
           <FormControl
             id="conversationInternalNote"
@@ -577,7 +549,7 @@ const RespondBox = (props: Props) => {
             {__("Internal note")}
           </FormControl>
         }
-      </>
+      </CheckBoxContainer>
     );
   }
 
@@ -606,45 +578,53 @@ const RespondBox = (props: Props) => {
 
     return (
       <EditorActions>
-        {/* {renderCheckbox(integration.kind)} */}
+        {renderCheckbox(integration.kind)}
         {/* { renderVideoRoom()} */}
-        <SendButtonContainer>
-          <SendButton onClick={onSendDebouncedClickHandler}>
-            <Send size={20} color="white" />
-          </SendButton>
-        </SendButtonContainer>
-        {loadDynamicComponent("inboxEditorAction", props, true)}
+        <ButtonsContainer>
+          {loadDynamicComponent("inboxEditorAction", props, true)}
 
-        <label style={{ marginInlineEnd: "10px" }}>
-          <Tip text={__("Attach file")}>
-            <Icon icon="paperclip" size={20} />
-            <input type="file" onChange={handleFileInput} multiple={true} />
-          </Tip>
-        </label>
+          <ActionIconContainer>
+            <Tip text={__("Record audio")}>
+              <Icon
+                icon="microphone-2"
+                onClick={() => setState({ ...state, isActiveRecord: true })}
+              />
+            </Tip>
+          </ActionIconContainer>
 
-        <ResponseTemplate
-          brandId={integration.brandId}
-          attachments={state.attachments}
-          content={content}
-          onSelect={onSelectTemplate}
-        />
+          <ActionIconContainer>
+            <Tip text={__("Attach file")}>
+              <Icon icon="paperclip" />
+              <input type="file" onChange={handleFileInput} multiple={true} />
+            </Tip>
+          </ActionIconContainer>
+          <ActionIconContainer>
+            <ResponseTemplate
+              brandId={integration.brandId}
+              attachments={state.attachments}
+              content={content}
+              onSelect={onSelectTemplate}
+            />
+          </ActionIconContainer>
 
-        {conversation.integration.kind == "whatsapp" && (
-          <WhatsappTemplates
-            conversation={conversation}
-            buttonFrom="inbox"
-            onClose={() => setIsModalOpen(false)}
-          />
-        )}
-
-        {/* <Button
-          onClick={onSendDebouncedClickHandler}
-          btnStyle="success"
-          size="small"
-          icon="message"
-        >
-          {!disabled && "Send"}
-        </Button> */}
+          {conversation.integration.kind == "whatsapp" && (
+            <ActionIconContainer>
+              <WhatsappTemplates
+                conversation={conversation}
+                buttonFrom="inbox"
+                onClose={() => setIsModalOpen(false)}
+              />
+            </ActionIconContainer>
+          )}
+          <ActionIconContainer>
+            <Button
+              onClick={onSendDebouncedClickHandler}
+              btnStyle="success"
+              size="small"
+              icon="message"
+            />
+          </ActionIconContainer>
+        </ButtonsContainer>
       </EditorActions>
     );
   }
@@ -655,6 +635,7 @@ const RespondBox = (props: Props) => {
         {replyExist && renderReplyContent()}
         {renderEditor()}
         {renderIndicator()}
+        {renderButtons()}
       </>
     );
   }
@@ -696,6 +677,7 @@ const RespondBox = (props: Props) => {
 
     return (
       <MaskWrapper>
+        {renderRecordMask()}
         {renderMask()}
         {!isInternal && !isHiddenDynamicMask && dynamicComponent}
         <RespondBoxStyled $isInternal={isInternal} $isInactive={isInactive}>
