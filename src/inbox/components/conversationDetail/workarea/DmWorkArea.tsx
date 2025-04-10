@@ -1,26 +1,36 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   AddMessageMutationVariables,
   IConversation,
   IMessage,
-} from '@octobots/ui-inbox/src/inbox/types';
-import { ContenFooter, ContentBox } from '@octobots/ui/src/layout/styles';
+} from "@octobots/ui-inbox/src/inbox/types";
+import { ContenFooter, ContentBox } from "@octobots/ui/src/layout/styles";
 import {
   ConversationWrapper,
   MailSubject,
   RenderConversationWrapper,
-} from './styles';
-import ActionBar from './ActionBar';
-import CallPro from './callpro/Callpro';
-import GrandStream from './grandStream/GrandStream';
-import { IAttachmentPreview } from '@octobots/ui/src/types';
-import MailConversation from '@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/mail/MailConversation';
-import Message from '@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/conversation/messages/Message';
-import RespondBox from '../../../containers/conversationDetail/RespondBox';
-import TypingIndicator from './TypingIndicator';
-import { __ } from 'coreui/utils';
-import styled from 'styled-components';
-import { modernColors, borderRadius } from '../../../../styles/theme';
+  TabButton,
+  TabsContainer,
+} from "./styles";
+import ActionBar from "./ActionBar";
+import CallPro from "./callpro/Callpro";
+import GrandStream from "./grandStream/GrandStream";
+import { IAttachmentPreview } from "@octobots/ui/src/types";
+import MailConversation from "@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/mail/MailConversation";
+import Message from "@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/conversation/messages/Message";
+import RespondBox from "../../../containers/conversationDetail/RespondBox";
+import TypingIndicator from "./TypingIndicator";
+import { __ } from "coreui/utils";
+import styled from "styled-components";
+import { modernColors, borderRadius } from "../../../../styles/theme";
+import { DashboardApp } from "../../../containers/conversationDetail/ConversationDetail";
+import { UpdatedTabs, UpdatedTabTitle } from "@octobots/ui/src/components/tabs";
 
 const ModernContentBox = styled(ContentBox)`
   background-color: ${modernColors.contentBackground};
@@ -68,6 +78,7 @@ type Props = {
   msg?: string;
   updateMsg: (id: string, content: string, action: string) => void;
   hideMask: boolean;
+  userDashboardApps?: { userDashboardApps: DashboardApp[] };
 };
 
 const WorkArea: React.FC<Props> = React.memo((props) => {
@@ -83,12 +94,20 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
     refetchMessages,
     refetchDetail,
     loadMoreMessages,
+    userDashboardApps,
   } = props;
 
-  const [attachmentPreview, setAttachmentPreview] = useState<IAttachmentPreview | null>(null);
+  const [attachmentPreview, setAttachmentPreview] =
+    useState<IAttachmentPreview | null>(null);
   const [replyForMsgId, setReplyForMsgId] = useState<IMessage | null>(null);
   const conversationWrapperRef = useRef<HTMLDivElement>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [userApps, setUserApps] = useState(
+    userDashboardApps?.userDashboardApps
+  );
+  const [tabType, setTabType] = useState<DashboardApp>({ _id: "messages" });
+
+  console.log("userApps", userApps);
 
   // Scroll to bottom on new messages or typing info
   useEffect(() => {
@@ -102,7 +121,6 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
       loadMoreMessages().finally(() => setIsLoadingMore(false));
     }
   }, [loadMoreMessages, isLoadingMore]);
-  
 
   // Scroll to bottom of the conversation
   const scrollBottom = useCallback(() => {
@@ -116,14 +134,14 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
   const jumpToReleventDiv = useCallback((id: string) => {
     const releventDiv = document.getElementById(id);
     if (releventDiv) {
-      releventDiv.scrollIntoView({ behavior: 'smooth' });
+      releventDiv.scrollIntoView({ behavior: "smooth" });
     }
   }, []);
 
   // Check if the conversation is a mail conversation
   const isMailConversation = useCallback(
-    (kind: string) => kind.includes('nylas') || kind === 'gmail',
-    [],
+    (kind: string) => kind.includes("nylas") || kind === "gmail",
+    []
   );
 
   // Render extra heading for mail conversations
@@ -133,12 +151,12 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
 
       if (isMailConversation(kind)) {
         const { mailData } = conversationMessage;
-        return <MailSubject>{mailData?.subject || ''}</MailSubject>;
+        return <MailSubject>{mailData?.subject || ""}</MailSubject>;
       }
 
       return null;
     },
-    [isMailConversation],
+    [isMailConversation]
   );
 
   // Render messages in the conversation
@@ -147,15 +165,14 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
       messages: IMessage[],
       conversationFirstMessage: IMessage,
       updateMsg: (id: string, content: string, action: string) => void,
-      brandId?: string,
+      brandId?: string
     ) => {
       let tempId: string | undefined;
 
       return messages.map((message) => {
-        const isSameUser =
-          message.userId
-            ? message.userId === tempId
-            : message.customerId === tempId;
+        const isSameUser = message.userId
+          ? message.userId === tempId
+          : message.customerId === tempId;
 
         tempId = message.userId ? message.userId : message.customerId;
 
@@ -172,7 +189,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
         );
       });
     },
-    [jumpToReleventDiv],
+    [jumpToReleventDiv]
   );
 
   // Render the conversation based on its type
@@ -182,10 +199,10 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
     const messages = conversationMessages.slice();
     const firstMessage = messages[0];
     const { integration } = currentConversation;
-    const kind = integration?.kind.split('-')[0];
+    const kind = integration?.kind.split("-")[0];
     const brandId = currentConversation.integration.brandId;
 
-    if (kind === 'callpro') {
+    if (kind === "callpro") {
       return (
         <>
           <CallPro conversation={currentConversation} />
@@ -203,7 +220,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
       );
     }
 
-    if (kind === 'imap') {
+    if (kind === "imap") {
       return (
         <>
           {content}
@@ -212,7 +229,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
       );
     }
 
-    if (kind === 'calls') {
+    if (kind === "calls") {
       return (
         <>
           <GrandStream conversation={currentConversation} />
@@ -236,10 +253,10 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
     const { kind } = currentConversation.integration;
     const showInternal =
       isMailConversation(kind) ||
-      kind === 'lead' ||
-      kind === 'imap' ||
-      kind === 'calls' ||
-      kind === 'webhook';
+      kind === "lead" ||
+      kind === "imap" ||
+      kind === "calls" ||
+      kind === "webhook";
     return (
       <RespondBox
         showInternal={showInternal}
@@ -276,26 +293,49 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
   return (
     <>
       <ActionBar currentConversation={currentConversation} />
-
-      <ModernContentBox>
-        <ModernConversationWrapper
-          ref={conversationWrapperRef as unknown as React.RefObject<any>}
-          onScroll={handleScroll}
+      <TabsContainer>
+        <TabButton
+          type="button"
+          isActive={tabType?._id === "messages"}
+          onClick={() => setTabType({ _id: "messages" })}
         >
-          <RenderConversationWrapper>
-            {renderConversation()}
-          </RenderConversationWrapper>
-        </ModernConversationWrapper>
-      </ModernContentBox>
+          الرسائل
+        </TabButton>
+        {userApps?.map((userApp: DashboardApp) => (
+          <TabButton
+            type="button"
+            isActive={tabType === userApp}
+            onClick={() => setTabType(userApp)}
+          >
+            {userApp.__typename}
+          </TabButton>
+        ))}
+      </TabsContainer>
+      {tabType._id === "messages" && (
+        <>
+          <ModernContentBox>
+            <ModernConversationWrapper
+              ref={conversationWrapperRef as unknown as React.RefObject<any>}
+              onScroll={handleScroll}
+            >
+              <RenderConversationWrapper>
+                {renderConversation()}
+              </RenderConversationWrapper>
+            </ModernConversationWrapper>
+          </ModernContentBox>
 
-      {currentConversation._id && (
-        <ModernContenFooter>
-          {typingInfo && <TypingIndicator>{typingInfo}</TypingIndicator>}
-          {renderRespondBox()}
-        </ModernContenFooter>
+          {currentConversation._id && (
+            <ModernContenFooter>
+              {typingInfo && <TypingIndicator>{typingInfo}</TypingIndicator>}
+              {renderRespondBox()}
+            </ModernContenFooter>
+          )}
+        </>
       )}
+
+      {tabType?._id !== "messages" && <iframe src={tabType?.iframeUrl} />}
     </>
   );
 });
-   
+
 export default WorkArea;

@@ -222,7 +222,23 @@ const ButtonsContainer = styled.div`
   align-items: center;
   gap: 10px;
 `;
+const TabsContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+const TabButton = styled.button<{ isActive: boolean }>`
+  outline: none;
+  border: none;
+  background: none;
+  border-bottom: ${({ isActive }) => (isActive ? "2px solid #3789E6" : "none")};
+  font-weight: ${({ isActive }) => (isActive ? "600" : "400")};
+  color: ${({ isActive }) => (isActive ? "#3789E6" : "#000")};
+  cursor: pointer;
+  padding: 1rem;
+`;
 export {
+  TabButton,
+  TabsContainer,
   ButtonsContainer,
   CheckBoxContainer,
   ActionIconContainer,
