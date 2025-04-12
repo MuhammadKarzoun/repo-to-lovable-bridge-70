@@ -107,8 +107,6 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
   );
   const [tabType, setTabType] = useState<DashboardApp>({ _id: "messages" });
 
-  console.log("userApps", userApps);
-
   // Scroll to bottom on new messages or typing info
   useEffect(() => {
     scrollBottom();
@@ -307,7 +305,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
             isActive={tabType === userApp}
             onClick={() => setTabType(userApp)}
           >
-            {userApp.__typename}
+            {userApp?.name}
           </TabButton>
         ))}
       </TabsContainer>
@@ -333,7 +331,12 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
         </>
       )}
 
-      {tabType?._id !== "messages" && <iframe src={tabType?.iframeUrl} />}
+      {tabType?._id !== "messages" && (
+        <iframe
+          src={tabType?.iframeUrl}
+          style={{ height: "100%", width: "100%", border: "none" }}
+        />
+      )}
     </>
   );
 });

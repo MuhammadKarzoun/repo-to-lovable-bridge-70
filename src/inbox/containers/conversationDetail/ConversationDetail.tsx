@@ -25,6 +25,7 @@ export type DashboardApp = {
   description?: string;
   icon?: any;
   iframeUrl?: string;
+  name?: string;
 };
 
 type Props = {
