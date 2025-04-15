@@ -1,4 +1,4 @@
-import { ActivityContent, DateContainer } from '@octobots/ui/src/styles/main';
+import { ActivityContent, DateContainer } from "@octobots/ui/src/styles/main";
 import {
   ActivityDate,
   ActivityIcon,
@@ -17,8 +17,8 @@ import {
   IconWrapper,
   Row,
   Timeline,
-  Title
-} from '@octobots/ui-log/src/activityLogs/styles';
+  Title,
+} from "@octobots/ui-log/src/activityLogs/styles";
 import {
   AttachmentItem,
   AttachmentsContainer,
@@ -26,25 +26,28 @@ import {
   Details,
   Meta,
   Reply,
-  RightSide
-} from '@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/mail/style';
+  RightSide,
+} from "@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/mail/style";
 import {
   FormTable,
   MessageBody,
   MessageContent,
   MessageItem,
-  UserInfo
-} from '@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/conversation/styles';
-import { SectionContainer, SidebarCollapse } from '@octobots/ui/src/layout/styles';
+  UserInfo,
+} from "@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/conversation/styles";
+import {
+  SectionContainer,
+  SidebarCollapse,
+} from "@octobots/ui/src/layout/styles";
 import {
   SpaceBetweenRow,
-  Subject
-} from '@octobots/ui-inbox/src/settings/integrations/components/mail/styles';
-import { colors, dimensions, typography } from '@octobots/ui/src/styles';
+  Subject,
+} from "@octobots/ui-inbox/src/settings/integrations/components/mail/styles";
+import { colors, dimensions, typography } from "@octobots/ui/src/styles";
 
-import { CardItem } from '@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/conversation/messages/bot/styles';
-import { Flex } from '@octobots/ui/src/styles/main';
-import styled from 'styled-components';
+import { CardItem } from "@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/conversation/messages/bot/styles";
+import { Flex } from "@octobots/ui/src/styles/main";
+import styled from "styled-components";
 
 const FlexRow = styled(DateContainer)`
   display: flex;
@@ -55,7 +58,7 @@ const FlexRow = styled(DateContainer)`
 
 const FlexItem = styled.div`
   flex: 1;
-  margin-inline-start	: 5px;
+  margin-inline-start: 5px;
 `;
 
 const NoteFormContainer = styled.div`
@@ -97,7 +100,7 @@ const ActivityLogContent = styled(ActivityContent)`
     word-break: break-word;
   }
 
-  ${AvatarWrapper}, 
+  ${AvatarWrapper},
   ${MessageItem} > span, 
   ${Meta} > span,
   ${ConversationContent},
@@ -200,7 +203,7 @@ const ActivityLogContent = styled(ActivityContent)`
   ${CardItem} {
     width: 100%;
     margin-inline-end: 0;
-  } 
+  }
 
   // form
   ${FormTable} {
@@ -223,7 +226,7 @@ const ActivityLogContent = styled(ActivityContent)`
   }
 
   ${RightSide} {
-    margin-inline-start	: 0;
+    margin-inline-start: 0;
     padding: 0;
   }
 
@@ -238,7 +241,7 @@ const ActivityLogContent = styled(ActivityContent)`
   }
 
   ${AttachmentsContainer} {
-    margin: 0 16px 8px 16px
+    margin: 0 16px 8px 16px;
   }
 
   ${AttachmentItem} {
@@ -254,7 +257,7 @@ const ActivityLogContent = styled(ActivityContent)`
     }
   }
 
-  //email form 
+  //email form
   ${SpaceBetweenRow} {
     flex-direction: column;
 
@@ -283,7 +286,34 @@ const TabContent = styled.div`
   }
 `;
 
+const SideBarButton = styled.button<{ showSideBar }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #e0e1e6;
+  border-radius: 5px;
+  padding: 0.3rem;
+  cursor: pointer;
+  position: absolute;
+  top: 2rem;
+  inset-inline-start: ${({ showSideBar }) => (showSideBar ? "0" : "-1rem")};
+  z-index: 10;
+`;
+const SideBarContainer = styled.div`
+  position: relative;
+`;
+const SideBarContent = styled.div<{ showSideBar }>`
+  width: ${({ showSideBar }) => (showSideBar ? "100%" : "0")};
+  transform: ${({ showSideBar }) =>
+    showSideBar ? "none" : "translateX(-1.5rem)"};
+  transition: all 0.3s ease-in-out;
+`;
+
 export {
+  SideBarContent,
+  SideBarContainer,
+  SideBarButton,
   FlexRow,
   FlexItem,
   SectionContainer,
@@ -291,5 +321,5 @@ export {
   ActivityLogContent,
   BasicInfo,
   SidebarCollapse,
-  TabContent
+  TabContent,
 };
