@@ -1,8 +1,15 @@
-import { colors, dimensions } from '@octobots/ui/src/styles';
-import styled from 'styled-components';
-import { modernColors, borderRadius, spacing, typography, transitions } from '../../../../styles/theme';
+import { display } from "./../../../../../../../node_modules/@octobots/ui/node_modules/chart.js/dist/plugins/plugin.subtitle.d";
+import { colors, dimensions } from "@octobots/ui/src/styles";
+import styled from "styled-components";
+import {
+  modernColors,
+  borderRadius,
+  spacing,
+  typography,
+  transitions,
+} from "../../../../styles/theme";
 
-import styledTS from 'styled-components-ts';
+import styledTS from "styled-components-ts";
 
 const ConversationWrapper = styled.div`
   height: 100%;
@@ -36,7 +43,7 @@ const AssignTrigger = styledTS<{ $active?: boolean }>(styled.div)`
   border-radius: ${borderRadius.md};
   cursor: pointer;
   transition: all ${transitions.fast};
-  background-color: ${props => props.$active ? modernColors.active : 'transparent'};
+  background-color: ${(props) => (props.$active ? modernColors.active : "transparent")};
   
   &:hover {
     background-color: ${modernColors.hover};
@@ -82,13 +89,13 @@ const ReplyComponent = styled.div`
   background-color: ${modernColors.messageBackground};
   border-radius: ${borderRadius.md};
   margin-bottom: ${spacing.md};
-  
+
   .reply-head {
     font-weight: ${typography.fontWeights.medium};
     color: ${modernColors.textSecondary};
     margin-right: ${spacing.md};
   }
-  
+
   .reply-content {
     flex: 1;
     padding: ${spacing.sm} ${spacing.md};
@@ -100,11 +107,11 @@ const ReplyComponent = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  
+
   .reply-close {
     display: flex;
     align-items: center;
-    
+
     button {
       background: none;
       border: none;
@@ -116,7 +123,7 @@ const ReplyComponent = styled.div`
       align-items: center;
       justify-content: center;
       border-radius: ${borderRadius.circle};
-      
+
       &:hover {
         background-color: ${modernColors.hover};
         color: ${modernColors.danger};
@@ -124,13 +131,127 @@ const ReplyComponent = styled.div`
     }
   }
 `;
+const SendButtonContainer = styled.div`
+  /* width: 3rem; */
+  height: 3rem;
+  display: grid;
+  place-items: center;
+`;
+const SendButton = styled.button`
+  border: none;
+  outline: none;
+  background: #1f97ff;
+  display: grid;
+  place-items: center;
+  /* width: 2.2rem; */
+  height: 2.2rem;
+  border-radius: 10px;
+  padding-inline: 1rem;
+  transition: all 0.2s ease-in-out;
+  &:hover {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+`;
+const RespondBoxContainer = styled.div`
+  border: 1px solid #dedede;
+  border-radius: 20px;
+  padding: 1rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+const RespondTypeContainer = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: #dedede;
+  border-radius: 10px;
+  padding: 4px;
+  width: auto;
+`;
 
+const RespondTypeButton = styled.button<{ isSelected: boolean }>`
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  background: ${({ isSelected }) => (isSelected ? "#fff" : "#dedede")};
+  margin-inline: 4px;
+`;
+const ActionIconContainer = styled.label`
+  width: auto;
+  height: 2.5rem;
+  border-radius: 10px;
+  background-color: #f0f0f0;
+  border: 1px solid #f0f0f0;
+  display: grid;
+  place-items: center;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+
+  .headlessui-popover-tooltip {
+    display: grid;
+    place-items: center;
+  }
+
+  i {
+    font-size: 1.2rem;
+    &::before {
+      margin: 7px;
+    }
+  }
+  button {
+    padding-inline: 10px;
+  }
+  &:hover {
+    background-color: #bbe0ff;
+
+    .microphone-2 {
+      color: #fff;
+    }
+  }
+`;
+const CheckBoxContainer = styled.div`
+  span {
+    display: flex;
+    align-items: center;
+  }
+`;
+const ButtonsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+const TabsContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+const TabButton = styled.button<{ isActive: boolean }>`
+  outline: none;
+  border: none;
+  background: none;
+  border-bottom: ${({ isActive }) => (isActive ? "2px solid #3789E6" : "none")};
+  font-weight: ${({ isActive }) => (isActive ? "600" : "400")};
+  color: ${({ isActive }) => (isActive ? "#3789E6" : "#000")};
+  cursor: pointer;
+  padding: 1rem;
+`;
 export {
+  TabButton,
+  TabsContainer,
+  ButtonsContainer,
+  CheckBoxContainer,
+  ActionIconContainer,
+  RespondTypeButton,
+  RespondTypeContainer,
+  RespondBoxContainer,
+  SendButton,
+  SendButtonContainer,
   ConversationWrapper,
   RenderConversationWrapper,
   ActionBarLeft,
   AssignTrigger,
   AssignText,
   MailSubject,
-  ReplyComponent
+  ReplyComponent,
 };

@@ -1,29 +1,43 @@
-import { AttachmentWrapper, Meta } from '@octobots/ui/src/components/Attachment';
-import { colors, dimensions } from '@octobots/ui/src/styles';
-import { darken, rgba } from '@octobots/ui/src/styles/ecolor';
-import styled, { css } from 'styled-components';
-import { modernColors, borderRadius, spacing, typography, transitions } from '../../../../../styles/theme';
+import {
+  AttachmentWrapper,
+  Meta,
+} from "@octobots/ui/src/components/Attachment";
+import { colors, dimensions } from "@octobots/ui/src/styles";
+import { darken, rgba } from "@octobots/ui/src/styles/ecolor";
+import styled, { css } from "styled-components";
+import {
+  modernColors,
+  borderRadius,
+  spacing,
+  typography,
+  transitions,
+} from "../../../../../styles/theme";
 
-import styledTS from 'styled-components-ts';
+import styledTS from "styled-components-ts";
 
-const MessageContent = styledTS<{ $failed?: boolean; $internal?: boolean; $staff?: boolean }>(
-  styled.div,
-)`
+const MessageContent = styledTS<{
+  $failed?: boolean;
+  $internal?: boolean;
+  $staff?: boolean;
+}>(styled.div)`
   max-width: 80%;
   position: relative;
   padding: ${spacing.md} ${spacing.lg};
-  border-radius: ${borderRadius.lg};
-  background: ${props => 
-    props.$failed ? modernColors.danger :
-    props.$internal ? modernColors.info + '20' :
-    props.$staff ? modernColors.messageBackgroundOwn : modernColors.messageBackground
-  };
+  border-radius: ${borderRadius.sm};
+  background: ${(props) =>
+    props.$failed
+      ? modernColors.danger
+      : props.$internal
+        ? modernColors.info + "20"
+        : props.$staff
+          ? modernColors.messageBackgroundOwn
+          : modernColors.messageBackground};
   word-break: break-word;
   box-shadow: 0 1px 2px 0 ${modernColors.shadow};
-  color: ${props => props.$staff && !props.$internal ? modernColors.messageTextOwn : modernColors.textPrimary};
+  color: ${(props) => (props.$staff && !props.$internal ? modernColors.messageTextOwn : modernColors.textPrimary)};
   text-align: start;
 
-  ${props =>
+  ${(props) =>
     props.$staff &&
     css`
       border-bottom-end-radius: ${borderRadius.sm};
@@ -33,14 +47,14 @@ const MessageContent = styledTS<{ $failed?: boolean; $internal?: boolean; $staff
       }
     `};
 
-  ${props =>
+  ${(props) =>
     !props.$staff &&
     css`
       border-bottom-start-radius: ${borderRadius.sm};
     `};
 
   a {
-    color: ${props =>
+    color: ${(props) =>
       props.$staff && !props.$internal
         ? modernColors.messageTextOwn
         : modernColors.primary};
@@ -78,7 +92,7 @@ const MessageContent = styledTS<{ $failed?: boolean; $internal?: boolean; $staff
 
   img {
     max-width: 300px;
-    border-radius: ${borderRadius.md};
+    border-radius: ${borderRadius.sm};
   }
 
   ul,
@@ -102,9 +116,9 @@ const MessageContent = styledTS<{ $failed?: boolean; $internal?: boolean; $staff
 `;
 
 const MessageBody = styledTS<{ $staff?: boolean }>(styled.div)`
-  margin: ${props => props.$staff ? '0 55px 0 0' : '0 0 0 55px'};
+  margin: ${(props) => (props.$staff ? "0 55px 0 0" : "0 0 0 55px")};
   display: flex;
-  flex-direction: ${props => props.$staff ? 'row-reverse' : 'row'};
+  flex-direction: ${(props) => (props.$staff ? "row-reverse" : "row")};
   align-items: flex-start;
   position: relative;
 
@@ -133,7 +147,7 @@ const MessageItem = styledTS<{
   $staff?: boolean;
   $isBot?: boolean;
 }>(styled.div)`
-  margin-top: ${props => props.$isSame ? spacing.sm : spacing.lg};
+  margin-top: ${(props) => (props.$isSame ? spacing.sm : spacing.lg)};
   padding-inline-end: 17%;
   display: flex;
   flex-direction: row;
@@ -142,11 +156,11 @@ const MessageItem = styledTS<{
 
   > span {
     position: absolute;
-    inset-inline-end: ${props => props.$staff && '0'};
+    inset-inline-end: ${(props) => props.$staff && "0"};
     bottom: 0;
   }
 
-  ${props =>
+  ${(props) =>
     props.$isBot &&
     css`
       padding-inline-end: 0;
@@ -161,9 +175,9 @@ const MessageItem = styledTS<{
       }
     `};
 
-  ${props => {
+  ${(props) => {
     if (!props.$staff) {
-      return '';
+      return "";
     }
 
     return `
@@ -176,14 +190,14 @@ const MessageItem = styledTS<{
 
   &.same {
     ${MessageContent} {
-      border-top-start-radius: ${props => !props.$staff && borderRadius.sm};
-      border-top-end-radius: ${props => props.$staff && borderRadius.sm};
+      border-top-start-radius: ${(props) => !props.$staff && borderRadius.sm};
+      border-top-end-radius: ${(props) => props.$staff && borderRadius.sm};
     }
 
     &:last-of-type {
       ${MessageContent} {
-        border-bottom-end-radius: ${props => props.$staff && borderRadius.lg};
-        border-bottom-start-radius: ${props => !props.$staff && borderRadius.lg};
+        border-bottom-end-radius: ${(props) => props.$staff && borderRadius.sm};
+        border-bottom-start-radius: ${(props) => !props.$staff && borderRadius.sm};
       }
     }
   }
@@ -357,7 +371,7 @@ const FieldWrapper = styledTS<{ column?: number }>(styled.div)`
     }
   }
 
-${props =>
+${(props) =>
   props.column &&
   css`
     width: ${100 / props.column}%;
@@ -418,11 +432,11 @@ const DropdownItem = styledTS(styled.a)`
   text-decoration: none;
 `;
 
-const OptionsContainer = styledTS<{$staff?: boolean;}>(styled.div)`
-  inset-inline-end: ${props => props.$staff? 'unset' : '24px'};
-  inset-inline-start:  ${props => props.$staff? '-24px' : 'unset'};
-  border-top-end-radius: ${props => props.$staff? 'unset' : '16px'};
-  border-top-start-radius: ${props => props.$staff? '16px' : 'unset'};
+const OptionsContainer = styledTS<{ $staff?: boolean }>(styled.div)`
+  inset-inline-end: ${(props) => (props.$staff ? "unset" : "24px")};
+  inset-inline-start:  ${(props) => (props.$staff ? "-24px" : "unset")};
+  border-top-end-radius: ${(props) => (props.$staff ? "unset" : "16px")};
+  border-top-start-radius: ${(props) => (props.$staff ? "16px" : "unset")};
   flex-direction: row;
   cursor: pointer;
   opacity: 0;
@@ -458,8 +472,8 @@ const FloatItem = styledTS(styled.div)`
     bottom: -50px;
 `;
 
-const Reactionbutton = styledTS<{$staff?: boolean;}>(styled.button)`
-    margin-${props => props.$staff? 'inline-end: 5px' : 'inline-start: 5px'};
+const Reactionbutton = styledTS<{ $staff?: boolean }>(styled.button)`
+    margin-${(props) => (props.$staff ? "inline-end: 5px" : "inline-start: 5px")};
     border-radius: 50%;
     border: solid 1px ${modernColors.border};
     background-color: transparent;
@@ -478,9 +492,7 @@ const Reactionbutton = styledTS<{$staff?: boolean;}>(styled.button)`
     }
 `;
 
-const DeletedMessageContent = styledTS<{ $staff?: boolean }>(
-  styled.div,
-)`
+const DeletedMessageContent = styledTS<{ $staff?: boolean }>(styled.div)`
   max-width: 80%;
   position: relative;
   padding: ${spacing.md} ${spacing.lg};
@@ -492,7 +504,7 @@ const DeletedMessageContent = styledTS<{ $staff?: boolean }>(
   text-align: start;
   font-style: italic;
 
-  ${props =>
+  ${(props) =>
     props.$staff &&
     css`
       border-bottom-end-radius: ${borderRadius.sm};
@@ -523,7 +535,9 @@ const EmojiPickerContainer = styled.div`
 const EmojiButton = styled.span`
   font-size: 18px;
   cursor: pointer;
-  transition: transform ${transitions.fast}, opacity ${transitions.fast};
+  transition:
+    transform ${transitions.fast},
+    opacity ${transitions.fast};
 
   &:hover {
     transform: scale(1.2);
@@ -582,5 +596,5 @@ export {
   EmojiPickerContainer,
   EmojiButton,
   ReactionContainer,
-  ReactionEmoji
+  ReactionEmoji,
 };

@@ -1,53 +1,59 @@
-import { IResponseTemplate } from '../../../../settings/responseTemplates/types';
-import { MentionSuggestionParams } from '@octobots/ui/src/components/richTextEditor/utils/getMentionSuggestions';
-import React, { forwardRef, useEffect, useState } from 'react';
+import { IResponseTemplate } from "../../../../settings/responseTemplates/types";
+import { MentionSuggestionParams } from "@octobots/ui/src/components/richTextEditor/utils/getMentionSuggestions";
+import React, { forwardRef, useEffect, useState } from "react";
 import {
   EditorMethods,
   RichTextEditor,
-} from '@octobots/ui/src/components/richTextEditor/TEditor';
-import TemplateList from './TemplateList';
-import styled from 'styled-components';
-import { modernColors, borderRadius, spacing, typography, transitions } from '../../../../styles/theme';
+} from "@octobots/ui/src/components/richTextEditor/TEditor";
+import TemplateList from "./TemplateList";
+import styled from "styled-components";
+import {
+  modernColors,
+  borderRadius,
+  spacing,
+  typography,
+  transitions,
+} from "../../../../styles/theme";
 
 const EditorContainer = styled.div`
   position: relative;
-  
+
   .RichEditor-root {
     border: none;
     background-color: transparent;
-    
+
     &:focus-within {
       outline: none;
     }
   }
-  
+
   .RichEditor-editor {
     min-height: 100px;
     max-height: 200px;
     overflow-y: auto;
     padding: 0;
-    
+
     .public-DraftEditor-content {
       min-height: 100px;
       max-height: 200px;
     }
   }
-  
+
   .RichEditor-controls {
     border-top: 1px solid ${modernColors.border};
     padding: ${spacing.xs} ${spacing.sm};
     background-color: ${modernColors.messageBackground};
   }
-  
+
   .RichEditor-styleButton {
     padding: ${spacing.xs} ${spacing.sm};
     margin-right: ${spacing.xs};
     border-radius: ${borderRadius.sm};
-    
+
     &:hover {
       background-color: ${modernColors.hover};
     }
-    
+
     &.RichEditor-activeButton {
       background-color: ${modernColors.active};
       color: ${modernColors.primary};
@@ -71,7 +77,7 @@ const TemplateListContainer = styled.div`
 
 const PlainTextEditorContainer = styled.div`
   position: relative;
-  
+
   textarea {
     width: 100%;
     min-height: 100px;
@@ -84,7 +90,7 @@ const PlainTextEditorContainer = styled.div`
     font-size: ${typography.fontSizes.md};
     line-height: ${typography.lineHeights.normal};
     background-color: transparent;
-    
+
     &::placeholder {
       color: ${modernColors.textSecondary};
     }
@@ -102,12 +108,14 @@ type EditorProps = {
   limit?: number;
   mentionSuggestion?: MentionSuggestionParams;
   onCtrlEnter?: () => void;
+  isIntrnalNote?: boolean;
 };
 
 type State = {
   collectedMentions: any;
   templatesState: any;
   hideTemplates: boolean;
+  isIntrnalNote?: boolean;
 };
 
 const Editor = forwardRef(
@@ -123,12 +131,14 @@ const Editor = forwardRef(
       onChange,
       limit,
       onCtrlEnter,
+      isIntrnalNote,
     } = props;
 
     const [state, setState] = useState<State>({
       collectedMentions: [],
       templatesState: null,
       hideTemplates: props.showMentions,
+      isIntrnalNote: props.isIntrnalNote,
     });
 
     useEffect(() => {
@@ -150,7 +160,7 @@ const Editor = forwardRef(
 
     const getTemplatesState = () => {
       // get html content as text
-      const textContent = content.toLowerCase().replace(/<[^>]+>/g, '');
+      const textContent = content.toLowerCase().replace(/<[^>]+>/g, "");
 
       if (!textContent) {
         return null;
@@ -160,7 +170,7 @@ const Editor = forwardRef(
       const foundTemplates = responseTemplates.filter(
         (template) =>
           template.name.toLowerCase().includes(textContent) ||
-          template.content.toLowerCase().includes(textContent),
+          template.content.toLowerCase().includes(textContent)
       );
 
       if (foundTemplates.length > 0) {
@@ -213,40 +223,41 @@ const Editor = forwardRef(
     const shouldUseRichText = () => {
       // Integrations that don't support rich text
       const plainTextIntegrations = [
-        'whatsapp',
-        'instagram-messenger',
-        'facebook-messenger',
-        'telegram',
-        'viber',
-        'line',
-        'telnyx'
+        "whatsapp",
+        "instagram-messenger",
+        "facebook-messenger",
+        "telegram",
+        "viber",
+        "line",
+        "telnyx",
       ];
-      
-      return !plainTextIntegrations.some(type => integrationKind.includes(type));
+
+      return !plainTextIntegrations.some((type) =>
+        integrationKind.includes(type)
+      );
     };
 
     return (
       <EditorContainer>
         {renderTemplates()}
-          <RichTextEditor
-            ref={ref}
-            name={currentConversation}
-            placeholder={placeholder}
-            integrationKind={integrationKind}
-            showMentions={showMentions}
-            mentionSuggestion={mentionSuggestion}
-            content={content}
-            onChange={onChange}
-            autoGrow={true}
-            autoGrowMinHeight={100}
-            autoGrowMaxHeight="55vh"
-            limit={limit}
-            onCtrlEnter={onCtrlEnter}
-            toolbar={shouldUseRichText() ? undefined : [] }
-          />
+        <RichTextEditor
+          ref={ref}
+          name={currentConversation}
+          placeholder={placeholder}
+          integrationKind={integrationKind}
+          showMentions={showMentions}
+          mentionSuggestion={mentionSuggestion}
+          content={content}
+          onChange={onChange}
+          autoGrow={true}
+          autoGrowMinHeight={100}
+          autoGrowMaxHeight="55vh"
+          limit={limit}
+          onCtrlEnter={onCtrlEnter}
+        />
       </EditorContainer>
     );
-  },
+  }
 );
 
 export default Editor;

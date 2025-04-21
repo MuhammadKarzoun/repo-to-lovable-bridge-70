@@ -1,23 +1,23 @@
-import { ContentBox, MainContent } from '@octobots/ui/src/layout/styles';
+import { ContentBox, MainContent } from "@octobots/ui/src/layout/styles";
 import DmWorkArea, {
   resetDmWithQueryCache,
-} from '../../containers/conversationDetail/DmWorkArea';
+} from "../../containers/conversationDetail/DmWorkArea";
 import {
   getPluginConfig,
   loadDynamicComponent,
-} from '@octobots/ui/src/utils/core';
+} from "@octobots/ui/src/utils/core";
 
-import ConversationDetailLoader from './ConversationDetailLoader';
-import EmptySidebar from '@octobots/ui/src/layout/components/Sidebar';
-import EmptyState from '@octobots/ui/src/components/EmptyState';
-import { IConversation } from '@octobots/ui-inbox/src/inbox/types';
-import { IField } from '@octobots/ui/src/types';
-import React from 'react';
-import Sidebar from '../../containers/conversationDetail/Sidebar';
-import SidebarLoader from './sidebar/SidebarLoader';
-import WorkArea from './workarea/WorkArea';
-import styled from 'styled-components';
-import { modernColors, borderRadius } from '../../../styles/theme';
+import ConversationDetailLoader from "./ConversationDetailLoader";
+import EmptySidebar from "@octobots/ui/src/layout/components/Sidebar";
+import EmptyState from "@octobots/ui/src/components/EmptyState";
+import { IConversation } from "@octobots/ui-inbox/src/inbox/types";
+import { IField } from "@octobots/ui/src/types";
+import React from "react";
+import Sidebar from "../../containers/conversationDetail/Sidebar";
+import SidebarLoader from "./sidebar/SidebarLoader";
+import WorkArea from "./workarea/WorkArea";
+import styled from "styled-components";
+import { modernColors, borderRadius } from "../../../styles/theme";
 
 const ModernMainContent = styled(MainContent)`
   background-color: ${modernColors.contentBackground};
@@ -98,23 +98,23 @@ export default class ConversationDetail extends React.Component<Props> {
 
     if (currentConversation) {
       const { integration } = currentConversation;
-      const kind = integration.kind.split('-')[0];
+      const kind = integration.kind.split("-")[0];
 
       let content;
 
       if (
-        !['messenger', 'lead', 'webhook', 'callpro'].includes(
-          currentConversation.integration.kind,
+        !["messenger", "lead", "webhook", "callpro"].includes(
+          currentConversation.integration.kind
         )
       ) {
         const integrations = getPluginConfig({
           pluginName: kind,
-          configName: 'inboxIntegrations',
+          configName: "inboxIntegrations",
         });
 
         if (integrations) {
           const entry = integrations.find((i) => i.kind === integration.kind);
-          const key = 'inboxConversationDetail';
+          const key = "inboxConversationDetail";
 
           if (entry && entry.components && entry.components.includes(key)) {
             content = loadDynamicComponent(
@@ -124,13 +124,13 @@ export default class ConversationDetail extends React.Component<Props> {
                 conversation: currentConversation,
               },
               false,
-              kind,
+              kind
             );
           }
         }
 
         if (content) {
-          if (currentConversation.integration.kind === 'imap') {
+          if (currentConversation.integration.kind === "imap") {
             return <DmWorkArea msg={msg} content={content} {...this.props} />;
           }
 
@@ -145,7 +145,7 @@ export default class ConversationDetail extends React.Component<Props> {
 
       const dmConfig = getPluginConfig({
         pluginName: kind,
-        configName: 'inboxDirectMessage',
+        configName: "inboxDirectMessage",
       });
 
       if (dmConfig) {

@@ -33,7 +33,12 @@ import asyncComponent from "@octobots/ui/src/components/AsyncComponent";
 import { isEnabled } from "@octobots/ui/src/utils/core";
 import { queries } from "@octobots/ui-inbox/src/inbox/graphql";
 import styled from "styled-components";
-import { modernColors, borderRadius, spacing, typography } from "../../../styles/theme";
+import {
+  modernColors,
+  borderRadius,
+  spacing,
+  typography,
+} from "../../../styles/theme";
 import ModernButton from "../../../components/common/Button";
 import Badge from "../../../components/common/Badge";
 import FilterBar from "../filters/FilterBar";
@@ -89,8 +94,9 @@ type Props = {
   resolveAll: () => void;
 };
 
-const LeftSidebar: React.FC<Props> = props => {
-  const { currentUser, currentConversationId, queryParams, bulk, toggleBulk } = props;
+const LeftSidebar: React.FC<Props> = (props) => {
+  const { currentUser, currentConversationId, queryParams, bulk, toggleBulk } =
+    props;
 
   const [isOpen, setIsOpen] = useState<boolean>(
     props.config?.showAddition || false
@@ -139,7 +145,7 @@ const LeftSidebar: React.FC<Props> = props => {
 
     return (
       <SidebarHeaderStyled>
-        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+        <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
           {/* <ToggleButton
             id="btn-inbox-channel-visible"
             $isActive={isOpen}
@@ -148,12 +154,8 @@ const LeftSidebar: React.FC<Props> = props => {
             <Icon icon="subject" />
           </ToggleButton> */}
           {queryParams.status !== CONVERSATION_STATUSES.CLOSED && (
-            <ModernButton
-              size="sm"
-              variant="ghost"
-              onClick={props.resolveAll}
-            >
-              {__('Resolve all')}
+            <ModernButton size="sm" variant="ghost" onClick={props.resolveAll}>
+              {__("Resolve all")}
             </ModernButton>
           )}
         </div>
@@ -167,16 +169,16 @@ const LeftSidebar: React.FC<Props> = props => {
 
   const renderSidebarSearchBox = () => {
     return (
-    <SearchInput>
-      <Icon icon="search" />
-      <input
-        type="text"
-        placeholder="Search conversations..."
-        value={searchValue}
-        onChange={handleSearchChange}
-      />
-    </SearchInput>
-    )
+      <SearchInput>
+        <Icon icon="search" />
+        <input
+          type="text"
+          placeholder="Search conversations..."
+          value={searchValue}
+          onChange={handleSearchChange}
+        />
+      </SearchInput>
+    );
   };
 
   // #TODO remove this code or use later @MK
@@ -330,8 +332,6 @@ const LeftSidebar: React.FC<Props> = props => {
           {/* {renderSidebarHeader()} */}
           {renderSidebarSearchBox()}
 
-
-
           <InboxManagementActionConsumer>
             {({ refetchRequired }) => (
               <FilterBar
@@ -342,7 +342,11 @@ const LeftSidebar: React.FC<Props> = props => {
             )}
           </InboxManagementActionConsumer>
 
-          <TabFilter queryParams={queryParams} currentUser={currentUser} counts={counts} />
+          <TabFilter
+            queryParams={queryParams}
+            currentUser={currentUser}
+            counts={counts}
+          />
 
           <ConversationList
             currentUser={currentUser}
