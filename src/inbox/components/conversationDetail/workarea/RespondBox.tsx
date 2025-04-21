@@ -435,7 +435,7 @@ const RespondBox = (props: Props) => {
     responseTemplate: string;
     mentionedUserIds: string[];
     loading: object;
-    extraInfo?: any;
+    metadata?: any;
   }>({
     isInactive: !checkIsActive(props.conversation),
     isActiveRecord: false,
@@ -616,11 +616,11 @@ const RespondBox = (props: Props) => {
   };
 
   const addMessage = (isAudio?: any) => {
-    const { isInternal, attachments, extraInfo } = state;
+    const { isInternal, attachments, metadata } = state;
     const message = {
       conversationId: conversation._id,
       content: cleanText(content) || '',
-      extraInfo,
+      metadata,
       contentType: 'text',
       internal: isInternal,
       attachments: isAudio ? [isAudio] : attachments,
@@ -1001,10 +1001,10 @@ const RespondBox = (props: Props) => {
   }
 
   function renderContent() {
-    const { isInternal, isInactive, extraInfo, isHiddenDynamicMask } = state;
+    const { isInternal, isInactive, metadata, isHiddenDynamicMask } = state;
 
     const setExtraInfo = (value) => {
-      setState((prevState) => ({ ...prevState, extraInfo: value }));
+      setState((prevState) => ({ ...prevState, metadata: value }));
     };
 
     const { integration } = conversation;
@@ -1026,7 +1026,7 @@ const RespondBox = (props: Props) => {
         if (name) {
           dynamicComponent = loadDynamicComponent(name, {
             hideMask: hideMask,
-            extraInfo,
+            metadata,
             setExtraInfo,
             conversationId: conversation._id,
             conversation: entry.kind == 'whatsapp' ? conversation : null
