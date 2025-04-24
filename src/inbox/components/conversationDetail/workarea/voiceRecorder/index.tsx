@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import type { AudioRecorderProps } from './types';
 import { Waveform } from './Waveform';
@@ -6,7 +7,7 @@ import { RecordingTimer } from './RecordingTimer';
 import { AudioPreview } from './AudioPreview';
 import Alert from '@octobots/ui/src/utils/Alert';
 import uploadHandler from '@octobots/ui/src/utils/uploadHandler';
-import Icon from '@octobots/ui/src/components/Icon';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
   onSend,
@@ -131,28 +132,78 @@ export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-2 w-full">
-      {error && <div className="text-red-600">{error}</div>}
-
-      {!isRecording && !audioUrl && (
-        <button
-          type="button"
-          onClick={handleCancel}
-          style={{ position: 'absolute', top: '10px', insetInlineEnd: '10px' }}
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      className="flex flex-col gap-3 w-full bg-white rounded-lg p-4 shadow-lg border border-gray-100"
+    >
+      {error && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-red-600 bg-red-50 p-2 rounded-md"
         >
-          <Icon icon="times" size={20} />
-        </button>
+          {error}
+        </motion.div>
       )}
 
-      {isRecording && (
-        <>
-          <Waveform
-            isRecording={isRecording}
-            isPaused={isPaused}
-            analyser={analyser.current}
-          />
-          <div className="flex items-center justify-between">
-            <RecordingTimer duration={duration} maxDuration={maxDuration} />
+      <AnimatePresence mode="wait">
+        {!isRecording && !audioUrl && (
+          <motion.button
+            key="close-button"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            type="button"
+            onClick={handleCancel}
+            className="absolute top-2 right-2 hover:bg-gray-100 p-2 rounded-full transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </motion.button>
+        )}
+
+        {isRecording && (
+          <motion.div
+            key="recording"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="space-y-4"
+          >
+            <Waveform
+              isRecording={isRecording}
+              isPaused={isPaused}
+              analyser={analyser.current}
+            />
+            <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+              <RecordingTimer duration={duration} maxDuration={maxDuration} />
+              <AudioControls
+                isRecording={isRecording}
+                isPaused={isPaused}
+                duration={duration}
+                onStartRecording={startRecording}
+                onStopRecording={stopRecording}
+                onPauseRecording={() => {}}
+                onResumeRecording={() => {}}
+                onCancel={handleCancel}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {!isRecording && !audioUrl && (
+          <motion.div
+            key="start"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex items-center justify-between bg-gray-50 p-4 rounded-lg"
+          >
+            <span className="text-gray-500 font-medium">Click the microphone to start recording</span>
             <AudioControls
               isRecording={isRecording}
               isPaused={isPaused}
@@ -163,33 +214,24 @@ export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
               onResumeRecording={() => {}}
               onCancel={handleCancel}
             />
-          </div>
-        </>
-      )}
+          </motion.div>
+        )}
 
-      {!isRecording && !audioUrl && (
-        <div className="flex items-center justify-between">
-          <span className="text-gray-400">Click the microphone to start recording</span>
-          <AudioControls
-            isRecording={isRecording}
-            isPaused={isPaused}
-            duration={duration}
-            onStartRecording={startRecording}
-            onStopRecording={stopRecording}
-            onPauseRecording={() => {}}
-            onResumeRecording={() => {}}
-            onCancel={handleCancel}
-          />
-        </div>
-      )}
-
-      {!isRecording && audioUrl && (
-        <AudioPreview
-          audioUrl={audioUrl}
-          onConfirm={handleConfirm}
-          onCancel={handleCancel}
-        />
-      )}
-    </div>
+        {!isRecording && audioUrl && (
+          <motion.div
+            key="preview"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+          >
+            <AudioPreview
+              audioUrl={audioUrl}
+              onConfirm={handleConfirm}
+              onCancel={handleCancel}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };

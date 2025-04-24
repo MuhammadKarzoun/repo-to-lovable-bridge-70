@@ -1,79 +1,85 @@
+
 import React from 'react';
 import styled from 'styled-components';
 import type { AudioControlsProps } from './types';
-import Icon from '@octobots/ui/src/components/Icon';
-import styledTS from "styled-components-ts";
+import { Mic, Square, X } from 'lucide-react';
 import Tip from '@octobots/ui/src/components/Tip';
 import { __ } from 'coreui/utils';
 
-const Button = styled.button`
-  padding: 0.25rem;
-  border-radius: 9999px;
-  transition: background-color 0.2s;
+const ControlsContainer = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
 `;
 
-export const ControlButton = styledTS<{ $color?: string }>(styled(Button))`
-    box-sizing: border-box;
-    flex-shrink: 0;
-    width: 55px;
-    height: 55px;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    background-color: ${props =>
-        props.$color ? props.$color : '#fff'};
-    border: 4px solid #c5c5c5;
-    outline: none;
-    cursor: pointer;
-    transition: border-color .3s, background-color .3s;
+const IconButton = styled.button<{ $variant?: 'primary' | 'danger' | 'default' }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  border: none;
+  transition: all 0.2s ease-in-out;
+  background-color: ${props => 
+    props.$variant === 'primary' ? '#3b82f6' :
+    props.$variant === 'danger' ? '#ef4444' :
+    '#ffffff'};
+  color: ${props => props.$variant ? '#ffffff' : '#374151'};
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border: 1px solid ${props => 
+    props.$variant === 'primary' ? '#2563eb' :
+    props.$variant === 'danger' ? '#dc2626' :
+    '#e5e7eb'};
 
-    i {
-         padding-top: 10px;
-    }
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    background-color: ${props => 
+      props.$variant === 'primary' ? '#2563eb' :
+      props.$variant === 'danger' ? '#dc2626' :
+      '#f9fafb'};
+  }
 
-    &:hover {
-        border: 4px solid #9f9f9f;
-    }
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 export const AudioControls: React.FC<AudioControlsProps> = ({
-    isRecording,
-    isPaused,
-    onStartRecording,
-    onStopRecording,
-    onPauseRecording,
-    onResumeRecording,
-    onCancel,
+  isRecording,
+  onStartRecording,
+  onStopRecording,
+  onCancel,
 }) => {
-    return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}>
-            {!isRecording ? (
-                <Tip text={__('Start recording')}>
-                    <ControlButton onClick={onStartRecording}>
-                        <Icon icon="microphone-2" size={24} />
-                    </ControlButton>
-                </Tip>
-            ) : (
-                <>
-                    <Tip text={__('Cancel')}>
-                        <ControlButton onClick={onCancel}>
-                            <Icon icon="times" size={24} />
-                        </ControlButton>
-                    </Tip>
-                    <Tip text={isPaused ? __('Resume') : __('Pause')}>
-                        <ControlButton $color={isPaused ? "#3ccc38" : "orange"} onClick={isPaused ? onResumeRecording : onPauseRecording}>
-                            {isPaused ? <Icon icon="play-1" color='white' size={24} /> : <Icon icon="pause-1" color='white' size={24} />}
-                        </ControlButton>
-                    </Tip>
-                    <Tip text={__('Stop recording')}>
-                        <ControlButton $color="#ff3030" onClick={onStopRecording}>
-                            <Icon icon="square-shape" color='white' size={24} />
-                        </ControlButton>
-                    </Tip>
-                </>
-            )}
-        </div>
-    );
+  return (
+    <ControlsContainer>
+      {!isRecording ? (
+        <Tip text={__('Start recording')}>
+          <IconButton onClick={onStartRecording} $variant="primary">
+            <Mic size={20} />
+          </IconButton>
+        </Tip>
+      ) : (
+        <>
+          <Tip text={__('Cancel')}>
+            <IconButton onClick={onCancel}>
+              <X size={20} />
+            </IconButton>
+          </Tip>
+          <Tip text={__('Stop recording')}>
+            <IconButton onClick={onStopRecording} $variant="danger">
+              <Square size={20} />
+            </IconButton>
+          </Tip>
+        </>
+      )}
+    </ControlsContainer>
+  );
 };
