@@ -10,7 +10,6 @@ import '@nateradebaugh/react-datetime/css/react-datetime.css';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
-import { GlobalStyles } from './styles/theme';
 
 dayjs.extend(localizedFormat);
 dayjs.extend(relativeTime);
@@ -18,7 +17,6 @@ dayjs.extend(relativeTime);
 const App = () => {
   return (
     <PluginLayout>
-      <GlobalStyles />
       <AppProvider currentUser={dummyUser}>
         <GeneralRoutes />
       </AppProvider>

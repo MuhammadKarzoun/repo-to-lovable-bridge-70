@@ -1,7 +1,6 @@
 import { colors, dimensions } from '@octobots/ui/src/styles';
-import { createGlobalStyle } from 'styled-components';
 
-// Modern color palette based on the screenshots
+// TODO: remove this file and get styles from @octobots/ui instead
 export const modernColors = {
   primary: '#1F97FF',
   secondary: '#f1b500',
@@ -130,64 +129,3 @@ export const zIndex = {
   toast: 1700,
   tooltip: 1800,
 };
-
-// Create global styles
-export const GlobalStyles = createGlobalStyle`
-  body {
-    font-family: ${typography.fontFamily};
-    color: ${modernColors.textPrimary};
-    background-color: ${modernColors.background};
-    margin: 0;
-    padding: 0;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-
-  a {
-    color: ${modernColors.primary};
-    text-decoration: none;
-    
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-
-  button, input, select, textarea {
-    font-family: inherit;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    margin: 0;
-    font-weight: ${typography.fontWeights.semibold};
-    line-height: ${typography.lineHeights.tight};
-    color: ${modernColors.textPrimary};
-  }
-
-  p {
-    margin: 0;
-    line-height: ${typography.lineHeights.normal};
-  }
-
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: ${colors.colorLightGray};
-    border-radius: ${borderRadius.pill};
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: ${colors.colorCoreGray};
-  }
-`;
