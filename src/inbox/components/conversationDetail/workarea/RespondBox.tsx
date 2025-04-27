@@ -89,7 +89,7 @@ type State = {
   responseTemplate: string;
   mentionedUserIds: string[];
   loading: object;
-  extraInfo?: any;
+  metadata?: any;
 };
 
 const RespondBox = (props: Props) => {
@@ -654,7 +654,7 @@ const RespondBox = (props: Props) => {
   function renderContent() {
     const { isInternal, isInactive, metadata, isHiddenDynamicMask } = state;
 
-    const setExtraInfo = (value) => {
+    const setMetadata = (value) => {
       setState((prevState) => ({ ...prevState, metadata: value }));
     };
 
@@ -678,7 +678,7 @@ const RespondBox = (props: Props) => {
           dynamicComponent = loadDynamicComponent(name, {
             hideMask: hideMask,
             metadata,
-            setExtraInfo,
+            setMetadata,
             conversationId: conversation._id,
             conversation: entry.kind == "whatsapp" ? conversation : null,
           });
