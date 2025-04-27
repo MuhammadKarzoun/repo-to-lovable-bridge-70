@@ -1,9 +1,9 @@
 import {
   AddMessageMutationVariables,
   IConversation,
-  IMessage
-} from '@octobots/ui-inbox/src/inbox/types';
-import { Alert, __, readFile, uploadHandler } from 'coreui/utils';
+  IMessage,
+} from "@octobots/ui-inbox/src/inbox/types";
+import { Alert, __, readFile, uploadHandler } from "coreui/utils";
 import {
   Attachment,
   AttachmentIndicator,
@@ -16,45 +16,48 @@ import {
   PreviewImg,
   RecordMask,
   RespondBoxStyled,
-  SmallEditor
-} from '@octobots/ui-inbox/src/inbox/styles';
-import React, { useEffect, useRef, useState } from 'react';
+  SmallEditor,
+} from "@octobots/ui-inbox/src/inbox/styles";
+import React, { useEffect, useRef, useState } from "react";
 import {
   getPluginConfig,
   // isEnabled,
-  loadDynamicComponent
-} from '@octobots/ui/src/utils/core';
+  loadDynamicComponent,
+} from "@octobots/ui/src/utils/core";
 import {
   useDebounce,
-  useDebouncedCallback
-} from '@octobots/ui/src/components/richTextEditor/hooks';
-import debounce from 'lodash/debounce';
+  useDebouncedCallback,
+} from "@octobots/ui/src/components/richTextEditor/hooks";
+import debounce from "lodash/debounce";
 
-
-import Button from '@octobots/ui/src/components/Button';
-import Editor from './Editor';
-import { EditorMethods } from '@octobots/ui/src/components/richTextEditor/TEditor';
-import FormControl from '@octobots/ui/src/components/form/Control';
-import { IAttachmentPreview } from '@octobots/ui/src/types';
-import { IIntegration } from '@octobots/ui-inbox/src/settings/integrations/types';
-import { IResponseTemplate } from '../../../../settings/responseTemplates/types';
-import { IUser } from '@octobots/ui/src/auth/types';
-import Icon from '@octobots/ui/src/components/Icon';
-import { MentionSuggestionParams } from '@octobots/ui/src/components/richTextEditor/utils/getMentionSuggestions';
-import NameCard from '@octobots/ui/src/components/nameCard/NameCard';
-import ResponseTemplate from '../../../containers/conversationDetail/responseTemplate/ResponseTemplate';
-import { SmallLoader } from '@octobots/ui/src/components/ButtonMutate';
-import Tip from '@octobots/ui/src/components/Tip';
-import { deleteHandler } from '@octobots/ui/src/utils/uploadHandler';
-import { getParsedMentions } from '@octobots/ui/src/components/richTextEditor/utils/getParsedMentions';
-import { useGenerateJSON } from '@octobots/ui/src/components/richTextEditor/hooks/useExtensions';
-import AttachmentComp from '@octobots/ui/src/components/Attachment';
-import { urlify } from '@octobots/ui/src/utils/urlParser';
-import xss from 'xss';
-import { ReplyComponent } from './styles';
-import WhatsappTemplates from '@octobots/ui-whatsapp/src/containers/WhatsappTemplates';
-import { VoiceRecorder } from './voiceRecorder';
-
+import Button from "@octobots/ui/src/components/Button";
+import Editor from "./Editor";
+import { EditorMethods } from "@octobots/ui/src/components/richTextEditor/TEditor";
+import FormControl from "@octobots/ui/src/components/form/Control";
+import { IAttachmentPreview } from "@octobots/ui/src/types";
+import { IIntegration } from "@octobots/ui-inbox/src/settings/integrations/types";
+import { IResponseTemplate } from "../../../../settings/responseTemplates/types";
+import { IUser } from "@octobots/ui/src/auth/types";
+import Icon from "@octobots/ui/src/components/Icon";
+import { MentionSuggestionParams } from "@octobots/ui/src/components/richTextEditor/utils/getMentionSuggestions";
+import NameCard from "@octobots/ui/src/components/nameCard/NameCard";
+import ResponseTemplate from "../../../containers/conversationDetail/responseTemplate/ResponseTemplate";
+import { SmallLoader } from "@octobots/ui/src/components/ButtonMutate";
+import Tip from "@octobots/ui/src/components/Tip";
+import { deleteHandler } from "@octobots/ui/src/utils/uploadHandler";
+import { getParsedMentions } from "@octobots/ui/src/components/richTextEditor/utils/getParsedMentions";
+import { useGenerateJSON } from "@octobots/ui/src/components/richTextEditor/hooks/useExtensions";
+import AttachmentComp from "@octobots/ui/src/components/Attachment";
+import { urlify } from "@octobots/ui/src/utils/urlParser";
+import xss from "xss";
+import {
+  ActionIconContainer,
+  ButtonsContainer,
+  CheckBoxContainer,
+  ReplyComponent,
+} from "./styles";
+import WhatsappTemplates from "@octobots/ui-whatsapp/src/containers/WhatsappTemplates";
+import { VoiceRecorder } from "./voiceRecorder";
 
 type Props = {
   conversation: IConversation;
@@ -113,16 +116,27 @@ const RespondBox = (props: Props) => {
 
   const forwardedRef = useRef<EditorMethods>(null);
   const [content, setContent] = useState('');
-  const [state, setState] = useState<State>({
+  const [state, setState] = useState<{
+    isInactive: boolean;
+    isActiveRecord: boolean;
+    isHiddenDynamicMask: boolean;
+    isInternal: boolean;
+    sending: boolean;
+    attachments: any[];
+    responseTemplate: string;
+    mentionedUserIds: string[];
+    loading: object;
+    metadata?: any;
+  }>({
     isInactive: !checkIsActive(props.conversation),
     isActiveRecord: false,
     isHiddenDynamicMask: false,
     isInternal: props.showInternal || false,
     sending: false,
     attachments: [],
-    responseTemplate: '',
+    responseTemplate: "",
     mentionedUserIds: [],
-    loading: {}
+    loading: {},
   });
   const [debouncedContent] = useDebounce(content, 700);
 
@@ -136,31 +150,30 @@ const RespondBox = (props: Props) => {
   useEffect(() => {
     setState((prevState) => ({
       ...prevState,
-      isInactive: !checkIsActive(props.conversation)
+      isInactive: !checkIsActive(props.conversation),
     }));
 
     setState((prevState) => ({
       ...prevState,
-      isInternal: props.showInternal
+      isInternal: props.showInternal,
     }));
   }, [props.conversation, props.showInternal]);
 
   useEffect(() => {
-    const textContent = debouncedContent.toLowerCase().replace(/<[^>]+>/g, '');
+    const textContent = debouncedContent.toLowerCase().replace(/<[^>]+>/g, "");
     props.refetchResponseTemplates(textContent);
   }, [debouncedContent]);
-
 
   // save editor current content to state
   const onEditorContentChange = useDebouncedCallback(
     (editorContent: string) => {
       setContent(editorContent);
 
-      if (props.conversation.integration.kind === 'telnyx') {
+      if (props.conversation.integration.kind === "telnyx") {
         const characterCount = calcCharacterCount(160);
 
         if (characterCount < 1) {
-          Alert.warning(__('You have reached maximum number of characters'));
+          Alert.warning(__("You have reached maximum number of characters"));
         }
       }
     },
@@ -168,7 +181,7 @@ const RespondBox = (props: Props) => {
   );
 
   function checkIsActive(conversation: IConversation) {
-    if (conversation.integration.kind === 'messenger') {
+    if (conversation.integration.kind === "messenger") {
       return conversation.customer && conversation.customer.isOnline;
     }
 
@@ -178,7 +191,7 @@ const RespondBox = (props: Props) => {
   const hideMask = () => {
     setState((prevState) => ({ ...prevState, isInactive: false }));
 
-    const element = document.querySelector('.DraftEditor-root') as HTMLElement;
+    const element = document.querySelector(".DraftEditor-root") as HTMLElement;
 
     if (!element) {
       return;
@@ -206,12 +219,12 @@ const RespondBox = (props: Props) => {
       ...prevState,
       responseTemplate: responseTemplate.content,
       // set attachment from response template files
-      attachments: responseTemplate.files || []
+      attachments: responseTemplate.files || [],
     }));
   };
 
   const handleDeleteFile = (url: string) => {
-    const urlArray = url.split('/');
+    const urlArray = url.split("/");
 
     // checking whether url is full path or just file name
     const fileName =
@@ -225,17 +238,17 @@ const RespondBox = (props: Props) => {
     deleteHandler({
       fileName,
       afterUpload: ({ status }) => {
-        if (status === 'ok') {
+        if (status === "ok") {
           const remainedAttachments = state.attachments.filter(
             (a) => a.url !== url
           );
 
           setState((prevState) => ({
             ...prevState,
-            attachments: remainedAttachments
+            attachments: remainedAttachments,
           }));
 
-          Alert.success('You successfully deleted a file');
+          Alert.success("You successfully deleted a file");
         } else {
           Alert.error(status);
         }
@@ -244,7 +257,7 @@ const RespondBox = (props: Props) => {
         delete loading[url];
 
         setState((prevState) => ({ ...prevState, loading }));
-      }
+      },
     });
   };
 
@@ -263,8 +276,8 @@ const RespondBox = (props: Props) => {
           ...prevState,
           attachments: [
             ...state.attachments,
-            Object.assign({ url: response }, fileInfo)
-          ]
+            Object.assign({ url: response }, fileInfo),
+          ],
         }));
 
         // remove preview
@@ -277,16 +290,16 @@ const RespondBox = (props: Props) => {
         if (setAttachmentPreview) {
           setAttachmentPreview(Object.assign({ data: result }, fileInfo));
         }
-      }
+      },
     });
   };
 
   function cleanText(text: string) {
-    return text.replace(/&nbsp;/g, ' ');
+    return text.replace(/&nbsp;/g, " ");
   }
 
   const calcCharacterCount = (maxlength: number) => {
-    const cleanContent = content.replace(/<\/?[^>]+(>|$)/g, '');
+    const cleanContent = content.replace(/<\/?[^>]+(>|$)/g, "");
 
     if (!cleanContent) {
       return maxlength;
@@ -307,7 +320,7 @@ const RespondBox = (props: Props) => {
       internal: isInternal,
       attachments: isAudio ? [isAudio] : attachments,
       mentionedUserIds: getParsedMentions(useGenerateJSON(content)) as string[],
-      ...(replyExist && { replyForMsgId: replyExist._id })
+      ...(replyExist && { replyForMsgId: replyExist._id }),
     };
 
     setState((prevState) => ({ ...prevState, sending: true }));
@@ -321,9 +334,9 @@ const RespondBox = (props: Props) => {
         ...prevState,
         attachments: [],
         sending: false,
-        mentionedUserIds: []
+        mentionedUserIds: [],
       }));
-      setContent('');
+      setContent("");
       setReplyExist(null);
     });
   };
@@ -351,10 +364,10 @@ const RespondBox = (props: Props) => {
           {attachments.map((attachment) => (
             <Attachment key={attachment.name}>
               <AttachmentThumb>
-                {attachment.type.startsWith('image') && (
+                {attachment.type.startsWith("image") && (
                   <PreviewImg
                     style={{
-                      backgroundImage: `url(${readFile(attachment.url)})`
+                      backgroundImage: `url(${readFile(attachment.url)})`,
                     }}
                   />
                 )}
@@ -368,7 +381,7 @@ const RespondBox = (props: Props) => {
                 <SmallLoader />
               ) : (
                 <Icon
-                  icon='times'
+                  icon="times"
                   onClick={handleDeleteFile.bind(this, attachment.url)}
                 />
               )}
@@ -384,11 +397,9 @@ const RespondBox = (props: Props) => {
   function renderMask() {
     if (state.isInactive) {
       return (
-        <Mask
-          id='mask'
-          onClick={hideMask}>
+        <Mask id="mask" onClick={hideMask}>
           {__(
-            'Customer is offline Click to hide and send messages and they will receive them the next time they are online'
+            "Customer is offline Click to hide and send messages and they will receive them the next time they are online"
           )}
         </Mask>
       );
@@ -400,7 +411,7 @@ const RespondBox = (props: Props) => {
   function renderRecordMask() {
     if (state.isActiveRecord) {
       return (
-        <RecordMask id='recordmask'>
+        <RecordMask id="recordmask">
           <VoiceRecorder
             onSend={onAudioUpload}
             onCancel={() => setState({ ...state, isActiveRecord: false })}
@@ -421,7 +432,9 @@ const RespondBox = (props: Props) => {
     }
 
     return attachments.map((attachment, index) => {
-      return <AttachmentComp key={index} attachment={attachment} simple={true} />;
+      return (
+        <AttachmentComp key={index} attachment={attachment} simple={true} />
+      );
     });
   }
 
@@ -432,26 +445,27 @@ const RespondBox = (props: Props) => {
 
     if (!replyExist) return null;
 
-    const hasAttachment = replyExist.attachments && replyExist.attachments.length > 0;
+    const hasAttachment =
+      replyExist.attachments && replyExist.attachments.length > 0;
 
     if (!replyExist.content) {
-      return (
-        <>
-          {renderAttachment(replyExist, hasAttachment)}{' '}
-        </>
-      );
+      return <>{renderAttachment(replyExist, hasAttachment)} </>;
     }
 
     return (
       <ReplyComponent>
-        <div className='reply-head'>{__("REPLY TO")}</div>
-        <div className='reply-content'>
-          <span dangerouslySetInnerHTML={{ __html: xss(urlify(replyExist.content)) }} />
+        <div className="reply-head">{__("REPLY TO")}</div>
+        <div className="reply-content">
+          <span
+            dangerouslySetInnerHTML={{
+              __html: xss(urlify(replyExist.content)),
+            }}
+          />
           {renderAttachment(replyExist, hasAttachment)}
         </div>
-        <div className='reply-close'>
+        <div className="reply-close">
           <button onClick={deleteReplyContent}>
-            <i className='icon-cancel'></i>
+            <i className="icon-cancel"></i>
           </button>
         </div>
       </ReplyComponent>
@@ -461,9 +475,9 @@ const RespondBox = (props: Props) => {
   function renderEditor() {
     const { isInternal } = state;
 
-    let type = 'message';
+    let type = "message";
     if (isInternal) {
-      type = 'note';
+      type = "note";
     }
 
     const placeholder = __(
@@ -484,14 +498,14 @@ const RespondBox = (props: Props) => {
       if (files && files.length > 0) {
         uploadHandler({
           files,
-          beforeUpload: () => { },
+          beforeUpload: () => {},
           afterUpload: ({ response, fileInfo }) => {
             setState((prevState) => ({
               ...prevState,
               attachments: [
                 ...prevState.attachments,
-                { url: response, ...fileInfo }
-              ]
+                { url: response, ...fileInfo },
+              ],
             }));
 
             if (setAttachmentPreview) {
@@ -502,15 +516,12 @@ const RespondBox = (props: Props) => {
             if (setAttachmentPreview) {
               setAttachmentPreview({ data: result, ...fileInfo });
             }
-          }
+          },
         });
       }
     };
     return (
-      <div
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        style={{}}>
+      <div onDragOver={handleDragOver} onDrop={handleDrop} style={{}}>
         <Editor
           ref={forwardedRef}
           currentConversation={conversation._id}
@@ -521,7 +532,7 @@ const RespondBox = (props: Props) => {
           showMentions={isInternal}
           mentionSuggestion={props.mentionSuggestion}
           responseTemplates={responseTemplates}
-          limit={conversation.integration.kind === 'telnyx' ? 160 : undefined}
+          limit={conversation.integration.kind === "telnyx" ? 160 : undefined}
           onCtrlEnter={addMessage}
         />
       </div>
@@ -531,25 +542,25 @@ const RespondBox = (props: Props) => {
   function renderCheckbox(kind: string) {
     const { isInternal } = state;
 
-    if (kind.includes('nylas') || kind === 'gmail') {
+    if (kind.includes("nylas") || kind === "gmail") {
       return null;
     }
 
     return (
-      <>
+      <CheckBoxContainer>
         {
           <FormControl
-            id='conversationInternalNote'
-            className='toggle-message'
-            componentclass='checkbox'
+            id="conversationInternalNote"
+            className="toggle-message"
+            componentclass="checkbox"
             checked={isInternal}
             onChange={toggleForm}
-          // disabled={ props.disableInternalState}
+            // disabled={ props.disableInternalState}
           >
-            {__('Internal note')}
+            {__("Internal note")}
           </FormControl>
         }
-      </>
+      </CheckBoxContainer>
     );
   }
 
@@ -574,52 +585,57 @@ const RespondBox = (props: Props) => {
   function renderButtons() {
     const integration = conversation.integration || ({} as IIntegration);
     const disabled =
-      integration.kind.includes('nylas') || integration.kind === 'gmail';
+      integration.kind.includes("nylas") || integration.kind === "gmail";
 
     return (
       <EditorActions>
         {renderCheckbox(integration.kind)}
         {/* { renderVideoRoom()} */}
+        <ButtonsContainer>
+          {loadDynamicComponent("inboxEditorAction", props, true)}
 
-        {loadDynamicComponent('inboxEditorAction', props, true)}
+          <ActionIconContainer>
+            <Tip text={__("Record audio")}>
+              <Icon
+                icon="microphone-2"
+                onClick={() => setState({ ...state, isActiveRecord: true })}
+              />
+            </Tip>
+          </ActionIconContainer>
 
-        <label>
-          <Tip text={__('Record audio')}>
-            <Icon icon='microphone-2' onClick={() => setState({ ...state, isActiveRecord: true })} />
-          </Tip>
-        </label>
-
-        <label style={{ marginInlineEnd: '10px' }}>
-          <Tip text={__('Attach file')}>
-            <Icon icon='paperclip' />
-            <input
-              type='file'
-              onChange={handleFileInput}
-              multiple={true}
+          <ActionIconContainer>
+            <Tip text={__("Attach file")}>
+              <Icon icon="paperclip" />
+              <input type="file" onChange={handleFileInput} multiple={true} />
+            </Tip>
+          </ActionIconContainer>
+          <ActionIconContainer>
+            <ResponseTemplate
+              brandId={integration.brandId}
+              attachments={state.attachments}
+              content={content}
+              onSelect={onSelectTemplate}
             />
-          </Tip>
-        </label>
+          </ActionIconContainer>
 
-        <ResponseTemplate
-          brandId={integration.brandId}
-          attachments={state.attachments}
-          content={content}
-          onSelect={onSelectTemplate}
-        />
-
-        {conversation.integration.kind == 'whatsapp' && <WhatsappTemplates
-          conversation={conversation}
-          buttonFrom="inbox"
-          onClose={() => setIsModalOpen(false)}
-        />}
-
-        <Button
-          onClick={onSendDebouncedClickHandler}
-          btnStyle='success'
-          size='small'
-          icon='message'>
-          {!disabled && 'Send'}
-        </Button>
+          {conversation.integration.kind == "whatsapp" && (
+            <ActionIconContainer>
+              <WhatsappTemplates
+                conversation={conversation}
+                buttonFrom="inbox"
+                onClose={() => setIsModalOpen(false)}
+              />
+            </ActionIconContainer>
+          )}
+          <ActionIconContainer>
+            <Button
+              onClick={onSendDebouncedClickHandler}
+              btnStyle="success"
+              size="small"
+              icon="message"
+            />
+          </ActionIconContainer>
+        </ButtonsContainer>
       </EditorActions>
     );
   }
@@ -645,8 +661,8 @@ const RespondBox = (props: Props) => {
     const { integration } = conversation;
 
     const integrations = getPluginConfig({
-      pluginName: integration.kind.split('-')[0],
-      configName: 'inboxIntegrations'
+      pluginName: integration.kind.split("-")[0],
+      configName: "inboxIntegrations",
     });
 
     let dynamicComponent = null;
@@ -655,7 +671,7 @@ const RespondBox = (props: Props) => {
       const entry = integrations.find((s) => s.kind === integration.kind);
       if (entry && entry.components && entry.components.length > 0) {
         const name = entry.components.find(
-          (el) => el === 'inboxConversationDetailRespondBoxMask'
+          (el) => el === "inboxConversationDetailRespondBoxMask"
         );
 
         if (name) {
@@ -664,7 +680,7 @@ const RespondBox = (props: Props) => {
             metadata,
             setMetadata,
             conversationId: conversation._id,
-            conversation: entry.kind == 'whatsapp' ? conversation : null
+            conversation: entry.kind == "whatsapp" ? conversation : null,
           });
         }
       }
@@ -675,9 +691,7 @@ const RespondBox = (props: Props) => {
         {renderRecordMask()}
         {renderMask()}
         {!isInternal && !isHiddenDynamicMask && dynamicComponent}
-        <RespondBoxStyled
-          $isInternal={isInternal}
-          $isInactive={isInactive}>
+        <RespondBoxStyled $isInternal={isInternal} $isInactive={isInactive}>
           {renderBody()}
         </RespondBoxStyled>
       </MaskWrapper>
@@ -687,10 +701,7 @@ const RespondBox = (props: Props) => {
   function renderMailRespondBox() {
     return (
       <MailRespondBox $isInternal={true}>
-        <NameCard.Avatar
-          user={currentUser}
-          size={34}
-        />
+        <NameCard.Avatar user={currentUser} size={34} />
         <SmallEditor>{renderBody()}</SmallEditor>
       </MailRespondBox>
     );
@@ -699,7 +710,7 @@ const RespondBox = (props: Props) => {
   const integration = conversation.integration || ({} as IIntegration);
   const { kind } = integration;
 
-  const isMail = kind.includes('nylas') || kind === 'gmail';
+  const isMail = kind.includes("nylas") || kind === "gmail";
 
   if (isMail) {
     return renderMailRespondBox();

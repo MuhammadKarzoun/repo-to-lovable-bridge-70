@@ -1,28 +1,38 @@
-import * as compose from 'lodash.flowright';
+import * as compose from "lodash.flowright";
 
-import { Alert, withProps } from '@octobots/ui/src/utils';
+import { Alert, withProps } from "@octobots/ui/src/utils";
 import {
   ConversationDetailQueryResponse,
   MarkAsReadMutationResponse,
-} from '@octobots/ui-inbox/src/inbox/types';
+} from "@octobots/ui-inbox/src/inbox/types";
 import {
   mutations,
   queries,
   subscriptions,
-} from '@octobots/ui-inbox/src/inbox/graphql';
+} from "@octobots/ui-inbox/src/inbox/graphql";
 
-import { AppConsumer } from 'coreui/appContext';
-import ConversationDetail from '../../components/conversationDetail/ConversationDetail';
-import { IField } from '@octobots/ui/src/types';
-import { IUser } from '@octobots/ui/src/auth/types';
-import React from 'react';
-import { gql } from '@apollo/client';
-import { graphql } from '@apollo/client/react/hoc';
+import { AppConsumer } from "coreui/appContext";
+import ConversationDetail from "../../components/conversationDetail/ConversationDetail";
+import { IField } from "@octobots/ui/src/types";
+import { IUser } from "@octobots/ui/src/auth/types";
+import React from "react";
+import { gql } from "@apollo/client";
+import { graphql } from "@apollo/client/react/hoc";
+
+export type DashboardApp = {
+  _id: string;
+  __typename?: string;
+  description?: string;
+  icon?: any;
+  iframeUrl?: string;
+  name?: string;
+};
 
 type Props = {
   currentId: string;
   conversationFields?: IField[];
   msg?: string;
+  userDashboardApps?: { userDashboardApps: DashboardApp[] };
 };
 
 type FinalProps = {
@@ -86,7 +96,7 @@ class DetailContainer extends React.Component<FinalProps> {
 
     if (
       conversation.integration &&
-      conversation.integration.kind === 'messenger'
+      conversation.integration.kind === "messenger"
     ) {
       const customerId = conversation.customer && conversation.customer._id;
 
@@ -106,8 +116,13 @@ class DetailContainer extends React.Component<FinalProps> {
   }
 
   render() {
-    const { currentId, detailQuery, markAsReadMutation, currentUser } =
-      this.props;
+    const {
+      currentId,
+      detailQuery,
+      markAsReadMutation,
+      currentUser,
+      userDashboardApps,
+    } = this.props;
 
     const loading = detailQuery.loading;
     const conversation = detailQuery.conversationDetail;
@@ -142,17 +157,17 @@ const WithQuery = withProps<Props & { currentUser: IUser }>(
     graphql<Props, ConversationDetailQueryResponse, { _id: string }>(
       gql(queries.conversationDetail),
       {
-        name: 'detailQuery',
+        name: "detailQuery",
         options: ({ currentId }) => ({
           variables: { _id: currentId },
-          fetchPolicy: 'network-only',
+          fetchPolicy: "network-only",
         }),
-      },
+      }
     ),
     graphql<Props, MarkAsReadMutationResponse, { _id: string }>(
       gql(mutations.markAsRead),
       {
-        name: 'markAsReadMutation',
+        name: "markAsReadMutation",
         options: ({ currentId }) => {
           return {
             refetchQueries: [
@@ -164,9 +179,16 @@ const WithQuery = withProps<Props & { currentUser: IUser }>(
             ],
           };
         },
-      },
+      }
     ),
-  )(DetailContainer),
+    graphql<Props, any, { _id: string }>(gql(queries.UserDashboardApps), {
+      name: "userDashboardApps",
+      options: ({ currentId }) => ({
+        variables: { _id: currentId },
+        fetchPolicy: "network-only",
+      }),
+    })
+  )(DetailContainer)
 );
 
 const WithConsumer = (props: Props) => {

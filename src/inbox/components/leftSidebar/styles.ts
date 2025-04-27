@@ -1,187 +1,140 @@
+import { colors, dimensions } from "@octobots/ui/src/styles";
+import styled from "styled-components";
+import styledTS from "styled-components-ts";
 import {
-  EllipsisContent,
-  FlexCenter,
-  SimpleButton,
-} from '@octobots/ui/src/styles/main';
-import { colors, dimensions } from '@octobots/ui/src/styles';
-import styled, { css } from 'styled-components';
+  modernColors,
+  borderRadius,
+  spacing,
+  shadows,
+  transitions,
+  typography,
+  zIndex,
+} from "../../../styles/theme";
 
-import styledTS from 'styled-components-ts';
-
-const ScrollContent = styled.div`
-  flex: 1;
-  overflow: auto;
-  background-color: ${colors.colorWhite};
-  .weighted-score-table-body {
-    .with-input:last-child {
-      background-color: ${colors.bgLightPurple};
-      border-inline-start: 1px solid ${colors.borderPrimary};
-    }
-  }
-`;
-
-const RightItems = styled(FlexCenter)`
-  > div {
-    margin-inline-end: 10px;
-  }
-`;
-
-const ConversationItems = styled.ul`
-  margin: 0;
-  padding: 0;
-  list-style: none;
-`;
-
-const CheckBox = styled.div`
-  margin-top: ${dimensions.unitSpacing}px;
-  margin-inline-end: ${dimensions.unitSpacing}px;
-  position: absolute;
-  inset-inline-start: 0px;
-`;
-
-const RowContent = styledTS<{ $isChecked?: boolean }>(styled.div)`
-  flex: 1;
+// Main sidebar container
+const SidebarContainer = styled.div`
   display: flex;
-  flex-direction: row;
-  max-width: 100%;
-  transition: all ease 0.3s;
-  position: relative;
-  padding-inline-start: ${(props) => props.$isChecked && '30px'};
-
-  &:hover {
-    padding-inline-start: 30px;
-
-    ${CheckBox} {
-      width: 30px;
-    }
-  }
-
-  ${CheckBox} {
-    width: ${(props) => (props.$isChecked ? '30px' : '0')};
-    margin: 0;
-    overflow: hidden;
-    transition: all ease 0.3s;
-
-    > label {
-      margin-top: 7px;
-    }
-  }
-`;
-
-const FlexContent = styled.div`
-  flex: 1;
-  max-width: 100%;
-  transition: all ease 0.3s;
-
-  .tags {
-    margin-top: 5px;
-    line-height: 1;
-
-    > span {
-      margin-bottom: 3px;
-    }
-  }
-`;
-
-const MainInfo = styled.div`
+  height: 100%;
+  background-color: ${modernColors.sidebarBackground};
+  border-right: 1px solid ${modernColors.border};
   overflow: hidden;
-
-  > span {
-    margin-inline-end: ${dimensions.unitSpacing}px;
-  }
+  border-radius: 12px;
 `;
 
-const Count = styled.div`
-  min-width: 18px;
-  margin-inline-start	: 5px;
-  color: ${colors.colorCoreGray};
-  background-color: ${colors.bgGray};
-  line-height: 18px;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 0 4px;
-  border-radius: 9px;
-  text-align: center;
-`;
-
-const SmallTextOneLine = styled(EllipsisContent)`
-  color: ${colors.colorCoreGray};
-  font-size: 12px;
-`;
-
-const MessageContent = styled(FlexCenter)`
-  margin-top: 7px;
-  line-height: 18px;
-`;
-
-const RowItem = styledTS<{
-  $isActive?: boolean;
-  $isRead?: boolean;
-}>(styled.li)`
-  padding: ${dimensions.coreSpacing}px;
+// Sidebar navigation (left narrow sidebar)
+const SidebarNav = styled.div`
+  width: 72px;
+  background-color: ${modernColors.sidebarDark};
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: ${spacing.md} 0;
+  flex-shrink: 0;
+  z-index: ${zIndex.docked};
+`;
+
+// Logo container at the top of the sidebar
+const LogoContainer = styled.div`
+  padding: ${spacing.md};
+  margin-bottom: ${spacing.xl};
+
+  img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+  }
+`;
+
+// Navigation item in the sidebar
+const NavItem = styled.div<{ $active?: boolean }>`
+  width: 48px;
+  height: 48px;
+  border-radius: ${borderRadius.md};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: ${spacing.md};
+  cursor: pointer;
   position: relative;
-  flex-direction: row;
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  transition: all ease 0.3s;
-  background: ${(props) => (props.$isActive ? 'rgba(242,245,245,0.8)' : null)};
+  color: ${(props) =>
+    props.$active ? modernColors.sidebarText : modernColors.sidebarTextMuted};
+  background-color: ${(props) =>
+    props.$active ? modernColors.sidebarItemActive : "transparent"};
+  transition: all ${transitions.fast};
 
-  ${(props) =>
-    !props.$isRead &&
-    css`
-      background: ${colors.bgUnread};
-      border-top: 1px solid rgba(0, 0, 0, 0.05);
-      border-inline-start: 1px solid ${colors.colorSecondary};
-      margin-top: -1px;
-
-      ${MessageContent} {
-        font-weight: 700;
-      }
-    `};
   &:hover {
-    background: ${(props) =>
-      !props.$isRead || props.$isActive ? '' : colors.bgLight};
-    cursor: pointer;
+    background-color: ${modernColors.sidebarItemHover};
+    color: ${modernColors.sidebarText};
   }
-`;
 
-const Idle = styled.div`
-  position: absolute;
-  bottom: 0;
-  inset-inline-end: 0;
-  border: 5px solid transparent;
-  border-inline-end-color: ${colors.colorCoreRed};
-  border-bottom-color: ${colors.colorCoreRed};
-  transition: all ease 0.3s;
-
-  &:before {
-    font-family: 'octobots';
-    content: '\\ea47';
-    font-size: 10px;
+  &::after {
+    content: "";
     position: absolute;
-    color: ${colors.colorWhite};
-    top: -4px;
-    opacity: 0;
+    left: -${spacing.md};
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 24px;
+    background-color: ${modernColors.primary};
+    border-radius: 0 ${borderRadius.sm} ${borderRadius.sm} 0;
+    opacity: ${(props) => (props.$active ? 1 : 0)};
+    transition: opacity ${transitions.fast};
   }
 
-  &:hover {
-    border-width: 10px;
-
-    &:before {
-      opacity: 1;
-    }
+  i {
+    font-size: 20px;
   }
 `;
 
-const AssigneeImg = styled.img`
-  height: ${dimensions.coreSpacing - 2}px;
-  width: ${dimensions.coreSpacing - 2}px;
-  line-height: ${dimensions.coreSpacing - 2}px;
-  border-radius: ${dimensions.unitSpacing}px;
-  margin-inline-start	: 5px;
+// Badge for notification counts
+const NavBadge = styled.div`
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: ${borderRadius.pill};
+  background-color: ${modernColors.danger};
+  color: white;
+  font-size: ${typography.fontSizes.xs};
+  font-weight: ${typography.fontWeights.semibold};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 ${spacing.xs};
 `;
 
+// Main content area of the sidebar
+const SidebarContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 320px;
+`;
+
+// Header of the sidebar content
+const SidebarHeader = styled.div`
+  padding: ${spacing.lg};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid ${modernColors.border};
+`;
+
+// Title in the sidebar header
+const SidebarTitle = styled.h2`
+  font-size: ${typography.fontSizes.lg};
+  font-weight: ${typography.fontWeights.semibold};
+  color: ${modernColors.textPrimary};
+`;
+
+// Actions container in the sidebar header
 const SidebarActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
+
   .date-popover {
     max-width: 470px;
     width: 500px;
@@ -192,92 +145,400 @@ const SidebarActions = styled.div`
   }
 `;
 
-const LeftContent = styledTS<{ $isOpen?: boolean }>(styled.div)`
-  display: flex;
+// Search input in the sidebar
+const SearchInput = styled.div`
   position: relative;
-  flex-direction: row;
-  padding-inline-start: ${(props) => props.$isOpen && '200px'};
-  transition: padding 0.3s ease;
+  margin: ${spacing.md} ${spacing.lg};
 
-  > section {
-    margin: 0;
-    box-shadow: none;
+  input {
+    width: 100%;
+    padding: ${spacing.sm} ${spacing.md} ${spacing.sm} 40px;
+    border: 1px solid ${modernColors.border};
+    border-radius: ${borderRadius.md};
+    font-size: ${typography.fontSizes.md};
+    background-color: ${modernColors.background};
+    transition: all ${transitions.fast};
+
+    &:focus {
+      outline: none;
+      border-color: ${modernColors.primary};
+      box-shadow: 0 0 0 2px ${modernColors.primary}20;
+    }
+  }
+
+  i {
+    position: absolute;
+    left: ${spacing.md};
+    top: 50%;
+    transform: translateY(-50%);
+    color: ${modernColors.textSecondary};
   }
 `;
 
-const shadowColor = 'rgba(0,0,0,0.15)';
+// Filter bar below search
+const FilterBar = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 0 ${spacing.md};
+  margin-bottom: ${spacing.md};
+  overflow-x: auto;
 
-const AdditionalSidebar = styled.aside`
-  width: 200px;
-  background: ${colors.bgLight};
-  flex-shrink: 0;
-  box-shadow: inset -40px 0px 40px -40px ${shadowColor};
+  &::-webkit-scrollbar {
+    height: 0;
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+`;
+
+// Filter item in the filter bar
+const FilterItem = styled.div<{ $active?: boolean }>`
+  padding: ${spacing.sm} ${spacing.md};
+  border-radius: ${borderRadius.pill};
+  font-size: ${typography.fontSizes.sm};
+  font-weight: ${typography.fontWeights.medium};
+  white-space: nowrap;
+  cursor: pointer;
+  background-color: ${(props) =>
+    props.$active ? modernColors.primary : modernColors.messageBackground};
+  color: ${(props) => (props.$active ? "white" : modernColors.textSecondary)};
+  transition: all ${transitions.fast};
+  margin-right: ${spacing.sm};
+
+  &:hover {
+    background-color: ${(props) =>
+      props.$active ? modernColors.primary : modernColors.hover};
+  }
+`;
+
+// Conversation list container
+const ConversationList = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 ${spacing.md};
+`;
+
+// Conversation items list
+const ConversationItems = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+
+// Checkbox for conversation selection
+const CheckBox = styled.div`
   position: absolute;
   inset-inline-start: 0;
   top: 0;
-  bottom: 0;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity ${transitions.fast};
+  z-index: 1;
+`;
 
-  ul > li > a {
-    padding: 5px 22px;
+// Conversation item row content
+const RowContent = styledTS<{ $isChecked?: boolean }>(styled.div)`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: relative;
+  padding-left: ${(props) => (props.$isChecked ? "40px" : "0")};
+  transition: padding ${transitions.fast};
+  
+  ${CheckBox} {
+    opacity: ${(props) => (props.$isChecked ? 1 : 0)};
   }
 `;
 
-const SidebarContent = styled.div`
-  flex: 1;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  margin-inline-end:10px;
-  border-radius:12px;
-  ${ScrollContent} {
-    padding: 10px 0;
-  }
+// Flex content container
+const FlexContent = styled.div`
+  width: 100%;
 
-  > button {
-    text-align: start;
-    border-top: 1px solid #eee;
-    border-radius: 0;
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: ${spacing.xs};
+    margin-top: ${spacing.xs};
 
-    i {
-      color: ${colors.colorCoreOrange};
+    > span {
+      margin-right: ${spacing.xs};
     }
   }
 `;
 
-const DropdownWrapper = styled.div`
-  position: relative;
+// Main info section of conversation item
+const MainInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.md};
+  margin-bottom: ${spacing.xs};
+`;
 
-  > div {
-    padding-inline-start: 20px;
-    display: inline-block;
-    position: relative;
+// Customer info container
+const CustomerInfo = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
+// Message count badge
+const Count = styled.div`
+  min-width: 20px;
+  height: 20px;
+  padding: 0 ${spacing.xs};
+  background-color: ${modernColors.primary};
+  color: white;
+  border-radius: ${borderRadius.pill};
+  font-size: ${typography.fontSizes.xs};
+  font-weight: ${typography.fontWeights.semibold};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+// Small text with ellipsis
+const SmallTextOneLine = styled.div`
+  color: ${modernColors.textSecondary};
+  font-size: ${typography.fontSizes.sm};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+// Message content preview
+const MessageContent = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: ${spacing.xs};
+`;
+
+// Message preview text
+const MessagePreview = styled.div`
+  color: ${modernColors.textSecondary};
+  font-size: ${typography.fontSizes.sm};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+`;
+
+// Conversation item
+const RowItem = styledTS<{
+  $isActive?: boolean;
+  $isRead?: boolean;
+}>(styled.li)`
+  position: relative;
+  padding: ${spacing.md};
+  margin-bottom: ${spacing.sm};
+  border-radius: ${borderRadius.lg};
+  background-color: ${(props) =>
+    props.$isActive
+      ? modernColors.active
+      : props.$isRead
+        ? modernColors.contentBackground
+        : modernColors.unread};
+  cursor: pointer;
+  transition: all ${transitions.fast};
+  box-shadow: ${(props) => (props.$isActive ? shadows.md : "none")};
+  
+  ${(props) =>
+    !props.$isRead &&
+    `
+    border-left: 3px solid ${modernColors.primary};
+  `}
+  
+  &:hover {
+    background-color: ${(props) => (props.$isActive ? modernColors.active : modernColors.hover)};
+    
+    ${CheckBox} {
+      opacity: 1;
+    }
   }
 `;
 
-const ToggleButton = styled(SimpleButton)`
-  margin-inline-start	: -5px;
-  margin-inline-end: 10px;
+// Idle indicator
+const Idle = styled.div`
+  position: absolute;
+  top: ${spacing.md};
+  right: ${spacing.md};
+  width: 10px;
+  height: 10px;
+  border-radius: ${borderRadius.circle};
+  background-color: ${modernColors.warning};
+  box-shadow: 0 0 0 2px ${modernColors.contentBackground};
+`;
+
+// Assignee image
+const AssigneeImg = styled.div`
+  width: 24px;
+  height: 24px;
+  border-radius: ${borderRadius.circle};
+  overflow: hidden;
+  margin-left: ${spacing.xs};
+  border: 2px solid ${modernColors.contentBackground};
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+// Assignees container
+const AssigneesContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+// Left content container
+const LeftContent = styledTS<{ $isOpen?: boolean }>(styled.div)`
+  display: flex;
+  height: 100%;
+  transition: all ${transitions.normal};
+  width:100%;
+  padding-inline:4px;
+`;
+
+// Additional sidebar (filters)
+const AdditionalSidebar = styled.div`
+  width: 240px;
+  background-color: ${modernColors.background};
+  border-right: 1px solid ${modernColors.border};
+  overflow-y: auto;
+  transition: all ${transitions.normal};
+  padding: ${spacing.lg} 0;
+`;
+
+// Dropdown wrapper
+const DropdownWrapper = styled.div`
+  display: flex;
+  gap: ${spacing.sm};
+`;
+
+// Toggle button
+const ToggleButton = styledTS<{ $isActive?: boolean }>(styled.button)`
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: ${borderRadius.md};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${(props) => (props.$isActive ? modernColors.primary : modernColors.textSecondary)};
+  background-color: ${(props) => (props.$isActive ? modernColors.active : "transparent")};
+  cursor: pointer;
+  transition: all ${transitions.fast};
+  
+  &:hover {
+    background-color: ${modernColors.hover};
+    color: ${modernColors.textPrimary};
+  }
+`;
+
+// Group title in filters
+const GroupTitle = styledTS<{ $isOpen?: boolean }>(styled.div)`
+  font-weight: ${typography.fontWeights.medium};
+  padding: ${spacing.md} ${spacing.lg};
+  color: ${(props) => (props.$isOpen ? modernColors.primary : modernColors.textPrimary)};
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all ${transitions.fast};
+  
+  &:hover {
+    background-color: ${modernColors.hover};
+  }
+  
+  span i {
+    margin-left: ${spacing.xs};
+    transition: transform ${transitions.fast};
+    transform: ${(props) => (props.$isOpen ? "rotate(180deg)" : "rotate(0)")};
+  }
+  
+  a {
+    color: ${modernColors.textSecondary};
+    
+    &:hover {
+      color: ${modernColors.primary};
+    }
+  }
+`;
+
+// Filter group content
+const GroupContent = styled.div<{ $isOpen?: boolean }>`
+  max-height: ${(props) => (props.$isOpen ? "500px" : "0")};
+  overflow: hidden;
+  transition: max-height ${transitions.normal};
+`;
+
+// // Filter item
+// const FilterItem = styled.div<{ $active?: boolean }>`
+//   padding: ${spacing.sm} ${spacing.lg} ${spacing.sm} ${spacing.xl};
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   cursor: pointer;
+//   color: ${props => props.$active ? modernColors.primary : modernColors.textSecondary};
+//   background-color: ${props => props.$active ? modernColors.active : 'transparent'};
+//   transition: all ${transitions.fast};
+
+//   &:hover {
+//     background-color: ${modernColors.hover};
+//     color: ${modernColors.textPrimary};
+//   }
+// `;
+
+// Right items container
+const RightItems = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
+`;
+
+// Scroll content
+const ScrollContent = styled.div`
+  flex: 1;
+  overflow: auto;
 `;
 
 export {
+  SidebarContainer,
+  SidebarNav,
+  LogoContainer,
+  NavItem,
+  NavBadge,
+  SidebarContent,
+  SidebarHeader,
+  SidebarTitle,
+  SidebarActions,
+  SearchInput,
+  FilterBar,
+  FilterItem,
+  ConversationList,
   ConversationItems,
-  RightItems,
-  RowItem,
+  CheckBox,
   RowContent,
   FlexContent,
-  CheckBox,
   MainInfo,
-  FlexCenter,
+  CustomerInfo,
   Count,
   SmallTextOneLine,
   MessageContent,
+  MessagePreview,
+  RowItem,
+  Idle,
   AssigneeImg,
-  SidebarActions,
-  AdditionalSidebar,
-  SidebarContent,
+  AssigneesContainer,
   LeftContent,
+  AdditionalSidebar,
   DropdownWrapper,
   ToggleButton,
-  Idle,
+  GroupTitle,
+  GroupContent,
+  RightItems,
   ScrollContent,
 };

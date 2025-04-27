@@ -2,7 +2,7 @@ export const CONVERSATION_STATUSES = {
   NEW: 'new',
   OPEN: 'open',
   BOT: 'bot',
-  PENDDING: 'pending',
+  PENDING: 'pending',
   CLOSED: 'closed',
   ALL_LIST: ['new', 'open', 'bot', 'pending', 'closed']
 };

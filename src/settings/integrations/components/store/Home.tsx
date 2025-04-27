@@ -19,7 +19,7 @@ import { endianness } from 'os';
 import Button from "@octobots/ui/src/components/Button";
 import { BarItems } from "@octobots/ui/src/layout/styles";
 import RowCard from './RowCard';
-import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/css/bootstrap.min.css"; // NOT ALLOWED
 import { Link } from 'react-router-dom';
 
 type Props = {

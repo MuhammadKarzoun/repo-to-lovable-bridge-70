@@ -1,35 +1,48 @@
 import {
   AdditionalSidebar,
   DropdownWrapper,
-  FlexCenter,
   LeftContent,
   RightItems,
   ScrollContent,
   SidebarActions,
+  ToggleButton,
+  SidebarContainer,
+  SidebarNav,
+  LogoContainer,
+  NavItem,
+  NavBadge,
   SidebarContent,
-  ToggleButton
+  SidebarHeader,
+  SidebarTitle,
+  SearchInput,
 } from "./styles";
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 
-import Button from "@octobots/ui/src/components/Button";
 import { CONVERSATION_STATUSES } from "../../constants";
 import FilterToggler from "../../containers/leftSidebar/FilterToggler";
 import { IConversation } from "@octobots/ui-inbox/src/inbox/types";
 import { IUser } from "@octobots/ui/src/auth/types";
 import Icon from "@octobots/ui/src/components/Icon";
 import { InboxManagementActionConsumer } from "../../containers/InboxCore";
-import { PopoverButton } from "@octobots/ui-inbox/src/inbox/styles";
+import React, { useState } from "react";
 import Resolver from "../../containers/Resolver";
 import Sidebar from "@octobots/ui/src/layout/components/Sidebar";
-import { StatusFilterPopover } from "../../containers/leftSidebar";
 import { TAG_TYPES } from "@octobots/ui-tags/src/constants";
 import Tagger from "../../containers/Tagger";
-import { Transition } from "react-transition-group";
 import { __ } from "coreui/utils";
 import asyncComponent from "@octobots/ui/src/components/AsyncComponent";
 import { isEnabled } from "@octobots/ui/src/utils/core";
 import { queries } from "@octobots/ui-inbox/src/inbox/graphql";
+import styled from "styled-components";
+import {
+  modernColors,
+  borderRadius,
+  spacing,
+  typography,
+} from "../../../styles/theme";
+import ModernButton from "../../../components/common/Button";
+import Badge from "../../../components/common/Badge";
+import FilterBar from "../filters/FilterBar";
+import TabFilter from "../filters/TabFilter";
 
 const DateFilter = asyncComponent(
   () =>
@@ -60,8 +73,17 @@ const FilterList = asyncComponent(
     )
 );
 
+const SidebarHeaderStyled = styled.div`
+  padding: ${spacing.md} ${spacing.lg};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid ${modernColors.border};
+`;
+
 type Props = {
-  currentUser?: IUser;
+  currentUser: IUser;
+  history: any;
   currentConversationId?: string;
   queryParams: any;
   bulk: IConversation[];
@@ -72,23 +94,26 @@ type Props = {
   resolveAll: () => void;
 };
 
-const LeftSidebar: React.FC<Props> = props => {
+const LeftSidebar: React.FC<Props> = (props) => {
   const { currentUser, currentConversationId, queryParams, bulk, toggleBulk } =
     props;
-
-  const location = useLocation();
-  const navigate = useNavigate();
 
   const [isOpen, setIsOpen] = useState<boolean>(
     props.config?.showAddition || false
   );
   const [counts, setItemCounts] = useState<any>({});
+  const [searchValue, setSearchValue] = useState<string>("");
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+    // Here you would typically implement search functionality
+  };
 
   const renderTrigger = (text: string) => {
     return (
-      <PopoverButton>
+      <ModernButton variant="ghost" size="sm">
         {__(text)} <Icon icon="angle-down" />
-      </PopoverButton>
+      </ModernButton>
     );
   };
 
@@ -104,7 +129,7 @@ const LeftSidebar: React.FC<Props> = props => {
 
     if (bulk.length > 0) {
       return (
-        <Sidebar.Header>
+        <SidebarHeaderStyled>
           <Resolver conversations={bulk} emptyBulk={emptyBulk} />
           <RightItems>
             <AssignBoxPopover
@@ -114,35 +139,27 @@ const LeftSidebar: React.FC<Props> = props => {
 
             <Tagger targets={bulk} trigger={renderTrigger("Tag")} />
           </RightItems>
-        </Sidebar.Header>
+        </SidebarHeaderStyled>
       );
     }
 
     return (
-      <Sidebar.Header>
-        <FlexCenter>
-          <ToggleButton
+      <SidebarHeaderStyled>
+        <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
+          {/* <ToggleButton
             id="btn-inbox-channel-visible"
             $isActive={isOpen}
             onClick={onToggleSidebar}
           >
             <Icon icon="subject" />
-          </ToggleButton>
+          </ToggleButton> */}
           {queryParams.status !== CONVERSATION_STATUSES.CLOSED && (
-            <Button size="small" btnStyle="simple" onClick={props.resolveAll}>
-              Resolve all
-            </Button>
+            <ModernButton size="sm" variant="ghost" onClick={props.resolveAll}>
+              {__("Resolve all")}
+            </ModernButton>
           )}
-        </FlexCenter>
-        <DropdownWrapper>
-          <DateFilter
-            queryParams={queryParams}
-            countQuery={queries.totalConversationsCount}
-            countQueryParam="conversationsTotalCount"
-          />
-          <StatusFilterPopover queryParams={queryParams} />
-        </DropdownWrapper>
-      </Sidebar.Header>
+        </div>
+      </SidebarHeaderStyled>
     );
   };
 
@@ -150,163 +167,200 @@ const LeftSidebar: React.FC<Props> = props => {
     return <SidebarActions>{renderSidebarActions()}</SidebarActions>;
   };
 
-  const renderAdditionalSidebar = (refetchRequired: string) => {
-    const { queryParams, currentUser } = props;
-
-    if (!currentUser) {
-      return null;
-    }
-
-    const setCounts = (counts: any) => {
-      const current = { ...counts };
-
-      setItemCounts({ ...current, ...counts });
-    };
-
+  const renderSidebarSearchBox = () => {
     return (
-      <Transition
-        in={isOpen}
-        appear={true}
-        timeout={300}
-        // classNames="fade-in"
-        unmountOnExit={true}
-      >
-        <SidebarContent>
-          <ScrollContent>
-            <FilterToggler
-              groupText="Channels"
-              toggleName="showChannels"
-              manageUrl="/settings/channels"
-            >
-              <FilterList
-                query={{
-                  queryName: "channelsByMembers",
-                  variables: { memberIds: [currentUser._id] },
-                  dataName: "channelsByMembers"
-                }}
-                counts="byChannels"
-                paramKey="channelId"
-                queryParams={queryParams}
-                refetchRequired={refetchRequired}
-                setCounts={setCounts}
-              />
-            </FilterToggler>
-
-            {
-              <FilterToggler
-                groupText="Segments"
-                toggleName="showSegments"
-                manageUrl="/segments?contentType=inbox:conversation"
-              >
-                <FilterList
-                  query={{
-                    queryName: "segmentList",
-                    dataName: "segments",
-                    variables: {
-                      contentTypes: [TAG_TYPES.CONVERSATION]
-                    }
-                  }}
-                  queryParams={queryParams}
-                  counts="bySegment"
-                  paramKey="segment"
-                  icon="tag-alt"
-                  refetchRequired={refetchRequired}
-                  treeView={true}
-                  setCounts={setCounts}
-                />
-              </FilterToggler>
-            }
-
-            <FilterToggler
-              groupText="Brands"
-              toggleName="showBrands"
-              manageUrl="/settings/brands"
-            >
-              <FilterList
-                query={{ queryName: "allBrands", dataName: "allBrands" }}
-                counts="byBrands"
-                queryParams={queryParams}
-                paramKey="brandId"
-                refetchRequired={refetchRequired}
-                setCounts={setCounts}
-              />
-            </FilterToggler>
-
-            <FilterToggler
-              groupText="Integrations"
-              toggleName="showIntegrations"
-              manageUrl="/settings/integrations"
-            >
-              <FilterList
-                query={{
-                  queryName: "integrationsGetUsedTypes",
-                  dataName: "integrationsGetUsedTypes"
-                }}
-                queryParams={queryParams}
-                counts="byIntegrationTypes"
-                paramKey="integrationType"
-                refetchRequired={refetchRequired}
-                setCounts={setCounts}
-              />
-            </FilterToggler>
-
-            <FilterToggler
-              groupText="Tags"
-              toggleName="showTags"
-              manageUrl="/settings/tags/inbox:conversation"
-            >
-              <FilterList
-                query={{
-                  queryName: "tagList",
-                  dataName: "tags",
-                  variables: {
-                    type: TAG_TYPES.CONVERSATION,
-                    perPage: 100
-                  }
-                }}
-                queryParams={queryParams}
-                counts="byTags"
-                paramKey="tag"
-                icon="tag-alt"
-                refetchRequired={refetchRequired}
-                multiple={true}
-                treeView={true}
-                setCounts={setCounts}
-              />
-            </FilterToggler>
-          </ScrollContent>
-        </SidebarContent>
-      </Transition>
+      <SearchInput>
+        <Icon icon="search" />
+        <input
+          type="text"
+          placeholder="Search conversations..."
+          value={searchValue}
+          onChange={handleSearchChange}
+        />
+      </SearchInput>
     );
   };
 
+  // #TODO remove this code or use later @MK
+  // const renderAdditionalSidebar = (refetchRequired: string) => {
+  //   const { queryParams, currentUser } = props;
+
+  //   if (!currentUser) {
+  //     return null;
+  //   }
+
+  //   const setCounts = (counts: any) => {
+  //     const current = { ...counts };
+
+  //     setItemCounts({ ...current, ...counts });
+  //   };
+
+  //   return (
+  //     <AdditionalSidebar style={{ display: isOpen ? 'block' : 'none' }}>
+  //       <SidebarContent>
+  //         <ScrollContent>
+  //           <FilterToggler
+  //             groupText="Channels"
+  //             toggleName="showChannels"
+  //             manageUrl="/settings/channels"
+  //             isOpen={props.config?.showChannels || false}
+  //             toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+  //           >
+  //             <FilterList
+  //               query={{
+  //                 queryName: "channelsByMembers",
+  //                 variables: { memberIds: [currentUser._id] },
+  //                 dataName: "channelsByMembers"
+  //               }}
+  //               counts="byChannels"
+  //               paramKey="channelId"
+  //               queryParams={queryParams}
+  //               refetchRequired={refetchRequired}
+  //               setCounts={setCounts}
+  //             />
+  //           </FilterToggler>
+
+  //           {
+  //             <FilterToggler
+  //               groupText="Segments"
+  //               toggleName="showSegments"
+  //               manageUrl="/segments?contentType=inbox:conversation"
+  //               isOpen={props.config?.showSegments || false}
+  //               toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+  //             >
+  //               <FilterList
+  //                 query={{
+  //                   queryName: "segmentList",
+  //                   dataName: "segments",
+  //                   variables: {
+  //                     contentTypes: [TAG_TYPES.CONVERSATION]
+  //                   }
+  //                 }}
+  //                 queryParams={queryParams}
+  //                 counts="bySegment"
+  //                 paramKey="segment"
+  //                 icon="tag-alt"
+  //                 refetchRequired={refetchRequired}
+  //                 treeView={true}
+  //                 setCounts={setCounts}
+  //               />
+  //             </FilterToggler>
+  //           }
+
+  //           <FilterToggler
+  //             groupText="Brands"
+  //             toggleName="showBrands"
+  //             manageUrl="/settings/brands"
+  //             isOpen={props.config?.showBrands || false}
+  //             toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+  //           >
+  //             <FilterList
+  //               query={{ queryName: "allBrands", dataName: "allBrands" }}
+  //               counts="byBrands"
+  //               queryParams={queryParams}
+  //               paramKey="brandId"
+  //               refetchRequired={refetchRequired}
+  //               setCounts={setCounts}
+  //             />
+  //           </FilterToggler>
+
+  //           <FilterToggler
+  //             groupText="Integrations"
+  //             toggleName="showIntegrations"
+  //             manageUrl="/settings/integrations"
+  //             isOpen={props.config?.showIntegrations || false}
+  //             toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+  //           >
+  //             <FilterList
+  //               query={{
+  //                 queryName: "integrations",
+  //                 dataName: "integrations"
+  //               }}
+  //               queryParams={queryParams}
+  //               counts="byIntegration"
+  //               paramKey="integration"
+  //               refetchRequired={refetchRequired}
+  //               setCounts={setCounts}
+  //             />
+  //           </FilterToggler>
+
+  //           <FilterToggler
+  //             groupText="Tags"
+  //             toggleName="showTags"
+  //             manageUrl="/settings/tags/inbox:conversation"
+  //             isOpen={props.config?.showTags || false}
+  //             toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+  //           >
+  //             <FilterList
+  //               query={{
+  //                 queryName: "tagList",
+  //                 dataName: "tags",
+  //                 variables: {
+  //                   type: TAG_TYPES.CONVERSATION,
+  //                   perPage: 100
+  //                 }
+  //               }}
+  //               queryParams={queryParams}
+  //               counts="byTags"
+  //               paramKey="tag"
+  //               icon="tag-alt"
+  //               refetchRequired={refetchRequired}
+  //               multiple={true}
+  //               treeView={true}
+  //               setCounts={setCounts}
+  //             />
+  //           </FilterToggler>
+  //         </ScrollContent>
+  //       </SidebarContent>
+  //     </AdditionalSidebar>
+  //   );
+  // };
+
   return (
-    <LeftContent $isOpen={isOpen}>
-      <InboxManagementActionConsumer>
-        {({ refetchRequired }) => (
-          <AdditionalSidebar>
-            {renderAdditionalSidebar(refetchRequired)}
-          </AdditionalSidebar>
-        )}
-      </InboxManagementActionConsumer>
-      <Sidebar
-        wide={true}
-        full={true}
-        header={renderSidebarHeader()}
-        hasBorder={false}
-      >
-        <ConversationList
-          currentUser={currentUser}
-          currentConversationId={currentConversationId}
-          queryParams={queryParams}
-          toggleRowCheckbox={toggleBulk}
-          selectedConversations={bulk}
-          counts={counts}
-          location={location}
-          navigate={navigate}
-        />
-      </Sidebar>
-    </LeftContent>
+    <SidebarContainer>
+      <LeftContent $isOpen={isOpen}>
+        {/* #TODO: reuse the additional sidebar or remove it and it's relevant code @MK */}
+        {/* <InboxManagementActionConsumer>
+          {({ refetchRequired }) => (
+            <>
+              {renderAdditionalSidebar(refetchRequired)}
+            </>
+          )}
+        </InboxManagementActionConsumer> */}
+
+        <SidebarContent>
+          {/* {renderSidebarHeader()} */}
+          {renderSidebarSearchBox()}
+
+          <InboxManagementActionConsumer>
+            {({ refetchRequired }) => (
+              <FilterBar
+                queryParams={queryParams}
+                currentUser={currentUser}
+                refetchRequired={refetchRequired}
+              />
+            )}
+          </InboxManagementActionConsumer>
+
+          <TabFilter
+            queryParams={queryParams}
+            currentUser={currentUser}
+            counts={counts}
+          />
+
+          <ConversationList
+            currentUser={currentUser}
+            currentConversationId={currentConversationId}
+            queryParams={queryParams}
+            toggleRowCheckbox={toggleBulk}
+            selectedConversations={bulk}
+            counts={counts}
+            location={props.history.location}
+            navigate={props.history.navigate}
+          />
+        </SidebarContent>
+      </LeftContent>
+    </SidebarContainer>
   );
 };
 

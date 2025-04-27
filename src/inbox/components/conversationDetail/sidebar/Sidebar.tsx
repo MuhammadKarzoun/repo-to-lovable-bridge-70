@@ -1,4 +1,10 @@
-import { BasicInfo, TabContent } from "./styles";
+import {
+  BasicInfo,
+  SideBarButton,
+  SideBarContainer,
+  SideBarContent,
+  TabContent,
+} from "./styles";
 import { TabTitle, Tabs } from "@octobots/ui/src/components/tabs";
 import { isEnabled, loadDynamicComponent } from "@octobots/ui/src/utils/core";
 
@@ -14,7 +20,7 @@ import Sidebar from "@octobots/ui/src/layout/components/Sidebar";
 import WebsiteActivity from "@octobots/ui-contacts/src/customers/components/common/WebsiteActivity";
 import { __ } from "coreui/utils";
 import asyncComponent from "@octobots/ui/src/components/AsyncComponent";
-
+import { IoMdArrowDropleft, IoMdArrowDropright } from "react-icons/io";
 const ActionSection = asyncComponent(
   () =>
     import(
@@ -143,6 +149,7 @@ type IndexProps = {
 type IndexState = {
   currentTab: string;
   currentSubTab: string;
+  showSideBar?: boolean;
 };
 
 interface IRenderData {
@@ -158,15 +165,16 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
 
     this.state = {
       currentTab: "customer",
-      currentSubTab: "details"
+      currentSubTab: "details",
+      showSideBar: true,
     };
   }
 
-  onTabClick = currentTab => {
+  onTabClick = (currentTab) => {
     this.setState({ currentTab });
   };
 
-  onSubtabClick = currentSubTab => {
+  onSubtabClick = (currentSubTab) => {
     this.setState({ currentSubTab });
   };
 
@@ -183,7 +191,7 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
     customer,
     kind,
     fields,
-    toggleSection
+    toggleSection,
   }: IRenderData) => {
     if (!(kind === "messenger" || kind === "form")) {
       return null;
@@ -213,7 +221,7 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
       customerVisibility,
       deviceFields,
       conversationFields,
-      customerFields
+      customerFields,
     } = this.props;
 
     const { kind = "" } = customer.integration || {};
@@ -256,7 +264,7 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
             customer,
             kind,
             fields: deviceFields,
-            toggleSection
+            toggleSection,
           })}
           <WebsiteActivity urlVisits={customer.urlVisits || []} />
 
@@ -265,7 +273,7 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
             customer,
             customerId: customer._id,
             contentType: "inbox:conversations",
-            contentTypeId: conversation._id
+            contentTypeId: conversation._id,
           })}
         </TabContent>
       );
@@ -358,28 +366,45 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
   }
 
   render() {
-    const { currentTab } = this.state;
+    const { currentTab, showSideBar } = this.state;
     const customerOnClick = () => this.onTabClick("customer");
     const companyOnClick = () => this.onTabClick("company");
 
     return (
-      <Sidebar full={true}>
-        <Tabs full={true}>
-          <TabTitle
-            className={currentTab === "customer" ? "active" : ""}
-            onClick={customerOnClick}
-          >
-            {__("Customer")}
-          </TabTitle>
-          <TabTitle
-            className={currentTab === "company" ? "active" : ""}
-            onClick={companyOnClick}
-          >
-            {__("Company")}
-          </TabTitle>
-        </Tabs>
-        {this.renderTabContent()}
-      </Sidebar>
+      <SideBarContainer>
+        <SideBarButton
+          type="button"
+          onClick={() =>
+            this.setState({ showSideBar: !this.state.showSideBar })
+          }
+          showSideBar={showSideBar}
+        >
+          {showSideBar ? (
+            <IoMdArrowDropleft size={25} />
+          ) : (
+            <IoMdArrowDropright size={25} />
+          )}
+        </SideBarButton>
+        <SideBarContent showSideBar={showSideBar}>
+          <Sidebar full={true}>
+            <Tabs full={true}>
+              <TabTitle
+                className={currentTab === "customer" ? "active" : ""}
+                onClick={customerOnClick}
+              >
+                {__("Customer")}
+              </TabTitle>
+              <TabTitle
+                className={currentTab === "company" ? "active" : ""}
+                onClick={companyOnClick}
+              >
+                {__("Company")}
+              </TabTitle>
+            </Tabs>
+            {this.renderTabContent()}
+          </Sidebar>
+        </SideBarContent>
+      </SideBarContainer>
     );
   }
 }

@@ -1,6 +1,6 @@
-import { PluginLayout } from '@octobots/ui/src/styles/main';
 import React from 'react';
 import GeneralRoutes from './generalRoutes';
+import { PluginLayout } from '@octobots/ui/src/styles/main';
 import { AppProvider } from 'coreui/appContext';
 import { dummyUser } from '@octobots/ui/src/constants/dummy-data';
 import '@octobots/ui/src/styles/global-styles.ts';

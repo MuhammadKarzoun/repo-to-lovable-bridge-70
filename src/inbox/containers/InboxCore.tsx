@@ -14,6 +14,7 @@ import { generateParams } from "@octobots/ui-inbox/src/inbox/utils";
 import { gql } from "@apollo/client";
 import { graphql } from "@apollo/client/react/hoc";
 import { queries } from "@octobots/ui-inbox/src/inbox/graphql";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface IRouteProps {
   queryParams: any;
@@ -70,7 +71,7 @@ const WithCurrentId: React.FC<IProps> = (props) => {
         true
       );
     }
-  }, [_id, conversationsGetLast, loading]);
+  }, [_id, conversationsGetLast, loading, navigate, location]);
 
   return (
     <AppConsumer>
@@ -85,15 +86,33 @@ const WithCurrentId: React.FC<IProps> = (props) => {
 
         return (
           <WithRefetchHandling>
-              <InboxCore queryParams={queryParams} currentConversationId={_id} msg={msg} currentUserId={currentUser._id} />
-            </WithRefetchHandling>
+            <InboxCore
+              queryParams={queryParams}
+              currentConversationId={_id}
+              msg={msg}
+              currentUserId={currentUser._id}
+            />
+          </WithRefetchHandling>
         );
       }}
     </AppConsumer>
   );
 };
 
-export default compose(
+const WithRouterProps = (props) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  return (
+    <WithCurrentIdWithRouter
+      {...props}
+      navigate={navigate}
+      location={location}
+    />
+  );
+};
+
+const WithCurrentIdWithRouter = compose(
   graphql<
     IRouteProps,
     LastConversationQueryResponse,
@@ -109,8 +128,8 @@ export default compose(
     }),
     props: ({ data, ownProps }: { data?: any; ownProps: IRouteProps }) => {
       return {
-        conversationsGetLast: data.conversationsGetLast,
-        loading: data.loading,
+        conversationsGetLast: data?.conversationsGetLast,
+        loading: data?.loading,
         navigate: ownProps.navigate,
         location: ownProps.location,
         queryParams: ownProps.queryParams,
@@ -118,3 +137,5 @@ export default compose(
     },
   })
 )(WithCurrentId);
+
+export default WithRouterProps;
