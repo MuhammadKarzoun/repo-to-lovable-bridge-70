@@ -119,7 +119,6 @@ const RespondBoxContainer = (props: FinalProps) => {
         userId: currentUser._id,
         createdAt: new Date(),
         messengerAppData: null,
-        isCustomerRead: false,
         fromBot: false,
         formWidgetData: null,
         botData: null,
