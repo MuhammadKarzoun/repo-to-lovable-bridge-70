@@ -143,6 +143,7 @@ class WorkArea extends React.Component<FinalProps, State> {
         document: gql(subscriptions.conversationMessageInserted),
         variables: { _id: currentId },
         updateQuery: (prev, { subscriptionData }) => {
+          console.log('subscriptionData', JSON.stringify(subscriptionData));
           const message = subscriptionData.data.conversationMessageInserted;
           const kind = currentConversation.integration.kind;
 
