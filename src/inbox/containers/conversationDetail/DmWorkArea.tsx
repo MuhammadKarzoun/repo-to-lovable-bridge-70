@@ -203,6 +203,7 @@ class WorkArea extends React.Component<FinalProps, State> {
         document: gql(subscriptions.conversationMessageStatusChanged),
         variables: { _id: currentId },
         updateQuery: (prev, { subscriptionData }) => {
+          console.log('subscriptionData conversationMessageStatusChanged', JSON.stringify(subscriptionData));
           const message = subscriptionData.data.conversationMessageStatusChanged;
           const kind = currentConversation.integration.kind;
 
@@ -277,6 +278,7 @@ class WorkArea extends React.Component<FinalProps, State> {
     optimisticResponse: any;
     callback?: (e?) => void;
   }) => {
+    console.log("addMessage variables", variables);
     const { addMessageMutation, currentId, dmConfig } = this.props;
     // immediate ui update =======
     let update;
