@@ -287,6 +287,7 @@ class WorkArea extends React.Component<FinalProps, State> {
     optimisticResponse: any;
     callback?: (e?) => void;
   }) => {
+    console.log("addMessage variables", variables);
     const { addMessageMutation, currentId, dmConfig } = this.props;
     // immediate ui update =======
     let update;
