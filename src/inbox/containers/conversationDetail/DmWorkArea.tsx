@@ -107,6 +107,7 @@ class WorkArea extends React.Component<FinalProps, State> {
   private messageStatusChangedSubscription;
   private typingInfoSubscription;
 
+
   constructor(props) {
     super(props);
 
