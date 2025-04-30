@@ -108,7 +108,7 @@ const getQueryResultKey = (queryResponse: object, countQuery?: boolean) => {
 
 class WorkArea extends React.Component<FinalProps, State> {
   private prevMessageInsertedSubscription;
-  private prevMessageStatusUpdatedSubscription
+  private prevMessageStatusUpdatedSubscription;
   private prevTypingInfoSubscription;
 
   constructor(props) {
@@ -137,7 +137,9 @@ class WorkArea extends React.Component<FinalProps, State> {
       }
       
       if (!this.prevMessageStatusUpdatedSubscription || currentId !== this.props.currentId) {
-        this.prevMessageStatusUpdatedSubscription();
+        if (this.prevMessageStatusUpdatedSubscription) {
+          this.prevMessageStatusUpdatedSubscription();
+        }
       }
 
       if (this.prevTypingInfoSubscription) {
