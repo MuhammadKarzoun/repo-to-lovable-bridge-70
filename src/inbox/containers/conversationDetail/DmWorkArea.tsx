@@ -401,7 +401,6 @@ class WorkArea extends React.Component<FinalProps, State> {
     callback?: (e?) => void;
     kind: string;
   }) => {
-    console.log("[DmWorkArea] Adding message", { variables, kind });
     const { addMessageMutation, currentId, dmConfig } = this.props;
     // immediate ui update =======
     let update;
