@@ -108,6 +108,7 @@ const getQueryResultKey = (queryResponse: object, countQuery?: boolean) => {
 
 class WorkArea extends React.Component<FinalProps, State> {
   private prevMessageInsertedSubscription;
+  private prevMessageStatusUpdatedSubscription
   private prevTypingInfoSubscription;
 
   constructor(props) {
@@ -116,6 +117,8 @@ class WorkArea extends React.Component<FinalProps, State> {
     this.state = { loadingMessages: false, typingInfo: "", hideMask: false };
 
     this.prevMessageInsertedSubscription = null;
+    this.prevMessageStatusUpdatedSubscription = null;
+
   }
 
   componentWillReceiveProps(nextProps) {
@@ -131,6 +134,10 @@ class WorkArea extends React.Component<FinalProps, State> {
       // Unsubscribe previous subscription ==========
       if (this.prevMessageInsertedSubscription) {
         this.prevMessageInsertedSubscription();
+      }
+      
+      if (!this.prevMessageStatusUpdatedSubscription || currentId !== this.props.currentId) {
+        this.prevMessageStatusUpdatedSubscription();
       }
 
       if (this.prevTypingInfoSubscription) {
@@ -199,7 +206,7 @@ class WorkArea extends React.Component<FinalProps, State> {
       });
 
       // added by hichem
-      this.prevMessageInsertedSubscription = messagesQuery.subscribeToMore({
+      this.prevMessageStatusUpdatedSubscription = messagesQuery.subscribeToMore({
         document: gql(subscriptions.conversationMessageStatusChanged),
         variables: { _id: currentId },
         updateQuery: (prev, { subscriptionData }) => {
@@ -278,7 +285,6 @@ class WorkArea extends React.Component<FinalProps, State> {
     optimisticResponse: any;
     callback?: (e?) => void;
   }) => {
-    console.log("addMessage variables", variables);
     const { addMessageMutation, currentId, dmConfig } = this.props;
     // immediate ui update =======
     let update;
