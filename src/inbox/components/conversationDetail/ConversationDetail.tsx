@@ -167,7 +167,7 @@ export default class ConversationDetail extends React.Component<Props> {
   render() {
     return (
       <React.Fragment>
-        <ModernMainContent>{this.renderContent()}</ModernMainContent>
+        <ModernMainContent style={{ borderInlineEnd: '1px solid #e5e7eb', overflow: 'hidden' }}>{this.renderContent()}</ModernMainContent>
         {this.renderSidebar()}
       </React.Fragment>
     );

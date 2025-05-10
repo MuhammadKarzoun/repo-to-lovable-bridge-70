@@ -17,12 +17,12 @@ const Sidebar = asyncComponent(
 );
 
 const ModernHeightedWrapper = styled(HeightedWrapper)`
-  background-color: ${modernColors.background};
+  background-color: ${modernColors.contentBackground};
 `;
 
 const ModernContents = styled(Contents)`
-  padding: ${spacing.lg};
-  gap: ${spacing.lg};
+  padding: 0;
+  gap: 1px;
 `;
 
 type Props = {
@@ -49,11 +49,11 @@ const Inbox = (props: Props) => {
 
   return (
     <ModernHeightedWrapper>
-      <Header
+      {/* <Header
         title={"Conversation"}
         queryParams={queryParams}
-        submenu={menuInbox}
-      />
+        submenu={[]}
+      /> */}
       <ModernContents>
         <Sidebar
           queryParams={queryParams}

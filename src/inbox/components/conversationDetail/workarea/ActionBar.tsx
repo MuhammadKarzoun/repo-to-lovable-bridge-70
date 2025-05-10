@@ -10,10 +10,11 @@ import Tagger from '../../../containers/Tagger';
 import Resolver from '../../../containers/Resolver';
 import Icon from '@octobots/ui/src/components/Icon';
 import Avatar from '../../../../components/common/Avatar';
-import ModernButton from '../../../../components/common/Button';
+import ModernButton from '@octobots/ui-inbox/src/common/ModernButton';
 import Tags from '@octobots/ui/src/components/Tags';
 
 import asyncComponent from '@octobots/ui/src/components/AsyncComponent';
+import Button from '@octobots/ui/src/components/Button';
 
 const Participators = asyncComponent(
   () =>
@@ -45,6 +46,14 @@ const PostInstagram = asyncComponent(
       /* webpackChunkName:"Inbox-ConvertTo" */ '../../../containers/conversationDetail/workarea/PostIg'
     ),
   { height: '22px', width: '71px' }
+);
+
+const InfoSection = asyncComponent(
+  () =>
+    import(
+      /* webpackChunkName:"Inbox-Sidebar-InfoSection" */ "@octobots/ui-contacts/src/customers/components/common/InfoSection"
+    ),
+  { withImage: true }
 );
 
 // Modern styled components
@@ -80,7 +89,7 @@ const AssignButton = styled.div<{ $hasAssignee: boolean }>`
   align-items: center;
   gap: ${spacing.sm};
   padding: ${spacing.xs} ${props => props.$hasAssignee ? spacing.xs : spacing.md};
-  background-color: ${props => props.$hasAssignee ? modernColors.active : modernColors.messageBackground};
+  background-color: ${modernColors.messageBackground};
   border-radius: ${borderRadius.md};
   cursor: pointer;
   transition: all ${transitions.fast};
@@ -128,6 +137,7 @@ const TagButton = styled.div`
   border-radius: ${borderRadius.md};
   cursor: pointer;
   transition: all ${transitions.fast};
+  height: 30px;
   
   &:hover {
     background-color: ${modernColors.hover};
@@ -150,14 +160,14 @@ const ActionButton = styled.button<{ $variant?: 'primary' | 'secondary' | 'defau
   align-items: center;
   gap: ${spacing.xs};
   padding: ${spacing.xs} ${spacing.md};
-  background-color: ${props => 
-    props.$variant === 'primary' ? modernColors.primary : 
-    props.$variant === 'secondary' ? modernColors.secondary : 
-    modernColors.messageBackground
+  background-color: ${props =>
+    props.$variant === 'primary' ? modernColors.primary :
+      props.$variant === 'secondary' ? modernColors.secondary :
+        modernColors.messageBackground
   };
-  color: ${props => 
-    (props.$variant === 'primary' || props.$variant === 'secondary') ? 'white' : 
-    modernColors.textPrimary
+  color: ${props =>
+    (props.$variant === 'primary' || props.$variant === 'secondary') ? 'white' :
+      modernColors.textPrimary
   };
   border: none;
   border-radius: ${borderRadius.md};
@@ -167,11 +177,11 @@ const ActionButton = styled.button<{ $variant?: 'primary' | 'secondary' | 'defau
   transition: all ${transitions.fast};
   
   &:hover {
-    background-color: ${props => 
-      props.$variant === 'primary' ? '#1a85e0' : 
-      props.$variant === 'secondary' ? '#d9a300' : 
-      modernColors.hover
-    };
+    background-color: ${props =>
+    props.$variant === 'primary' ? '#1a85e0' :
+      props.$variant === 'secondary' ? '#d9a300' :
+        modernColors.hover
+  };
   }
   
   i {
@@ -229,7 +239,7 @@ type Props = {
 
 export default function ActionBar({ currentConversation }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
-  
+
   const { kind } = currentConversation.integration;
   const tags = currentConversation.tags || [];
   const assignedUser = currentConversation.assignedUser;
@@ -255,8 +265,8 @@ export default function ActionBar({ currentConversation }: Props) {
   );
 
   const assignTrigger = (
-    <AssignButton 
-      id='conversationAssignTrigger' 
+    <AssignButton
+      id='conversationAssignTrigger'
       $hasAssignee={!!assignedUser}
     >
       {assignedUser && assignedUser._id ? (
@@ -272,7 +282,7 @@ export default function ActionBar({ currentConversation }: Props) {
     if (!participatedUsers || participatedUsers.length === 0) {
       return null;
     }
-    
+
     return (
       <ParticipantsContainer>
         <Participators
@@ -286,13 +296,13 @@ export default function ActionBar({ currentConversation }: Props) {
   const renderReadUsers = () => {
     if (
       !['facebook-messenger', 'whatsapp', 'instagram-messenger'].includes(kind) ||
-      !readUsers || 
-      readUsers.length === 0 || 
+      !readUsers ||
+      readUsers.length === 0 ||
       participatedUsers.length > 0
     ) {
       return null;
     }
-    
+
     return (
       <ParticipantsContainer>
         <Participators
@@ -305,39 +315,39 @@ export default function ActionBar({ currentConversation }: Props) {
 
   const renderDynamicComponents = (): JSX.Element[] => {
     const components: JSX.Element[] = [];
-  
+
     // Add dynamic components
     const dynamicComponent = loadDynamicComponent('inboxConversationDetailActionBar', {
       conversation: currentConversation,
     });
-  
+
     if (dynamicComponent) {
       components.push(dynamicComponent);
     }
-  
+
     // Add Facebook Post component
     if (kind === 'facebook-post') {
       components.push(<Post key="facebook-post" conversation={currentConversation} />);
     }
-  
+
     // Add Instagram Post component
     if (kind === 'instagram-post') {
       components.push(<PostInstagram key="instagram-post" conversation={currentConversation} />);
     }
-  
+
     return components;
   };
 
   const renderConvertButton = () => {
     if (
-      !isEnabled('sales') && 
-      !isEnabled('tickets') && 
-      !isEnabled('tasks') && 
+      !isEnabled('sales') &&
+      !isEnabled('tickets') &&
+      !isEnabled('tasks') &&
       !isEnabled('purchases')
     ) {
       return null;
     }
-    
+
     return <ConvertTo conversation={currentConversation} />;
   };
 
@@ -345,45 +355,43 @@ export default function ActionBar({ currentConversation }: Props) {
     <RelativeContainer>
       <ActionBarContainer>
         <ActionBarSection>
-          <AssignSection>
-            <AssignLabel>{__('Assign to')}:</AssignLabel>
-            <AssignBoxPopover
-              targets={[currentConversation]}
-              trigger={assignTrigger}
-            />
-          </AssignSection>
-          
+          <InfoSection integration={currentConversation.integration} customer={currentConversation.customer} hideForm={true} avatarSize={40} noPadding={true} />
+        </ActionBarSection>
+        
+        <ActionBarSection>
           {renderParticipators()}
           {renderReadUsers()}
           {renderDynamicComponents()}
         </ActionBarSection>
-        
+
         <ActionBarSection>
-          <TagsContainer>
+          {/* <TagsContainer>
             <Tagger
               targets={[currentConversation]}
               trigger={tagTrigger}
             />
-          </TagsContainer>
-          
+          </TagsContainer> */}
+
           <ActionButtonsContainer>
             {renderConvertButton()}
-            
+
             <Resolver
               conversations={[currentConversation]}
               {...({ onClick, isResolved }) => (
-                <ModernButton
-                  variant={isResolved ? "primary" : "success"}
-                  size="sm"
+                <Button
+
+                  btnStyle={isResolved ? "primary" : "success"}
+                  size="small"
                   icon={isResolved ? "redo" : "check-circle"}
+                  iconLeftAlignment={true}
                   onClick={onClick}
                 >
                   {isResolved ? __('Reopen') : __('Resolve')}
-                </ModernButton>
+                </Button>
               )}
             />
-            
-            <ExpandButton 
+
+            <ExpandButton
               $isExpanded={isExpanded}
               onClick={toggleExpand}
               title={isExpanded ? __('Hide details') : __('Show details')}
@@ -393,7 +401,7 @@ export default function ActionBar({ currentConversation }: Props) {
           </ActionButtonsContainer>
         </ActionBarSection>
       </ActionBarContainer>
-      
+
       <ExpandedSection $isExpanded={isExpanded}>
         <div>
           {/* Additional conversation details that can be shown when expanded */}

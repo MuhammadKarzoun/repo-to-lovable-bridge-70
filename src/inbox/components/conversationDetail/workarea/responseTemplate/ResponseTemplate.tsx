@@ -7,7 +7,7 @@ import Icon from '@octobots/ui/src/components/Icon';
 import Modal from '../../../../containers/conversationDetail/responseTemplate/Modal';
 import PopoverContent from '../../../../containers/conversationDetail/responseTemplate/PopoverContent';
 import React from 'react';
-import { ResponseTemplateStyled } from '@octobots/ui-inbox/src/inbox/styles';
+import { ActionIconContainer, ResponseTemplateStyled } from '@octobots/ui-inbox/src/inbox/styles';
 import Tip from '@octobots/ui/src/components/Tip';
 import { __ } from '@octobots/ui/src/utils/core';
 import strip from 'strip';
@@ -24,11 +24,11 @@ const ResponseTemplate = (props: Props) => {
   const { brands, content, brandId, attachments } = props;
 
   const saveTrigger = (
-    <Button id="response-template-handler" btnStyle="link">
+    <ActionIconContainer>
       <Tip placement="top" text={__('Save as template')}>
         <Icon icon="file-upload-alt" />
       </Tip>
-    </Button>
+    </ActionIconContainer>
   );
 
   const popover = (close) => (
@@ -39,27 +39,29 @@ const ResponseTemplate = (props: Props) => {
   );
 
   return (
-    <ResponseTemplateStyled style={{ display: 'flex' }}>
+    <>
       <Popover
         placement="left-end"
         closeAfterSelect={true}
         trigger={
-          <Tip placement="top" text={__('Response template')}>
-            <Icon icon="file-bookmark-alt" />
-          </Tip>
+          <ActionIconContainer>
+            <Tip placement="top" text={__('Response template')}>
+              <Icon icon="file-bookmark-alt" />
+            </Tip>
+          </ActionIconContainer>
         }
       >
         {popover}
       </Popover>
 
-      <Modal
+      {strip(content) && <Modal
         trigger={strip(content) ? saveTrigger : <span />}
         content={content}
         files={attachments}
         brands={brands}
         brandId={brandId}
-      />
-    </ResponseTemplateStyled>
+      />}
+    </>
   );
 };
 

@@ -16,9 +16,8 @@ const SidebarContainer = styled.div`
   display: flex;
   height: 100%;
   background-color: ${modernColors.sidebarBackground};
-  border-right: 1px solid ${modernColors.border};
+  border: 1px solid ${modernColors.border};
   overflow: hidden;
-  border-radius: 12px;
 `;
 
 // Sidebar navigation (left narrow sidebar)
@@ -110,7 +109,7 @@ const SidebarContent = styled.div`
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  width: 320px;
+  width: 340px;
 `;
 
 // Header of the sidebar content
@@ -229,8 +228,8 @@ const ConversationItems = styled.ul`
 // Checkbox for conversation selection
 const CheckBox = styled.div`
   position: absolute;
-  inset-inline-start: 0;
-  top: 0;
+  inset-inline-start: .7rem;
+  top: 1.1rem;
   transform: translateY(-50%);
   opacity: 0;
   transition: opacity ${transitions.fast};
@@ -243,7 +242,7 @@ const RowContent = styledTS<{ $isChecked?: boolean }>(styled.div)`
   flex-direction: column;
   width: 100%;
   position: relative;
-  padding-left: ${(props) => (props.$isChecked ? "40px" : "0")};
+  // padding-left: ${(props) => (props.$isChecked ? "40px" : "0")};
   transition: padding ${transitions.fast};
   
   ${CheckBox} {
@@ -360,14 +359,18 @@ const RowItem = styledTS<{
 
 // Idle indicator
 const Idle = styled.div`
-  position: absolute;
-  top: ${spacing.md};
-  right: ${spacing.md};
-  width: 10px;
-  height: 10px;
-  border-radius: ${borderRadius.circle};
-  background-color: ${modernColors.warning};
-  box-shadow: 0 0 0 2px ${modernColors.contentBackground};
+  padding-left: .5rem;
+  padding-right: .5rem;
+  height: 1.25rem;
+  border-radius: .25rem;
+  border: 1px solid #e5e7eb;
+  background : #FFF;
+
+  span {
+    color: #ca244d;
+    font-size: ${typography.fontSizes.xs};
+    font-weight: ${typography.fontWeights.semibold};
+  }
 `;
 
 // Assignee image
@@ -403,12 +406,14 @@ const LeftContent = styledTS<{ $isOpen?: boolean }>(styled.div)`
 
 // Additional sidebar (filters)
 const AdditionalSidebar = styled.div`
-  width: 240px;
-  background-color: ${modernColors.background};
-  border-right: 1px solid ${modernColors.border};
+  width: 200px;
+  background-color: ${modernColors.sidebarBackground};
+  // border-right: 1px solid ${modernColors.border};
   overflow-y: auto;
   transition: all ${transitions.normal};
   padding: ${spacing.lg} 0;
+  border-inline-end: 1px solid #E5E7EB;
+  margin-inline-end: 4px;
 `;
 
 // Dropdown wrapper

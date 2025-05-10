@@ -35,6 +35,7 @@ import styled from "styled-components";
 import { modernColors, typography, spacing } from "../../../styles/theme";
 import Badge from "../../../components/common/Badge";
 import { IIntegration } from '@octobots/ui-inbox/src/settings/integrations/types';
+import Icon from "@octobots/ui/src/components/Icon";
 
 dayjs.extend(relativeTime);
 
@@ -133,7 +134,16 @@ const ConversationItem: React.FC<Props> = (props) => {
     return (
       lastMsgFrom == 'customer' && idle >= idleTimeConfig &&
       <Tip placement="left" text="Idle">
-        <Idle />
+        <Idle>
+          <Icon
+            icon="fire"
+            size={11}
+            color={"#ca244d"}
+            style={{ marginInlineEnd: spacing.xs }}
+          />
+
+          <span>{(dayjs(updatedAt) || ({} as any)).fromNow(true)}</span>
+        </Idle>
       </Tip>
     );
   };
@@ -177,7 +187,7 @@ const ConversationItem: React.FC<Props> = (props) => {
         <FlexContent>
           <MainInfo>
             {isExistingCustomer && (
-              <Avatar 
+              <Avatar
                 customer={customer}
                 size={40}
                 status={customer.isOnline ? 'online' : 'offline'}
@@ -186,7 +196,7 @@ const ConversationItem: React.FC<Props> = (props) => {
             <CustomerInfo>
               <CustomerName>
                 <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {isExistingCustomer && renderFullName(customer)}
+                  {isExistingCustomer && renderFullName(customer, true)}
                 </div>
                 <time>
                   {(dayjs(updatedAt || createdAt) || ({} as any)).fromNow(true)}
@@ -213,7 +223,7 @@ const ConversationItem: React.FC<Props> = (props) => {
                     placement="top"
                     text={assignedUser.details && assignedUser.details.fullName}
                   >
-                    <Avatar 
+                    <Avatar
                       user={assignedUser}
                       size={24}
                     />
@@ -222,10 +232,12 @@ const ConversationItem: React.FC<Props> = (props) => {
               )}
             </div>
           </MessageContent>
-          <Tags tags={tags} limit={3} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xs }}>
+            {isIdleContent(integration, updatedAt, idleTimeConfig || 3, lastMsgFrom)}
+            <Tags tags={tags} limit={3} />
+          </div>
         </FlexContent>
       </RowContent>
-      {isIdleContent(integration, updatedAt, idleTimeConfig || 3, lastMsgFrom)}
     </RowItem>
   );
 };

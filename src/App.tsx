@@ -16,7 +16,7 @@ dayjs.extend(relativeTime);
 
 const App = () => {
   return (
-    <PluginLayout>
+    <PluginLayout style={{ paddingTop: '0px' }}>
       <AppProvider currentUser={dummyUser}>
         <GeneralRoutes />
       </AppProvider>

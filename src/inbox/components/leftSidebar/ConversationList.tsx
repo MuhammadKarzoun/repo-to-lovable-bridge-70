@@ -13,7 +13,7 @@ import {
   typography,
   transitions,
 } from "../../../styles/theme";
-import ModernButton from "../../../components/common/Button";
+import ModernButton from "../../../components/common/ModernButton";
 import { IUser } from "@octobots/ui/src/auth/types";
 import WhatsappTemplates from "@octobots/ui-whatsapp/src/containers/WhatsappTemplates";
 

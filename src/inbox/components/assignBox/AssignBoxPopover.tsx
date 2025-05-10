@@ -46,7 +46,7 @@ class AssignBoxPopover extends React.Component<Props> {
     );
 
     return (
-      <Popover className="relative">
+      <Popover style={{ height: '36px' }} className="relative">
         <Popover.Button>{trigger}</Popover.Button>
         <Popover.Panel className="assign-popover">
           {({ close }) => popover(close)}

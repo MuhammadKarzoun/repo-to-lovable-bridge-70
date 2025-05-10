@@ -310,7 +310,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
     <>
       <ActionBar currentConversation={currentConversation} />
       {renderConnectionStatus()}
-      <TabsContainer>
+      {(userApps && userApps?.length> 0) && <TabsContainer>
         <TabButton
           type="button"
           isActive={tabType?._id === "messages"}
@@ -328,7 +328,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
             {userApp?.name}
           </TabButton>
         ))}
-      </TabsContainer>
+      </TabsContainer>}
       {tabType._id === "messages" && (
         <>
           <ModernContentBox>

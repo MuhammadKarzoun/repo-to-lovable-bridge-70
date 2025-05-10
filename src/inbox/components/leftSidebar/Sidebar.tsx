@@ -39,7 +39,7 @@ import {
   spacing,
   typography,
 } from "../../../styles/theme";
-import ModernButton from "../../../components/common/Button";
+import ModernButton from "../../../components/common/ModernButton";
 import Badge from "../../../components/common/Badge";
 import FilterBar from "../filters/FilterBar";
 import TabFilter from "../filters/TabFilter";
@@ -99,7 +99,7 @@ const LeftSidebar: React.FC<Props> = (props) => {
     props;
 
   const [isOpen, setIsOpen] = useState<boolean>(
-    props.config?.showAddition || false
+    props.config?.showAddition || true
   );
   const [counts, setItemCounts] = useState<any>({});
   const [searchValue, setSearchValue] = useState<string>("");
@@ -146,13 +146,13 @@ const LeftSidebar: React.FC<Props> = (props) => {
     return (
       <SidebarHeaderStyled>
         <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
-          {/* <ToggleButton
+          <ToggleButton
             id="btn-inbox-channel-visible"
             $isActive={isOpen}
             onClick={onToggleSidebar}
           >
             <Icon icon="subject" />
-          </ToggleButton> */}
+          </ToggleButton>
           {queryParams.status !== CONVERSATION_STATUSES.CLOSED && (
             <ModernButton size="sm" variant="ghost" onClick={props.resolveAll}>
               {__("Resolve all")}
@@ -181,152 +181,158 @@ const LeftSidebar: React.FC<Props> = (props) => {
     );
   };
 
-  // #TODO remove this code or use later @MK
-  // const renderAdditionalSidebar = (refetchRequired: string) => {
-  //   const { queryParams, currentUser } = props;
+  //#TODO remove this code or use later @MK
+  const renderAdditionalSidebar = (refetchRequired: string) => {
+    const { queryParams, currentUser } = props;
 
-  //   if (!currentUser) {
-  //     return null;
-  //   }
+    if (!currentUser) {
+      return null;
+    }
 
-  //   const setCounts = (counts: any) => {
-  //     const current = { ...counts };
+    const setCounts = (counts: any) => {
+      const current = { ...counts };
 
-  //     setItemCounts({ ...current, ...counts });
-  //   };
+      setItemCounts({ ...current, ...counts });
+    };
 
-  //   return (
-  //     <AdditionalSidebar style={{ display: isOpen ? 'block' : 'none' }}>
-  //       <SidebarContent>
-  //         <ScrollContent>
-  //           <FilterToggler
-  //             groupText="Channels"
-  //             toggleName="showChannels"
-  //             manageUrl="/settings/channels"
-  //             isOpen={props.config?.showChannels || false}
-  //             toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
-  //           >
-  //             <FilterList
-  //               query={{
-  //                 queryName: "channelsByMembers",
-  //                 variables: { memberIds: [currentUser._id] },
-  //                 dataName: "channelsByMembers"
-  //               }}
-  //               counts="byChannels"
-  //               paramKey="channelId"
-  //               queryParams={queryParams}
-  //               refetchRequired={refetchRequired}
-  //               setCounts={setCounts}
-  //             />
-  //           </FilterToggler>
+    return (
+      <AdditionalSidebar style={{ display: isOpen ? 'block' : 'none' }}>
+        <SidebarContent style={{ width: "unset" }}>
+          <ScrollContent>
+            <FilterToggler
+              groupText="Channels"
+              icon="users-alt"
+              toggleName="showChannels"
+              manageUrl="/settings/channels"
+              isOpen={props.config?.showChannels || false}
+              toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+            >
+              <FilterList
+                query={{
+                  queryName: "channelsByMembers",
+                  variables: { memberIds: [currentUser._id] },
+                  dataName: "channelsByMembers"
+                }}
+                counts="byChannels"
+                paramKey="channelId"
+                queryParams={queryParams}
+                refetchRequired={refetchRequired}
+                setCounts={setCounts}
+              />
+            </FilterToggler>
 
-  //           {
-  //             <FilterToggler
-  //               groupText="Segments"
-  //               toggleName="showSegments"
-  //               manageUrl="/segments?contentType=inbox:conversation"
-  //               isOpen={props.config?.showSegments || false}
-  //               toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
-  //             >
-  //               <FilterList
-  //                 query={{
-  //                   queryName: "segmentList",
-  //                   dataName: "segments",
-  //                   variables: {
-  //                     contentTypes: [TAG_TYPES.CONVERSATION]
-  //                   }
-  //                 }}
-  //                 queryParams={queryParams}
-  //                 counts="bySegment"
-  //                 paramKey="segment"
-  //                 icon="tag-alt"
-  //                 refetchRequired={refetchRequired}
-  //                 treeView={true}
-  //                 setCounts={setCounts}
-  //               />
-  //             </FilterToggler>
-  //           }
+            {
+              <FilterToggler
+                groupText="Segments"
+                icon="pie-chart"
+                toggleName="showSegments"
+                manageUrl="/segments?contentType=inbox:conversation"
+                isOpen={props.config?.showSegments || false}
+                toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+              >
+                <FilterList
+                  query={{
+                    queryName: "segmentList",
+                    dataName: "segments",
+                    variables: {
+                      contentTypes: [TAG_TYPES.CONVERSATION]
+                    }
+                  }}
+                  queryParams={queryParams}
+                  counts="bySegment"
+                  paramKey="segment"
+                  icon="tag-alt"
+                  refetchRequired={refetchRequired}
+                  treeView={true}
+                  setCounts={setCounts}
+                />
+              </FilterToggler>
+            }
 
-  //           <FilterToggler
-  //             groupText="Brands"
-  //             toggleName="showBrands"
-  //             manageUrl="/settings/brands"
-  //             isOpen={props.config?.showBrands || false}
-  //             toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
-  //           >
-  //             <FilterList
-  //               query={{ queryName: "allBrands", dataName: "allBrands" }}
-  //               counts="byBrands"
-  //               queryParams={queryParams}
-  //               paramKey="brandId"
-  //               refetchRequired={refetchRequired}
-  //               setCounts={setCounts}
-  //             />
-  //           </FilterToggler>
+            <FilterToggler
+              groupText="Brands"
+              icon="building"
+              toggleName="showBrands"
+              manageUrl="/settings/brands"
+              isOpen={props.config?.showBrands || false}
+              toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+            >
+              <FilterList
+                query={{ queryName: "allBrands", dataName: "allBrands" }}
+                counts="byBrands"
+                queryParams={queryParams}
+                paramKey="brandId"
+                refetchRequired={refetchRequired}
+                setCounts={setCounts}
+              />
+            </FilterToggler>
 
-  //           <FilterToggler
-  //             groupText="Integrations"
-  //             toggleName="showIntegrations"
-  //             manageUrl="/settings/integrations"
-  //             isOpen={props.config?.showIntegrations || false}
-  //             toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
-  //           >
-  //             <FilterList
-  //               query={{
-  //                 queryName: "integrations",
-  //                 dataName: "integrations"
-  //               }}
-  //               queryParams={queryParams}
-  //               counts="byIntegration"
-  //               paramKey="integration"
-  //               refetchRequired={refetchRequired}
-  //               setCounts={setCounts}
-  //             />
-  //           </FilterToggler>
+            <FilterToggler
+              groupText="Integrations"
+              icon="plug"
+              toggleName="showIntegrations"
+              manageUrl="/settings/integrations"
+              isOpen={props.config?.showIntegrations || false}
+              toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+            >
+              <FilterList
+                query={{
+                  queryName: "integrationsList",
+                  dataName: "integrations"
+                }}
+                icon="whatsapp"
+                queryParams={queryParams}
+                counts="byIntegration"
+                paramKey="integrationId"
+                refetchRequired={refetchRequired}
+                setCounts={setCounts}
+              />
+            </FilterToggler>
 
-  //           <FilterToggler
-  //             groupText="Tags"
-  //             toggleName="showTags"
-  //             manageUrl="/settings/tags/inbox:conversation"
-  //             isOpen={props.config?.showTags || false}
-  //             toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
-  //           >
-  //             <FilterList
-  //               query={{
-  //                 queryName: "tagList",
-  //                 dataName: "tags",
-  //                 variables: {
-  //                   type: TAG_TYPES.CONVERSATION,
-  //                   perPage: 100
-  //                 }
-  //               }}
-  //               queryParams={queryParams}
-  //               counts="byTags"
-  //               paramKey="tag"
-  //               icon="tag-alt"
-  //               refetchRequired={refetchRequired}
-  //               multiple={true}
-  //               treeView={true}
-  //               setCounts={setCounts}
-  //             />
-  //           </FilterToggler>
-  //         </ScrollContent>
-  //       </SidebarContent>
-  //     </AdditionalSidebar>
-  //   );
-  // };
+            <FilterToggler
+              groupText="Tags"
+              icon="tag-alt"
+              toggleName="showTags"
+              manageUrl="/settings/tags/inbox:conversation"
+              isOpen={props.config?.showTags || false}
+              toggle={({ isOpen }) => props.toggleSidebar({ isOpen })}
+            >
+              <FilterList
+                query={{
+                  queryName: "tagList",
+                  dataName: "tags",
+                  variables: {
+                    type: TAG_TYPES.CONVERSATION,
+                    perPage: 100
+                  }
+                }}
+                queryParams={queryParams}
+                counts="byTags"
+                paramKey="tag"
+                icon="tag-alt"
+                refetchRequired={refetchRequired}
+                multiple={true}
+                treeView={true}
+                setCounts={setCounts}
+              />
+            </FilterToggler>
+          </ScrollContent>
+        </SidebarContent>
+      </AdditionalSidebar>
+    );
+  };
 
   return (
     <SidebarContainer>
       <LeftContent $isOpen={isOpen}>
         {/* #TODO: reuse the additional sidebar or remove it and it's relevant code @MK */}
-        {/* <InboxManagementActionConsumer>
+        <InboxManagementActionConsumer>
           {({ refetchRequired }) => (
             <>
               {renderAdditionalSidebar(refetchRequired)}
             </>
           )}
-        </InboxManagementActionConsumer> */}
+        </InboxManagementActionConsumer>
 
         <SidebarContent>
           {/* {renderSidebarHeader()} */}

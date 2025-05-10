@@ -5,6 +5,7 @@ import {
 } from "@octobots/ui-inbox/src/inbox/types";
 import { Alert, __, readFile, uploadHandler } from "coreui/utils";
 import {
+  ActionIconContainer,
   Attachment,
   AttachmentIndicator,
   AttachmentThumb,
@@ -51,7 +52,6 @@ import AttachmentComp from "@octobots/ui/src/components/Attachment";
 import { urlify } from "@octobots/ui/src/utils/urlParser";
 import xss from "xss";
 import {
-  ActionIconContainer,
   ButtonsContainer,
   CheckBoxContainer,
   ReplyComponent,
@@ -498,7 +498,7 @@ const RespondBox = (props: Props) => {
       if (files && files.length > 0) {
         uploadHandler({
           files,
-          beforeUpload: () => {},
+          beforeUpload: () => { },
           afterUpload: ({ response, fileInfo }) => {
             setState((prevState) => ({
               ...prevState,
@@ -530,6 +530,7 @@ const RespondBox = (props: Props) => {
           placeholder={placeholder}
           content={content}
           showMentions={isInternal}
+          isInternalNote={isInternal}
           mentionSuggestion={props.mentionSuggestion}
           responseTemplates={responseTemplates}
           limit={conversation.integration.kind === "telnyx" ? 160 : undefined}
@@ -555,7 +556,7 @@ const RespondBox = (props: Props) => {
             componentclass="checkbox"
             checked={isInternal}
             onChange={toggleForm}
-            // disabled={ props.disableInternalState}
+          // disabled={ props.disableInternalState}
           >
             {__("Internal note")}
           </FormControl>
@@ -609,14 +610,13 @@ const RespondBox = (props: Props) => {
               <input type="file" onChange={handleFileInput} multiple={true} />
             </Tip>
           </ActionIconContainer>
-          <ActionIconContainer>
-            <ResponseTemplate
-              brandId={integration.brandId}
-              attachments={state.attachments}
-              content={content}
-              onSelect={onSelectTemplate}
-            />
-          </ActionIconContainer>
+
+          <ResponseTemplate
+            brandId={integration.brandId}
+            attachments={state.attachments}
+            content={content}
+            onSelect={onSelectTemplate}
+          />
 
           {conversation.integration.kind == "whatsapp" && (
             <ActionIconContainer>
@@ -627,14 +627,14 @@ const RespondBox = (props: Props) => {
               />
             </ActionIconContainer>
           )}
-          <ActionIconContainer>
-            <Button
-              onClick={onSendDebouncedClickHandler}
-              btnStyle="success"
-              size="small"
-              icon="message"
-            />
-          </ActionIconContainer>
+          <Button
+            onClick={onSendDebouncedClickHandler}
+            btnStyle="success"
+            size="small"
+            icon="message"
+          >
+            {__("Send")}
+          </Button>
         </ButtonsContainer>
       </EditorActions>
     );
