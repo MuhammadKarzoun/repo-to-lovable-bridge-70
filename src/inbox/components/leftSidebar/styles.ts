@@ -147,7 +147,8 @@ const SidebarActions = styled.div`
 // Search input in the sidebar
 const SearchInput = styled.div`
   position: relative;
-  margin: ${spacing.md} ${spacing.lg};
+  margin: ${spacing.md} 0;
+  width: 100%;
 
   input {
     width: 100%;
@@ -155,6 +156,7 @@ const SearchInput = styled.div`
     border: 1px solid ${modernColors.border};
     border-radius: ${borderRadius.md};
     font-size: ${typography.fontSizes.md};
+    line-height: ${typography.fontSizes.md};
     background-color: ${modernColors.background};
     transition: all ${transitions.fast};
 

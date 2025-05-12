@@ -87,6 +87,7 @@ const BadgeContainer = styled.span<{
       padding: ${sizes[props.$size].padding};
       background-color: ${variants[props.$variant].backgroundColor};
       color: ${variants[props.$variant].color};
+      line-height: ${sizes[props.$size].height};
     `;
   }}
 `;

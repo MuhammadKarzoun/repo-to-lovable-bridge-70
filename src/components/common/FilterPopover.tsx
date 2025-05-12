@@ -14,14 +14,14 @@ const PopoverButton = styled.button<{ $isActive?: boolean }>`
   display: flex;
   align-items: center;
   gap: ${spacing.xs};
-  padding: ${spacing.sm} ${spacing.md};
+  padding: 8px 10px 5px 10px;
   background-color: ${(props) =>
     props.$isActive ? modernColors.active : modernColors.messageBackground};
   border: none;
   border-radius: ${borderRadius.md};
   color: ${(props) =>
     props.$isActive ? modernColors.primary : modernColors.textPrimary};
-  font-size: ${typography.fontSizes.md};
+  font-size: ${typography.fontSizes.sm};
   cursor: pointer;
   transition: all ${transitions.fast};
 
@@ -35,24 +35,27 @@ const PopoverButton = styled.button<{ $isActive?: boolean }>`
 
   i {
     color: ${(props) =>
-      props.$isActive ? modernColors.primary : modernColors.textSecondary};
+      props.$isActive ? modernColors.primary : modernColors.textPrimary};
     transition: transform ${transitions.fast};
   }
 
-  &[aria-expanded="true"] i {
-    transform: rotate(180deg);
-  }
+  // &[aria-expanded="true"] i {
+  //   transform: rotate(180deg);
+  // }
 `;
 
 const PopoverPanel = styled.div`
   position: absolute;
-  z-index: 10;
-  margin-top: ${spacing.sm};
+  //z-index: 10;
+  top: 70px;
+  //margin-top: ${spacing.sm};
+  inset-inline-start: auto;
   background-color: ${modernColors.contentBackground};
   border-radius: ${borderRadius.md};
   box-shadow: 0 4px 12px ${modernColors.shadow};
-  width: 320px;
+  min-width: 330px;
   overflow: hidden;
+  border: 1px solid #E5E7EB;
 `;
 
 const PopoverHeader = styled.div`

@@ -38,6 +38,7 @@ type Props = {
   dmConfig?: DmConfig;
   content?: any;
   msg?: string;
+  toggle?: () => void;
 };
 
 type FinalProps = {

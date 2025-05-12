@@ -43,6 +43,11 @@ import ModernButton from "../../../components/common/ModernButton";
 import Badge from "../../../components/common/Badge";
 import FilterBar from "../filters/FilterBar";
 import TabFilter from "../filters/TabFilter";
+import Button from "@octobots/ui/src/components/Button";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { ActionIconContainer } from "@octobots/ui-inbox/src/inbox/styles";
+import Tip from "@octobots/ui/src/components/Tip";
+import Search from "../../containers/Search";
 
 const DateFilter = asyncComponent(
   () =>
@@ -103,6 +108,7 @@ const LeftSidebar: React.FC<Props> = (props) => {
   );
   const [counts, setItemCounts] = useState<any>({});
   const [searchValue, setSearchValue] = useState<string>("");
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
@@ -169,15 +175,23 @@ const LeftSidebar: React.FC<Props> = (props) => {
 
   const renderSidebarSearchBox = () => {
     return (
-      <SearchInput>
-        <Icon icon="search" />
-        <input
-          type="text"
-          placeholder="Search conversations..."
-          value={searchValue}
-          onChange={handleSearchChange}
-        />
-      </SearchInput>
+      <div style={{ display: "flex", alignItems: "center", margin: "0px 10px", gap: spacing.sm }}>
+        <ActionIconContainer onClick={onToggleSidebar}>
+          <Tip placement="top" text={__('Open/Hide sidebar')}>
+            <Icon icon="subject" />
+          </Tip>
+        </ActionIconContainer>
+        {/* <SearchInput>
+          <Icon icon="search" />
+          <input
+            type="text"
+            placeholder="Search conversations..."
+            value={searchValue}
+            onChange={handleSearchChange}
+          />
+        </SearchInput> */}
+        <Search />
+      </div>
     );
   };
 
@@ -195,9 +209,26 @@ const LeftSidebar: React.FC<Props> = (props) => {
       setItemCounts({ ...current, ...counts });
     };
 
+    const clearFilters = () => {
+      const newQueryParams = { ...queryParams };
+      delete newQueryParams.channelId;
+      delete newQueryParams.brandId;
+      delete newQueryParams.integrationId;
+      delete newQueryParams.tag;
+      delete newQueryParams.segment;
+      delete newQueryParams.tab;
+
+      setSearchParams(newQueryParams);
+    };
+
     return (
       <AdditionalSidebar style={{ display: isOpen ? 'block' : 'none' }}>
         <SidebarContent style={{ width: "unset" }}>
+          <div style={{ justifyItems: "center", padding: `0px 10px 10px 10px` }}>
+            <Button btnStyle="simple" icon="filter" size="small" onClick={clearFilters}>
+              {__("All conversations")}
+            </Button>
+          </div>
           <ScrollContent>
             <FilterToggler
               groupText="Channels"
@@ -280,7 +311,7 @@ const LeftSidebar: React.FC<Props> = (props) => {
                   queryName: "integrationsList",
                   dataName: "integrations"
                 }}
-                icon="whatsapp"
+                iconFor="integrations"
                 queryParams={queryParams}
                 counts="byIntegration"
                 paramKey="integrationId"
@@ -323,7 +354,7 @@ const LeftSidebar: React.FC<Props> = (props) => {
   };
 
   return (
-    <SidebarContainer>
+    <SidebarContainer style={{ overflow: "unset" }}>
       <LeftContent $isOpen={isOpen}>
         {/* #TODO: reuse the additional sidebar or remove it and it's relevant code @MK */}
         <InboxManagementActionConsumer>
@@ -334,7 +365,7 @@ const LeftSidebar: React.FC<Props> = (props) => {
           )}
         </InboxManagementActionConsumer>
 
-        <SidebarContent>
+        <SidebarContent style={{ overflow: "unset" }}>
           {/* {renderSidebarHeader()} */}
           {renderSidebarSearchBox()}
 
