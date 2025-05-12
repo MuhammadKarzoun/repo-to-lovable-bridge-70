@@ -14,16 +14,17 @@ const PopoverButton = styled.button<{ $isActive?: boolean }>`
   display: flex;
   align-items: center;
   gap: ${spacing.xs};
-  padding: 8px 10px 5px 10px;
+  padding: 10px 10px 8px 10px;
   background-color: ${(props) =>
     props.$isActive ? modernColors.active : modernColors.messageBackground};
   border: none;
   border-radius: ${borderRadius.md};
   color: ${(props) =>
     props.$isActive ? modernColors.primary : modernColors.textPrimary};
-  font-size: ${typography.fontSizes.sm};
+  //font-size: ${typography.fontSizes.sm};
   cursor: pointer;
   transition: all ${transitions.fast};
+  line-height: 10px;
 
   &:hover {
     background-color: ${modernColors.hover};

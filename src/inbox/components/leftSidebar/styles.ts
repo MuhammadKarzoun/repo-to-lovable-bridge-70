@@ -343,11 +343,12 @@ const RowItem = styledTS<{
   cursor: pointer;
   transition: all ${transitions.fast};
   box-shadow: ${(props) => (props.$isActive ? shadows.md : "none")};
+  border: 1px solid ${modernColors.active};
   
   ${(props) =>
     !props.$isRead &&
     `
-    border-left: 3px solid ${modernColors.primary};
+    border-left: 2px solid ${modernColors.primary};
   `}
   
   &:hover {

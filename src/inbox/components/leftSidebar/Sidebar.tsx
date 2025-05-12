@@ -224,7 +224,7 @@ const LeftSidebar: React.FC<Props> = (props) => {
     return (
       <AdditionalSidebar style={{ display: isOpen ? 'block' : 'none' }}>
         <SidebarContent style={{ width: "unset" }}>
-          <div style={{ justifyItems: "center", padding: `0px 10px 10px 10px` }}>
+          <div style={{ justifyItems: "center", padding: `4px 10px 10px 10px` }}>
             <Button btnStyle="simple" icon="filter" size="small" onClick={clearFilters}>
               {__("All conversations")}
             </Button>
