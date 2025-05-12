@@ -15,6 +15,8 @@ import Tags from '@octobots/ui/src/components/Tags';
 
 import asyncComponent from '@octobots/ui/src/components/AsyncComponent';
 import Button from '@octobots/ui/src/components/Button';
+import Tip from '@octobots/ui/src/components/Tip';
+import { ActionIconContainer } from '@octobots/ui-inbox/src/inbox/styles';
 
 const Participators = asyncComponent(
   () =>
@@ -235,10 +237,12 @@ const RelativeContainer = styled.div`
 
 type Props = {
   currentConversation: IConversation;
+  toggle?: () => void;
 };
 
-export default function ActionBar({ currentConversation }: Props) {
+export default function ActionBar({ currentConversation, toggle }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const { kind } = currentConversation.integration;
   const tags = currentConversation.tags || [];
@@ -357,7 +361,7 @@ export default function ActionBar({ currentConversation }: Props) {
         <ActionBarSection>
           <InfoSection integration={currentConversation.integration} customer={currentConversation.customer} hideForm={true} avatarSize={40} noPadding={true} />
         </ActionBarSection>
-        
+
         <ActionBarSection>
           {renderParticipators()}
           {renderReadUsers()}
@@ -398,6 +402,11 @@ export default function ActionBar({ currentConversation }: Props) {
             >
               <Icon icon="ellipsis-h" />
             </ExpandButton>
+            <ActionIconContainer onClick={toggle}>
+              <Tip placement="top" text={__('Open/Hide sidebar')}>
+                <Icon icon="subject" />
+              </Tip>
+            </ActionIconContainer>
           </ActionButtonsContainer>
         </ActionBarSection>
       </ActionBarContainer>

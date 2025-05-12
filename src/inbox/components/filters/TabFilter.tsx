@@ -15,7 +15,7 @@ import { IUser } from "@octobots/ui/src/auth/types";
 const TabsContainer = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-evenly;
   border-bottom: 1px solid ${modernColors.border};
   margin-bottom: ${spacing.md};
   width: 100%;
@@ -23,12 +23,12 @@ const TabsContainer = styled.div`
 `;
 
 const Tab = styled.div<{ $active: boolean }>`
-  padding: ${spacing.md} ${spacing.sm};
+  padding: ${spacing.sm} ${spacing.sm};
   font-size: ${typography.fontSizes.md};
   font-weight: ${(props) =>
     props.$active
-      ? typography.fontWeights.semibold
-      : typography.fontWeights.normal};
+      ? typography.fontWeights.bold
+      : typography.fontWeights.medium};
   color: ${(props) =>
     props.$active ? modernColors.primary : modernColors.textSecondary};
   cursor: pointer;

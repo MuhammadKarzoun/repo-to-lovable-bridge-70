@@ -148,6 +148,49 @@ const ConversationItem: React.FC<Props> = (props) => {
     );
   };
 
+
+  const renderIntegration = (integration: IIntegration) => {
+
+    if (!integration) {
+      return null;
+    }
+
+    const { name, kind } = integration;
+    let icon = "external-link-alt";
+    let color = "##333333";
+    switch (kind) {
+      case "whatsapp":
+        icon = "whatsapp";
+        color = "#25D366";
+        break;
+      case "facebook-messenger":
+        icon = "facebook";
+        color = "#3b5998";
+        break;
+      case "facebook-post":
+        icon = "facebook-official";
+        color = "#3b5998";
+        break;
+      case "instagram-messenger":
+        icon = "instagram";
+        color = "#E1306C";
+        break;
+      case "instagram-post":
+        icon = "instagram";
+        color = "#E1306C";
+        break;
+      default:
+        icon = "earthgrid";
+        break;
+    }
+
+    return (
+      <span >
+        <Icon icon={icon} color={color} size={12} /> <span>{name}</span>
+      </span>
+    );
+  }
+
   const showMessageContent = (kind: string, content: string) => {
     if (kind === "callpro") {
       return (
@@ -204,8 +247,7 @@ const ConversationItem: React.FC<Props> = (props) => {
               </CustomerName>
 
               <SmallTextOneLine>
-                {brand.name && `${brand.name} via `}
-                {integration.name}
+                {renderIntegration(integration)}
               </SmallTextOneLine>
             </CustomerInfo>
           </MainInfo>

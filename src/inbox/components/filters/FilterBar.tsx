@@ -14,7 +14,7 @@ import { IUser } from "@octobots/ui/src/auth/types";
 const FilterBarContainer = styled.div`
   display: flex;
   align-items: center;
-  padding: 0 ${spacing.lg};
+  padding: 0 ${spacing.sm};
   margin-bottom: ${spacing.md};
   overflow-x: auto;
   gap: ${spacing.sm};
@@ -47,10 +47,10 @@ const FilterBar: React.FC<FilterBarProps> = ({
       />
       <AssignedFilter queryParams={queryParams} currentUser={currentUser} />
       <DateFilter queryParams={queryParams} />
-      <TagFilter queryParams={queryParams} />
+      {/* <TagFilter queryParams={queryParams} />
       <ChannelFilter queryParams={queryParams} currentUser={currentUser} />
       <BrandFilter queryParams={queryParams} />
-      <IntegrationFilter queryParams={queryParams} />
+      <IntegrationFilter queryParams={queryParams} /> */}
       <SortFilter queryParams={queryParams} />
     </FilterBarContainer>
   );
