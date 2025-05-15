@@ -157,7 +157,7 @@ const ConversationItem: React.FC<Props> = (props) => {
 
     const { name, kind } = integration;
     let icon = "external-link-alt";
-    let color = "##333333";
+    let color = "#333333";
     switch (kind) {
       case "whatsapp":
         icon = "whatsapp";
