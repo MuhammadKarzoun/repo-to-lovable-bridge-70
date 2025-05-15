@@ -82,6 +82,7 @@ type Props = {
   hideMask: boolean;
   userDashboardApps?: { userDashboardApps: DashboardApp[] };
   connectionStatus?: 'connected' | 'disconnected' | 'connecting';
+  toggle?: () => void;
 };
 
 const WorkArea: React.FC<Props> = React.memo((props) => {
@@ -99,6 +100,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
     loadMoreMessages,
     userDashboardApps,
     connectionStatus = 'connected',
+    toggle
   } = props;
 
   const [attachmentPreview, setAttachmentPreview] =
@@ -308,9 +310,9 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
 
   return (
     <>
-      <ActionBar currentConversation={currentConversation} />
+      <ActionBar toggle={toggle} currentConversation={currentConversation} />
       {renderConnectionStatus()}
-      <TabsContainer>
+      {(userApps && userApps?.length> 0) && <TabsContainer>
         <TabButton
           type="button"
           isActive={tabType?._id === "messages"}
@@ -328,7 +330,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
             {userApp?.name}
           </TabButton>
         ))}
-      </TabsContainer>
+      </TabsContainer>}
       {tabType._id === "messages" && (
         <>
           <ModernContentBox>

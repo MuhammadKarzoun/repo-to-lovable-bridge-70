@@ -40,7 +40,20 @@ type Props = {
   msg?: string;
 };
 
-export default class ConversationDetail extends React.Component<Props> {
+type State = {
+  isOpen: boolean;
+};
+
+export default class ConversationDetail extends React.Component<Props, State> {
+
+  constructor(props: Props) {
+    super(props);
+
+    this.state = {
+      isOpen: true,
+    };
+  }
+
   renderSidebar() {
     const { loading, currentConversation, conversationFields } = this.props;
 
@@ -88,6 +101,10 @@ export default class ConversationDetail extends React.Component<Props> {
   renderContent() {
     const { loading, currentConversation, msg } = this.props;
 
+    const toggleSidebar = () => {
+      this.setState({ isOpen: !this.state.isOpen })
+    }
+
     if (loading) {
       return (
         <ModernContentBox>
@@ -131,7 +148,7 @@ export default class ConversationDetail extends React.Component<Props> {
 
         if (content) {
           if (currentConversation.integration.kind === "imap") {
-            return <DmWorkArea msg={msg} content={content} {...this.props} />;
+            return <DmWorkArea toggle={toggleSidebar} msg={msg} content={content} {...this.props} />;
           }
 
           return (
@@ -149,10 +166,10 @@ export default class ConversationDetail extends React.Component<Props> {
       });
 
       if (dmConfig) {
-        return <DmWorkArea msg={msg} {...this.props} dmConfig={dmConfig} />;
+        return <DmWorkArea toggle={toggleSidebar} msg={msg} {...this.props} dmConfig={dmConfig} />;
       }
 
-      return <DmWorkArea msg={msg} {...this.props} />;
+      return <DmWorkArea toggle={toggleSidebar} msg={msg} {...this.props} />;
     }
 
     return (
@@ -167,8 +184,8 @@ export default class ConversationDetail extends React.Component<Props> {
   render() {
     return (
       <React.Fragment>
-        <ModernMainContent>{this.renderContent()}</ModernMainContent>
-        {this.renderSidebar()}
+        <ModernMainContent style={{ borderInlineEnd: '1px solid #e5e7eb', overflow: 'hidden' }}>{this.renderContent()}</ModernMainContent>
+        {this.state.isOpen && this.renderSidebar()}
       </React.Fragment>
     );
   }

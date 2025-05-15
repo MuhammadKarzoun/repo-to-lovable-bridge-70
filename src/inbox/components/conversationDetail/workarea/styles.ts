@@ -177,39 +177,6 @@ const RespondTypeButton = styled.button<{ isSelected: boolean }>`
   background: ${({ isSelected }) => (isSelected ? "#fff" : "#dedede")};
   margin-inline: 4px;
 `;
-const ActionIconContainer = styled.label`
-  width: auto;
-  height: 2.5rem;
-  border-radius: 10px;
-  background-color: #f0f0f0;
-  border: 1px solid #f0f0f0;
-  display: grid;
-  place-items: center;
-  transition: all 0.3s ease-in-out;
-  cursor: pointer;
-
-  .headlessui-popover-tooltip {
-    display: grid;
-    place-items: center;
-  }
-
-  i {
-    font-size: 1.2rem;
-    &::before {
-      margin: 7px;
-    }
-  }
-  button {
-    padding-inline: 10px;
-  }
-  &:hover {
-    background-color: #bbe0ff;
-
-    .microphone-2 {
-      color: #fff;
-    }
-  }
-`;
 const CheckBoxContainer = styled.div`
   span {
     display: flex;
@@ -334,7 +301,6 @@ export {
   TabsContainer,
   ButtonsContainer,
   CheckBoxContainer,
-  ActionIconContainer,
   RespondTypeButton,
   RespondTypeContainer,
   RespondBoxContainer,

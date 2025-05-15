@@ -14,8 +14,8 @@ const AvatarWrapper = styled.div<{
   position: relative;
   width: ${props => `${props.$size}px`};
   height: ${props => `${props.$size}px`};
-  border-radius: ${borderRadius.circle};
-  overflow: hidden;
+  border-radius: ${borderRadius.circle} !important;
+  // overflow: hidden;
   flex-shrink: 0;
   background-color: ${modernColors.avatarBackground};
   display: flex;
@@ -30,7 +30,7 @@ const AvatarWrapper = styled.div<{
     display: ${props => (props.$status ? 'block' : 'none')};
     position: absolute;
     bottom: 0;
-    right: 0;
+    inset-inline-end: 0;
     width: ${props => `${Math.max(props.$size / 4, 8)}px`};
     height: ${props => `${Math.max(props.$size / 4, 8)}px`};
     border-radius: 50%;
@@ -55,6 +55,7 @@ const AvatarImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: ${borderRadius.circle} !important;
 `;
 
 const AvatarInitials = styled.div`
@@ -66,6 +67,7 @@ const AvatarInitials = styled.div`
   background-color: ${props => props.color || modernColors.primary};
   color: white;
   font-weight: 600;
+  border-radius: ${borderRadius.circle} !important;
 `;
 
 interface AvatarProps {

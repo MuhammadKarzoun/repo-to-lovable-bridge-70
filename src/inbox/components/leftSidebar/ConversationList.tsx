@@ -13,7 +13,7 @@ import {
   typography,
   transitions,
 } from "../../../styles/theme";
-import ModernButton from "../../../components/common/Button";
+import ModernButton from "../../../components/common/ModernButton";
 import { IUser } from "@octobots/ui/src/auth/types";
 import WhatsappTemplates from "@octobots/ui-whatsapp/src/containers/WhatsappTemplates";
 
@@ -131,23 +131,24 @@ export default class ConversationList extends React.Component<Props> {
 
     return (
       <React.Fragment>
-        <ConversationItems id="conversations">
-          {conversations.map((conv) => (
-            <ConversationItem
-              key={conv._id}
-              conversation={conv}
-              toggleCheckbox={toggleRowCheckbox}
-              onClick={onChangeConversation}
-              selectedIds={(selectedConversations || []).map(
-                (conversation) => conversation._id
-              )}
-              currentConversationId={currentConversationId}
-              currentUser={currentUser}
-            />
-          ))}
-        </ConversationItems>
-
-        {this.renderLoadMore()}
+        <div style={{ overflowY: 'auto', paddingInlineEnd: '5px' }}>
+          <ConversationItems id="conversations">
+            {conversations.map((conv) => (
+              <ConversationItem
+                key={conv._id}
+                conversation={conv}
+                toggleCheckbox={toggleRowCheckbox}
+                onClick={onChangeConversation}
+                selectedIds={(selectedConversations || []).map(
+                  (conversation) => conversation._id
+                )}
+                currentConversationId={currentConversationId}
+                currentUser={currentUser}
+              />
+            ))}
+            {this.renderLoadMore()}
+          </ConversationItems>
+        </div>
       </React.Fragment>
     );
   }

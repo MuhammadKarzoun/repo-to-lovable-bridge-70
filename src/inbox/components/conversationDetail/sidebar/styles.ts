@@ -43,11 +43,13 @@ import {
   SpaceBetweenRow,
   Subject,
 } from "@octobots/ui-inbox/src/settings/integrations/components/mail/styles";
-import { colors, dimensions, typography } from "@octobots/ui/src/styles";
+import { colors, dimensions, typography as typography1 } from "@octobots/ui/src/styles";
 
 import { CardItem } from "@octobots/ui-inbox/src/inbox/components/conversationDetail/workarea/conversation/messages/bot/styles";
 import { Flex } from "@octobots/ui/src/styles/main";
 import styled from "styled-components";
+import { rgba } from "@octobots/ui/src/styles/ecolor";
+import { borderRadius, modernColors, spacing, transitions, typography } from "../../../../styles/theme";
 
 const FlexRow = styled(DateContainer)`
   display: flex;
@@ -137,7 +139,7 @@ const ActivityLogContent = styled(ActivityContent)`
   ${ActivityDate} {
     margin: 0;
     font-style: italic;
-    font-size: ${typography.fontSizeUppercase}px;
+    font-size: ${typography1.fontSizeUppercase}px;
   }
 
   ${EmailContent}, ${MessageItem} {
@@ -286,28 +288,144 @@ const TabContent = styled.div`
   }
 `;
 
-const SideBarButton = styled.button<{ showSideBar }>`
+const SideBarButton = styled.button<{ showSideBar, isRTL: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: #e0e1e6;
-  border-radius: 5px;
-  padding: 0.3rem;
+  border: 1px solid #e0e1e6;
+  background: white;
+  border-radius: ${({ isRTL }) => (isRTL ? "0px 7px 7px 0px" : "7px 0px 0px 7px")};
+  padding: 5px 0px 2px 0px;
   cursor: pointer;
   position: absolute;
-  top: 2rem;
-  inset-inline-start: ${({ showSideBar }) => (showSideBar ? "0" : "-1rem")};
+  top: 4.5rem;
+  inset-inline-start: ${({ showSideBar }) => (showSideBar ? "-14px" : "0")};
   z-index: 10;
+  border-inline-end: none;
+
+  &:hover {
+    background: #f5f5f5;
+  }
 `;
 const SideBarContainer = styled.div`
   position: relative;
 `;
 const SideBarContent = styled.div<{ showSideBar }>`
+  padding: 0 8px;
   width: ${({ showSideBar }) => (showSideBar ? "100%" : "0")};
   transform: ${({ showSideBar }) =>
     showSideBar ? "none" : "translateX(-1.5rem)"};
   transition: all 0.3s ease-in-out;
+`;
+
+const SideBarSection = styled.section`
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 290px;
+  background: ${colors.colorWhite};
+`;
+
+const RoundedItem = styled.div`
+  border-radius: 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+  // background: #FFF;
+  // box-shadow: 0 4px 12px ${rgba(colors.shadowPrimary, 0.1)};
+`;
+
+const ContactItem = styled.div`
+  padding: 0px 20px 8px 20px;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-inline-start: .25rem;
+`;
+
+const AssignSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
+`;
+
+const AssignLabel = styled.div`
+  font-size: ${typography.fontSizes.md};
+  color: ${modernColors.textSecondary};
+`;
+
+const AssignButton = styled.div<{ $hasAssignee: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
+  padding: ${spacing.xs} ${props => props.$hasAssignee ? spacing.xs : spacing.md};
+  background-color: ${modernColors.messageBackground};
+  border-radius: ${borderRadius.md};
+  cursor: pointer;
+  transition: all ${transitions.fast};
+  
+  &:hover {
+    background-color: ${modernColors.hover};
+  }
+  
+  span {
+    color: ${modernColors.textPrimary};
+    font-weight: ${typography.fontWeights.medium};
+  }
+  
+  i {
+    color: ${modernColors.textSecondary};
+    font-size: 12px;
+  }
+`;
+
+const ParticipantsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
+  margin-left: ${spacing.md};
+`;
+
+const TagsContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.sm};
+  
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: ${spacing.xs};
+  }
+`;
+
+const TagButton = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.xs};
+  padding: ${spacing.xs} ${spacing.md};
+  background-color: ${modernColors.messageBackground};
+  border-radius: ${borderRadius.md};
+  cursor: pointer;
+  transition: all ${transitions.fast};
+  height: 30px;
+  
+  &:hover {
+    background-color: ${modernColors.hover};
+  }
+  
+  i {
+    color: ${modernColors.textSecondary};
+    font-size: 12px;
+  }
+`;
+
+const ConversationActionSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${spacing.md};
+  padding: 0 10px;
+  margin-bottom: 10px;
 `;
 
 export {
@@ -317,9 +435,19 @@ export {
   FlexRow,
   FlexItem,
   SectionContainer,
+  SideBarSection,
   NoteFormContainer,
   ActivityLogContent,
   BasicInfo,
   SidebarCollapse,
   TabContent,
+  RoundedItem,
+  ContactItem,
+  AssignSection,
+  AssignLabel,
+  AssignButton,
+  ParticipantsContainer,
+  TagsContainer,
+  TagButton,
+  ConversationActionSection
 };

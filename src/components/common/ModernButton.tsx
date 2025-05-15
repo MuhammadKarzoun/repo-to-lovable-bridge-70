@@ -16,7 +16,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children?: React.ReactNode;
 }
 
-const StyledButton = styled.button<{
+const StyledModernButton= styled.button<{
   $variant: ButtonVariant;
   $size: ButtonSize;
   $hasIcon: boolean;
@@ -49,7 +49,7 @@ const StyledButton = styled.button<{
       sm: {
         fontSize: typography.fontSizes.sm,
         padding: '6px 12px',
-        height: '32px',
+        height: '30px',
       },
       md: {
         fontSize: typography.fontSizes.md,
@@ -171,7 +171,7 @@ const ModernButton: React.FC<ButtonProps> = ({
   const hasIcon = !!icon;
   
   return (
-    <StyledButton
+    <StyledModernButton
       $variant={variant}
       $size={size}
       $hasIcon={hasIcon}
@@ -185,7 +185,7 @@ const ModernButton: React.FC<ButtonProps> = ({
       {!isLoading && hasIcon && iconPosition === 'left' && <Icon icon={icon} />}
       {children}
       {!isLoading && hasIcon && iconPosition === 'right' && <Icon icon={icon} />}
-    </StyledButton>
+    </StyledModernButton>
   );
 };
 
