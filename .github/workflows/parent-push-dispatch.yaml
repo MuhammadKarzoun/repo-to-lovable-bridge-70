@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main # or any branch you want to listen to
+      - dev 
 
 jobs:
   notify-parent:

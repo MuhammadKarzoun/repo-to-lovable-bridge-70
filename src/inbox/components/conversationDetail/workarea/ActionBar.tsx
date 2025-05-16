@@ -134,6 +134,7 @@ type Props = {
 
 export default function ActionBar({ currentConversation, toggle }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   const { kind } = currentConversation.integration;
   const participatedUsers = currentConversation.participatedUsers || [];
