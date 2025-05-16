@@ -18,6 +18,7 @@ type Props = {
   brandId?: string;
   attachments: any[];
   content: string;
+  disabled?: boolean;
 };
 
 type FinalProps = {
