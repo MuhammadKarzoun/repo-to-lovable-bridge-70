@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import type { AudioRecorderProps } from './types';
 import { Waveform } from './Waveform';
@@ -33,6 +32,10 @@ export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
       streamRef.current?.getTracks().forEach(track => track.stop());
     };
   }, [audioUrl]);
+
+  useEffect(() => {
+    startRecording()
+  }, []);
 
   const startRecording = async () => {
     try {
@@ -104,7 +107,7 @@ export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
               yield file;
             },
           },
-          beforeUpload: () => {},
+          beforeUpload: () => { },
           afterUpload: ({ status, response }) => {
             if (status === 'ok') {
               onSend({
@@ -132,14 +135,14 @@ export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="flex flex-col gap-3 w-full bg-white rounded-lg p-4 shadow-lg border border-gray-100"
+      className="w-full"
     >
       {error && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-red-600 bg-red-50 p-2 rounded-md"
@@ -179,41 +182,19 @@ export const VoiceRecorder: React.FC<AudioRecorderProps> = ({
               isPaused={isPaused}
               analyser={analyser.current}
             />
-            <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-              <RecordingTimer duration={duration} maxDuration={maxDuration} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <AudioControls
                 isRecording={isRecording}
                 isPaused={isPaused}
                 duration={duration}
                 onStartRecording={startRecording}
                 onStopRecording={stopRecording}
-                onPauseRecording={() => {}}
-                onResumeRecording={() => {}}
+                onPauseRecording={() => { }}
+                onResumeRecording={() => { }}
                 onCancel={handleCancel}
               />
+              <RecordingTimer duration={duration} maxDuration={maxDuration} />
             </div>
-          </motion.div>
-        )}
-
-        {!isRecording && !audioUrl && (
-          <motion.div
-            key="start"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="flex items-center justify-between bg-gray-50 p-4 rounded-lg"
-          >
-            <span className="text-gray-500 font-medium">Click the microphone to start recording</span>
-            <AudioControls
-              isRecording={isRecording}
-              isPaused={isPaused}
-              duration={duration}
-              onStartRecording={startRecording}
-              onStopRecording={stopRecording}
-              onPauseRecording={() => {}}
-              onResumeRecording={() => {}}
-              onCancel={handleCancel}
-            />
           </motion.div>
         )}
 

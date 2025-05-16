@@ -107,13 +107,7 @@ const LeftSidebar: React.FC<Props> = (props) => {
     props.config?.showAddition || true
   );
   const [counts, setItemCounts] = useState<any>({});
-  const [searchValue, setSearchValue] = useState<string>("");
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
-    // Here you would typically implement search functionality
-  };
 
   const renderTrigger = (text: string) => {
     return (
@@ -181,15 +175,6 @@ const LeftSidebar: React.FC<Props> = (props) => {
             <Icon icon="subject" />
           </Tip>
         </ActionIconContainer>
-        {/* <SearchInput>
-          <Icon icon="search" />
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            value={searchValue}
-            onChange={handleSearchChange}
-          />
-        </SearchInput> */}
         <Search />
       </div>
     );
@@ -231,7 +216,7 @@ const LeftSidebar: React.FC<Props> = (props) => {
           </div>
           <ScrollContent>
             <FilterToggler
-              groupText="Channels"
+              groupText="Teams"
               icon="users-alt"
               toggleName="showChannels"
               manageUrl="/settings/channels"

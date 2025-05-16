@@ -18,10 +18,11 @@ type Props = {
   brands: IBrand[];
   attachments?: IAttachment[];
   content?: string;
+  disabled?: boolean;
 };
 
 const ResponseTemplate = (props: Props) => {
-  const { brands, content, brandId, attachments } = props;
+  const { brands, content, brandId, attachments, disabled } = props;
 
   const saveTrigger = (
     <ActionIconContainer>
@@ -46,7 +47,12 @@ const ResponseTemplate = (props: Props) => {
         trigger={
           <ActionIconContainer>
             <Tip placement="top" text={__('Response template')}>
-              <Icon icon="file-bookmark-alt" />
+              <Button
+                btnStyle='success'
+                size='small'
+                icon='file-bookmark-alt'
+                disabled={disabled}>
+              </Button>
             </Tip>
           </ActionIconContainer>
         }

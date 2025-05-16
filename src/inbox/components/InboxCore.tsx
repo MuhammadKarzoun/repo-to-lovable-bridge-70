@@ -33,27 +33,10 @@ type Props = {
 };
 
 const Inbox = (props: Props) => {
-  const { currentConversationId, queryParams, msg, currentUserId } = props;
-
-  const menuInbox = [
-    { title: "Team Inbox", link: "/inbox/index" }, 
-    { title: "My tasks", link: `/taks?assignedUserIds=${currentUserId}` }, 
-    { title: "My tickets", link: `/ticket?assignedUserIds=${currentUserId}` }
-  ];
-  
-  const ReportsFormButton = loadDynamicComponent("reportsCommonFormButton", {
-    serviceName: "inbox",
-    reportTemplateType: "inbox",
-    ...props,
-  });
+  const { currentConversationId, queryParams, msg } = props;
 
   return (
     <ModernHeightedWrapper>
-      {/* <Header
-        title={"Conversation"}
-        queryParams={queryParams}
-        submenu={[]}
-      /> */}
       <ModernContents>
         <Sidebar
           queryParams={queryParams}

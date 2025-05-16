@@ -5,13 +5,8 @@ import styled from 'styled-components';
 import { modernColors, borderRadius, spacing, typography, transitions, shadows } from '../../../../styles/theme';
 
 import { IConversation } from '@octobots/ui-inbox/src/inbox/types';
-import AssignBoxPopover from '../../assignBox/AssignBoxPopover';
-import Tagger from '../../../containers/Tagger';
 import Resolver from '../../../containers/Resolver';
 import Icon from '@octobots/ui/src/components/Icon';
-import Avatar from '../../../../components/common/Avatar';
-import ModernButton from '@octobots/ui-inbox/src/common/ModernButton';
-import Tags from '@octobots/ui/src/components/Tags';
 
 import asyncComponent from '@octobots/ui/src/components/AsyncComponent';
 import Button from '@octobots/ui/src/components/Button';
@@ -75,42 +70,6 @@ const ActionBarSection = styled.div`
   gap: ${spacing.md};
 `;
 
-const AssignSection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${spacing.sm};
-`;
-
-const AssignLabel = styled.div`
-  font-size: ${typography.fontSizes.md};
-  color: ${modernColors.textSecondary};
-`;
-
-const AssignButton = styled.div<{ $hasAssignee: boolean }>`
-  display: flex;
-  align-items: center;
-  gap: ${spacing.sm};
-  padding: ${spacing.xs} ${props => props.$hasAssignee ? spacing.xs : spacing.md};
-  background-color: ${modernColors.messageBackground};
-  border-radius: ${borderRadius.md};
-  cursor: pointer;
-  transition: all ${transitions.fast};
-  
-  &:hover {
-    background-color: ${modernColors.hover};
-  }
-  
-  span {
-    color: ${modernColors.textPrimary};
-    font-weight: ${typography.fontWeights.medium};
-  }
-  
-  i {
-    color: ${modernColors.textSecondary};
-    font-size: 12px;
-  }
-`;
-
 const ParticipantsContainer = styled.div`
   display: flex;
   align-items: center;
@@ -118,77 +77,10 @@ const ParticipantsContainer = styled.div`
   margin-left: ${spacing.md};
 `;
 
-const TagsContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${spacing.sm};
-  
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: ${spacing.xs};
-  }
-`;
-
-const TagButton = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${spacing.xs};
-  padding: ${spacing.xs} ${spacing.md};
-  background-color: ${modernColors.messageBackground};
-  border-radius: ${borderRadius.md};
-  cursor: pointer;
-  transition: all ${transitions.fast};
-  height: 30px;
-  
-  &:hover {
-    background-color: ${modernColors.hover};
-  }
-  
-  i {
-    color: ${modernColors.textSecondary};
-    font-size: 12px;
-  }
-`;
-
 const ActionButtonsContainer = styled.div`
   display: flex;
   align-items: center;
   gap: ${spacing.sm};
-`;
-
-const ActionButton = styled.button<{ $variant?: 'primary' | 'secondary' | 'default' }>`
-  display: flex;
-  align-items: center;
-  gap: ${spacing.xs};
-  padding: ${spacing.xs} ${spacing.md};
-  background-color: ${props =>
-    props.$variant === 'primary' ? modernColors.primary :
-      props.$variant === 'secondary' ? modernColors.secondary :
-        modernColors.messageBackground
-  };
-  color: ${props =>
-    (props.$variant === 'primary' || props.$variant === 'secondary') ? 'white' :
-      modernColors.textPrimary
-  };
-  border: none;
-  border-radius: ${borderRadius.md};
-  font-size: ${typography.fontSizes.md};
-  font-weight: ${typography.fontWeights.medium};
-  cursor: pointer;
-  transition: all ${transitions.fast};
-  
-  &:hover {
-    background-color: ${props =>
-    props.$variant === 'primary' ? '#1a85e0' :
-      props.$variant === 'secondary' ? '#d9a300' :
-        modernColors.hover
-  };
-  }
-  
-  i {
-    font-size: 14px;
-  }
 `;
 
 const ExpandButton = styled.button<{ $isExpanded: boolean }>`
@@ -245,42 +137,12 @@ export default function ActionBar({ currentConversation, toggle }: Props) {
   const [isOpen, setIsOpen] = useState(true);
 
   const { kind } = currentConversation.integration;
-  const tags = currentConversation.tags || [];
-  const assignedUser = currentConversation.assignedUser;
   const participatedUsers = currentConversation.participatedUsers || [];
   const readUsers = currentConversation.readUsers || [];
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
-
-  const tagTrigger = (
-    <TagButton id='conversationTags'>
-      {tags.length ? (
-        <Tags
-          tags={tags}
-          limit={1}
-        />
-      ) : (
-        <span>{__('Add tags')}</span>
-      )}
-      <Icon icon='angle-down' />
-    </TagButton>
-  );
-
-  const assignTrigger = (
-    <AssignButton
-      id='conversationAssignTrigger'
-      $hasAssignee={!!assignedUser}
-    >
-      {assignedUser && assignedUser._id ? (
-        <Avatar user={assignedUser} size={28} />
-      ) : (
-        <span>{__('Assign')}</span>
-      )}
-      <Icon icon='angle-down' />
-    </AssignButton>
-  );
 
   const renderParticipators = () => {
     if (!participatedUsers || participatedUsers.length === 0) {
@@ -369,12 +231,6 @@ export default function ActionBar({ currentConversation, toggle }: Props) {
         </ActionBarSection>
 
         <ActionBarSection>
-          {/* <TagsContainer>
-            <Tagger
-              targets={[currentConversation]}
-              trigger={tagTrigger}
-            />
-          </TagsContainer> */}
 
           <ActionButtonsContainer>
             {renderConvertButton()}
