@@ -585,8 +585,8 @@ const RespondBox = (props: Props) => {
 
   function renderButtons() {
     const integration = conversation.integration || ({} as IIntegration);
-    const disabled =
-      integration.kind.includes("nylas") || integration.kind === "gmail";
+    const disabled = integration.kind.includes("nylas") || integration.kind === "gmail";
+    const { isInactive, isHiddenDynamicMask, isInternal } = state;
 
     return (
       <EditorActions>
@@ -597,17 +597,23 @@ const RespondBox = (props: Props) => {
 
           <ActionIconContainer>
             <Tip text={__("Record audio")}>
-              <Icon
-                icon="microphone-2"
-                onClick={() => setState({ ...state, isActiveRecord: true })}
-              />
+              <Button
+                btnStyle='success'
+                size='small'
+                icon='microphone-2'
+                disabled={!isInternal && !isHiddenDynamicMask && isInactive}
+                onClick={() => setState({ ...state, isActiveRecord: true })}>
+              </Button>
             </Tip>
           </ActionIconContainer>
 
           <ActionIconContainer>
             <Tip text={__("Attach file")}>
               <Icon icon="paperclip" />
-              <input type="file" onChange={handleFileInput} multiple={true} />
+              <input type="file"
+                disabled={!isInternal && !isHiddenDynamicMask && isInactive}
+                onChange={handleFileInput}
+                multiple={true} />
             </Tip>
           </ActionIconContainer>
 
@@ -616,12 +622,14 @@ const RespondBox = (props: Props) => {
             attachments={state.attachments}
             content={content}
             onSelect={onSelectTemplate}
+            disabled={!isInternal && !isHiddenDynamicMask && isInactive}
           />
 
           {conversation.integration.kind == "whatsapp" && (
             <ActionIconContainer>
               <WhatsappTemplates
                 conversation={conversation}
+                disabled={!isInternal && !isHiddenDynamicMask && isInactive}
                 buttonFrom="inbox"
                 onClose={() => setIsModalOpen(false)}
               />
@@ -629,6 +637,7 @@ const RespondBox = (props: Props) => {
           )}
           <Button
             onClick={onSendDebouncedClickHandler}
+            disabled={!isInternal && !isHiddenDynamicMask && isInactive}
             btnStyle="success"
             size="small"
             icon="message"

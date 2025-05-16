@@ -329,8 +329,8 @@ const SideBarSection = styled.section`
 `;
 
 const RoundedItem = styled.div`
-  border-radius: 12px;
-  margin-bottom: 8px;
+  border-radius: 10px;
+  //margin-bottom: 8px;
   border: 1px solid #e5e7eb;
   // background: #FFF;
   // box-shadow: 0 4px 12px ${rgba(colors.shadowPrimary, 0.1)};
@@ -364,6 +364,8 @@ const AssignButton = styled.div<{ $hasAssignee: boolean }>`
   border-radius: ${borderRadius.md};
   cursor: pointer;
   transition: all ${transitions.fast};
+  justify-content: space-between;
+  height: 34px;
   
   &:hover {
     background-color: ${modernColors.hover};
@@ -409,23 +411,28 @@ const TagButton = styled.div`
   cursor: pointer;
   transition: all ${transitions.fast};
   height: 30px;
+  color: ${colors.colorPrimary};
+  width: max-content;
   
   &:hover {
     background-color: ${modernColors.hover};
-  }
-  
-  i {
-    color: ${modernColors.textSecondary};
-    font-size: 12px;
   }
 `;
 
 const ConversationActionSection = styled.div`
   display: flex;
   align-items: center;
-  gap: ${spacing.md};
   padding: 0 10px;
-  margin-bottom: 10px;
+
+  .relative > button {
+    width: 100% !important; 
+  }
+
+  [id^="headlessui-popover-panel-"] {
+    width: max-content !important;
+    border-radius: 8px;
+    padding: 5px;
+  }
 `;
 
 export {

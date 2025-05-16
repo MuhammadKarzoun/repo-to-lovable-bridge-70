@@ -5,7 +5,7 @@ import type { WaveformProps } from './types';
 
 const Canvas = styled.canvas`
   width: 100%;
-  height: 64px;
+  height: 50px;
   border-radius: 0.75rem;
   background: linear-gradient(to right, #e5e7eb, #f3f4f6);
 `;
@@ -91,7 +91,7 @@ export const Waveform: React.FC<WaveformProps> = ({ analyser, isRecording, isPau
       <Canvas
         ref={canvasRef}
         width={300}
-        height={64}
+        height={50}
       />
     </WaveformContainer>
   );

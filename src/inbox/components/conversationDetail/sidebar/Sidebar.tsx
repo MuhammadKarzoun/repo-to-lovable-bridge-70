@@ -38,6 +38,7 @@ import AssignBoxPopover from "../../assignBox/AssignBoxPopover";
 import Avatar from "../../../../components/common/Avatar";
 import Tagger from "../../../containers/Tagger";
 import { FormLabel } from "@octobots/ui/src/components/form/styles";
+import { colors } from "@octobots/ui/src/styles";
 
 const ActionSection = asyncComponent(
   () =>
@@ -192,7 +193,7 @@ type IndexState = {
   currentTab: string;
   currentSubTab: string;
   showSideBar?: boolean;
-  customerMenu: any[];
+  inboxWidgets: any[];
 };
 
 interface IRenderData {
@@ -210,7 +211,13 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
       currentTab: "customer",
       currentSubTab: "details",
       showSideBar: true,
-      customerMenu: [
+      inboxWidgets: [
+        {
+          _id: "DetailsInfo",
+        },
+        {
+          _id: "ConversationActions",
+        },
         {
           _id: "CustomFields",
         },
@@ -246,7 +253,10 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
         },
         {
           _id: "PortableTasks",
-        }
+        },
+        {
+          _id: "conversationDetailSidebar",
+        },
       ],
     };
   }
@@ -261,10 +271,12 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
 
   renderTrackedData = ({ customer, kind, toggleSection }: IRenderData) => {
     return (
-      <TrackedDataSection
-        customer={customer}
-        collapseCallback={toggleSection}
-      />
+      <RoundedItem>
+        <TrackedDataSection
+          customer={customer}
+          collapseCallback={toggleSection}
+        />
+      </RoundedItem>
     );
   };
 
@@ -277,19 +289,24 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
     if (!(kind === "messenger" || kind === "form")) {
       return null;
     }
+    if (!fields || fields.length === 0) {
+      return null;
+    }
 
     return (
-      <DevicePropertiesSection
-        customer={customer}
-        fields={fields}
-        collapseCallback={toggleSection}
-        isDetail={false}
-        deviceFieldsVisibility={this.props.deviceVisibility}
-      />
+      <RoundedItem>
+        <DevicePropertiesSection
+          customer={customer}
+          fields={fields}
+          collapseCallback={toggleSection}
+          isDetail={false}
+          deviceFieldsVisibility={this.props.deviceVisibility}
+        />
+      </RoundedItem>
     );
   };
 
-  renderTabContent() {
+  renderTabContent(item) {
     const {
       currentUser,
       taggerRefetchQueries,
@@ -302,24 +319,16 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
       conversationFields,
       customerFields,
     } = this.props;
-    //const { _id } = item;
+    const { _id } = item;
 
     const { kind = "" } = customer.integration || {};
     const tags = conversation.tags || [];
     const assignedUser = conversation.assignedUser;
-    const participatedUsers = conversation.participatedUsers || [];
-    const readUsers = conversation.readUsers || [];
 
     const tagTrigger = (
       <TagButton id='conversationTags'>
-        {tags.length ? (
-          <Tags
-            tags={tags}
-          />
-        ) : (
-          <span>{__('Add tags')}</span>
-        )}
-        <Icon icon='angle-down' />
+        <Icon icon='plus' color={colors.colorPrimary} size={11} />
+        <span>{__('Add tags')}</span>
       </TagButton>
     );
 
@@ -329,316 +338,227 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
         $hasAssignee={!!assignedUser}
       >
         {assignedUser && assignedUser._id ? (
-          <Avatar user={assignedUser} size={28} />
+          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <Avatar user={assignedUser} size={26} />
+            <span>{assignedUser?.details?.fullName}</span>
+          </div>
         ) : (
-          <span>{__('Assign')}</span>
+          <span>{__('None')}</span>
         )}
         <Icon icon='angle-down' />
       </AssignButton>
     );
 
-    const renderParticipators = () => {
-      if (!participatedUsers || participatedUsers.length === 0) {
-        return null;
-      }
+    const conversationActions = (
+      <RoundedItem>
+        <Box
+          title={__("Conversation Actions")}
+          name="showConversationActions"
+          callback={toggleSection}
+        >
+          <ConversationActionSection>
+            <FormGroup>
+              <FormLabel>
+                {__("Assign to user")}
+              </FormLabel>
+              <AssignBoxPopover
+                targets={[conversation]}
+                trigger={assignTrigger}
+              />
+            </FormGroup>
+          </ConversationActionSection>
 
-      return (
-        <ParticipantsContainer>
-          <Participators
-            participatedUsers={participatedUsers}
-            limit={3}
-          />
-        </ParticipantsContainer>
-      );
-    };
+          <ConversationActionSection>
+            <FormGroup>
+              <FormLabel>
+                {__("Conversation Tags")}
+              </FormLabel>
+              <TagsContainer>
+                <Tagger
+                  targets={[conversation]}
+                  trigger={tagTrigger}
+                />
+                <Tags tags={tags} />
+              </TagsContainer>
+            </FormGroup>
+          </ConversationActionSection>
+        </Box>
+      </RoundedItem>
+    )
 
-    const renderReadUsers = () => {
-      if (
-        !['facebook-messenger', 'whatsapp', 'instagram-messenger'].includes(kind) ||
-        !readUsers ||
-        readUsers.length === 0 ||
-        participatedUsers.length > 0
-      ) {
-        return null;
-      }
-
-      return (
-        <ParticipantsContainer>
-          <Participators
-            participatedUsers={readUsers}
-            limit={3}
-          />
-        </ParticipantsContainer>
-      );
-    };
-
-    const renderDynamicComponents = (): JSX.Element[] => {
-      const components: JSX.Element[] = [];
-
-      // Add dynamic components
-      const dynamicComponent = loadDynamicComponent('inboxConversationDetailActionBar', {
-        conversation: conversation,
+    const conversationDetailSidebar = () => {
+      const component = loadDynamicComponent("conversationDetailSidebar", {
+        conversation,
+        customer,
+        customerId: customer._id,
+        contentType: "inbox:conversations",
+        contentTypeId: conversation._id,
       });
 
-      if (dynamicComponent) {
-        components.push(dynamicComponent);
+      if (component) {
+        return (
+          <RoundedItem>
+            {component}
+          </RoundedItem>
+        );
       }
 
-      // Add Facebook Post component
-      if (kind === 'facebook-post') {
-        components.push(<Post key="facebook-post" conversation={conversation} />);
-      }
+      return null;
+    }
 
-      // Add Instagram Post component
-      if (kind === 'instagram-post') {
-        components.push(<PostInstagram key="instagram-post" conversation={conversation} />);
-      }
-
-      return components;
-    };
-
-    // switch (_id) {
-    //   case "CustomFields":
-    //     return (
-    //       <RoundedItem>
-    //         <CustomFieldsSection
-    //           loading={loading}
-    //           customer={customer}
-    //           isDetail={false}
-    //           collapseCallback={toggleSection}
-    //         />
-    //       </RoundedItem>
-    //     );
-    //   case "ConversationDetails":
-    //     return (
-    //       <RoundedItem>
-    //         <Box
-    //           title={__("Conversation details")}
-    //           name="showConversationDetails"
-    //           callback={toggleSection}
-    //         >
-    //           <ConversationDetails
-    //             conversation={conversation}
-    //             fields={conversationFields}
-    //           />
-    //           <ConversationCustomFieldsSection conversation={conversation} />
-    //         </Box>
-    //       </RoundedItem>
-    //     );
-    //   case "TaggerSection":
-    //     return (
-    //       <RoundedItem>
-    //         <TaggerSection
-    //           data={customer}
-    //           type="core:customer"
-    //           refetchQueries={taggerRefetchQueries}
-    //           collapseCallback={toggleSection}
-    //         />
-    //       </RoundedItem>
-    //     );
-    //   case "CompanySection":
-    //     return (
-    //       <RoundedItem>
-    //         <CompanySection
-    //           mainType="customer"
-    //           mainTypeId={customer._id}
-    //           collapseCallback={toggleSection}
-    //         />
-    //       </RoundedItem>
-    //     );
-    //   case "Contacts":
-    //     return (
-    //       <RoundedItem>
-    //         <Contacts
-    //           companies={customer.companies}
-    //           customerId={customer._id}
-    //           collapseCallback={toggleSection}
-    //         />
-    //       </RoundedItem>
-    //     );
-    //   case "TrackedDataSection":
-    //     return this.renderTrackedData({ customer, kind, toggleSection });
-    //   case "DevicePropertiesSection":
-    //     return this.renderDeviceProperties({
-    //       customer,
-    //       kind,
-    //       fields: deviceFields,
-    //       toggleSection,
-    //     });
-    //   case "WebsiteActivity":
-    //     return (
-    //       <RoundedItem>
-    //         <WebsiteActivity urlVisits={customer.urlVisits || []} />
-    //       </RoundedItem>
-    //     );
-    //   // case "PortableDeals":
-    //   //   return (
-    //   //     <PortableDeals
-    //   //       mainType="customer"
-    //   //       mainTypeId={customer._id}
-    //   //     />
-    //   //   );
-    //   // case "PortablePurchases":
-    //   //   return (
-    //   //     <PortablePurchases
-    //   //       mainType="customer"
-    //   //       mainTypeId={customer._id}
-    //   //     />
-    //   //   );
-    //   // case "PortableTickets":
-    //   //   return (
-    //   //     <PortableTickets
-    //   //       mainType="customer"
-    //   //       mainTypeId={customer._id}
-    //   //     />
-    //   //   );
-    //   // case "PortableTasks":
-    //   //   return (
-    //   //     <PortableTasks
-    //   //       mainType="customer"
-    //   //       mainTypeId={customer._id}
-    //   //     />
-    //   //   );
-    //   default:
-    //     return null;
-    // }
-
-    return (
-      <>
-        <RoundedItem>
-          <Box
-            title={__("Conversation Actions")}
-            name="showConversationActions"
-            callback={toggleSection}
-          >
-            <ConversationActionSection>
-              <AssignSection>
-                <AssignLabel>{__('Assign to')}:</AssignLabel>
-                <AssignBoxPopover
-                  targets={[conversation]}
-                  trigger={assignTrigger}
-                />
-              </AssignSection>
-
-              {/* {renderParticipators()}
-              {renderReadUsers()}
-              {renderDynamicComponents()} */}
-            </ConversationActionSection>
-
-            <ConversationActionSection>
-              <FormGroup>
-                <FormLabel>
-                  {__("Conversation Tags")}
-                </FormLabel>
-                <TagsContainer>
-                  <Tagger
-                    targets={[conversation]}
-                    trigger={tagTrigger}
-                  />
-                </TagsContainer>
-              </FormGroup>
-            </ConversationActionSection>
-          </Box>
-        </RoundedItem>
-
-        <RoundedItem>
-          <Box
-            title={__("Conversation details")}
-            name="showConversationDetails"
-            callback={toggleSection}
-          >
-            <ConversationDetails
-              conversation={conversation}
-              fields={conversationFields}
+    switch (_id) {
+      case "DetailsInfo":
+        if (!customerFields || customerFields.length == 0) return null;
+        return (
+          <RoundedItem>
+            <Box
+              title={__("Details info")}
+              name="showDetailsInfo"
+              callback={toggleSection}
+            >
+              <DetailInfo
+                customer={customer}
+                fieldsVisibility={customerVisibility}
+                fields={customerFields}
+                isDetail={false}
+              />
+            </Box>
+          </RoundedItem>
+        )
+      case "ConversationActions":
+        return conversationActions;
+      case "CustomFields":
+        return (
+          <RoundedItem>
+            <CustomFieldsSection
+              loading={loading}
+              customer={customer}
+              isDetail={false}
+              collapseCallback={toggleSection}
             />
-            <ConversationCustomFieldsSection conversation={conversation} />
-          </Box>
-        </RoundedItem>
-        <RoundedItem>
-          <TaggerSection
-            data={customer}
-            type="core:customer"
-            refetchQueries={taggerRefetchQueries}
-            collapseCallback={toggleSection}
-          />
-        </RoundedItem>
-
-        <RoundedItem>
-          <CompanySection
-            mainType="customer"
-            mainTypeId={customer._id}
-            collapseCallback={toggleSection}
-          />
-        </RoundedItem>
-        <RoundedItem>
-          <Contacts companies={customer.companies} customerId={customer._id} />
-        </RoundedItem>
-
-        <RoundedItem>
-          <CustomFieldsSection
-            loading={loading}
-            customer={customer}
-            isDetail={false}
-            collapseCallback={toggleSection}
-          />
-        </RoundedItem>
-
-        <RoundedItem>
-          {this.renderTrackedData({ customer, kind, toggleSection })}
-        </RoundedItem>
-
-        {this.renderDeviceProperties({
+          </RoundedItem>
+        );
+      case "ConversationDetails":
+        return (
+          <RoundedItem>
+            <Box
+              title={__("Conversation details")}
+              name="showConversationDetails"
+              callback={toggleSection}
+            >
+              <ConversationDetails
+                conversation={conversation}
+                fields={conversationFields}
+              />
+              <ConversationCustomFieldsSection conversation={conversation} />
+            </Box>
+          </RoundedItem>
+        );
+      case "TaggerSection":
+        return (
+          <RoundedItem>
+            <TaggerSection
+              data={customer}
+              type="core:customer"
+              refetchQueries={taggerRefetchQueries}
+              collapseCallback={toggleSection}
+            />
+          </RoundedItem>
+        );
+      case "CompanySection":
+        return (
+          <RoundedItem>
+            <CompanySection
+              mainType="customer"
+              mainTypeId={customer._id}
+              collapseCallback={toggleSection}
+            />
+          </RoundedItem>
+        );
+      case "Contacts":
+        return (
+          <RoundedItem>
+            <Contacts
+              companies={customer.companies}
+              customerId={customer._id}
+              collapseCallback={toggleSection}
+            />
+          </RoundedItem>
+        );
+      case "TrackedDataSection":
+        return this.renderTrackedData({ customer, kind, toggleSection });
+      case "DevicePropertiesSection":
+        return this.renderDeviceProperties({
           customer,
           kind,
           fields: deviceFields,
           toggleSection,
-        })}
-
-        <RoundedItem>
-          <WebsiteActivity urlVisits={customer.urlVisits || []} />
-        </RoundedItem>
-
-
-        {isEnabled("sales") && (
+        });
+      case "WebsiteActivity":
+        return (
           <RoundedItem>
-            <PortableDeals mainType="customer" mainTypeId={customer._id} />
+            <WebsiteActivity urlVisits={customer.urlVisits || []} />
           </RoundedItem>
-        )}
-
-        {isEnabled("purchases") && (
+        );
+      case "PortableDeals":
+        if (!isEnabled("sales")) {
+          return null;
+        }
+        return (
           <RoundedItem>
-            <PortablePurchases mainType="customer" mainTypeId={customer._id} />
+            <PortableDeals
+              mainType="customer"
+              mainTypeId={customer._id}
+            />
           </RoundedItem>
-        )}
-
-        {isEnabled("tickets") && (
+        );
+      case "PortablePurchases":
+        if (!isEnabled("purchases")) {
+          return null;
+        }
+        return (
           <RoundedItem>
-            <PortableTickets mainType="customer" mainTypeId={customer._id} />
+            <PortablePurchases
+              mainType="customer"
+              mainTypeId={customer._id}
+            />
           </RoundedItem>
-        )}
-
-        {isEnabled("tasks") && (
+        );
+      case "PortableTickets":
+        if (!isEnabled("tickets")) {
+          return null;
+        }
+        return (
           <RoundedItem>
-            <PortableTasks mainType="customer" mainTypeId={customer._id} />
+            <PortableTickets
+              mainType="customer"
+              mainTypeId={customer._id}
+            />
           </RoundedItem>
-        )}
-
-        {loadDynamicComponent("conversationDetailSidebar", {
-          conversation,
-          customer,
-          customerId: customer._id,
-          contentType: "inbox:conversations",
-          contentTypeId: conversation._id,
-        })}
-      </>
-    );
+        );
+      case "PortableTasks":
+        if (!isEnabled("tasks")) {
+          return null;
+        }
+        return (
+          <RoundedItem>
+            <PortableTasks
+              mainType="customer"
+              mainTypeId={customer._id}
+            />
+          </RoundedItem>
+        );
+      case "conversationDetailSidebar":
+        return conversationDetailSidebar();
+      default:
+        return null;
+    }
 
     //     <SidebarActivity
     //       currentUser={currentUser}
     //       customer={customer}
     //       currentSubTab={currentSubTab}
     //     />
-
   }
 
   renderMenuItem = (props: { _id: string }) => {
@@ -653,26 +573,26 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
 
   renderContents = () => {
     const onChangeFields = (menu) => {
-      this.setState({ ...this.state, customerMenu: menu });
+      this.setState({ ...this.state, inboxWidgets: menu });
     };
 
     return (
       <div>
         <SortableList
-          fields={this.state.customerMenu}
+          fields={this.state.inboxWidgets}
           child={this.renderMenuItem}
           onChangeFields={onChangeFields}
           showDragHandler={false}
           droppableId="property option fields"
           emptyMessage={"empty"}
+          fromInbox={true}
         />
       </div>
     );
   };
 
   renderContent() {
-    const { customer, customerFields, customerVisibility, toggleSection } = this.props;
-    console.log("🚀 ~ RightSidebar ~ renderContent ~ customerFields:", customerFields)
+    const { customer } = this.props;
 
     return (
       <>
@@ -686,23 +606,7 @@ class RightSidebar extends React.Component<IndexProps, IndexState> {
           <span>{(customer.primaryEmail) ? customer.primaryEmail : __("Not available")}</span>
         </ContactItem>
         <ActionSection customer={customer} />
-
-        {(customerFields && customerFields.length > 0) &&
-          <RoundedItem>
-            <Box
-              title={__("Details info")}
-              name="showDetailsInfo"
-              callback={toggleSection}
-            >
-              <DetailInfo
-                customer={customer}
-                fieldsVisibility={customerVisibility}
-                fields={customerFields}
-                isDetail={false}
-              />
-            </Box>
-          </RoundedItem>}
-        {this.renderTabContent()}
+        {this.renderContents()}
       </>
     );
   }

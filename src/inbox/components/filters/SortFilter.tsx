@@ -84,7 +84,7 @@ const SortFilter: React.FC<SortFilterProps> = ({ queryParams }) => {
       return `${field} ${direction}`;
     }
     
-    return 'Sort';
+    return '';
   };
 
   return (
