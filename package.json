@@ -1,6 +1,6 @@
 {
   "name": "@octobots/plugin-inbox-ui",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "scripts": {
     "start": "webpack serve --mode development",
     "build": "webpack --mode production"

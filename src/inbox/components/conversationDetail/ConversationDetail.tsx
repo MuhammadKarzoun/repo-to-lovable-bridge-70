@@ -15,10 +15,11 @@ import { IField } from "@octobots/ui/src/types";
 import React from "react";
 import Sidebar from "../../containers/conversationDetail/Sidebar";
 import SidebarLoader from "./sidebar/SidebarLoader";
-import WorkArea from "./workarea/WorkArea";
+import WorkArea from "./workarea/WorkArea"; // This is the simpler WorkArea component
 import styled from "styled-components";
 import { modernColors, borderRadius } from "../../../styles/theme";
 
+// ... keep existing code (styled components ModernMainContent, ModernContentBox)
 const ModernMainContent = styled(MainContent)`
   background-color: ${modernColors.contentBackground};
   border-radius: ${borderRadius.md};
@@ -38,6 +39,9 @@ type Props = {
   conversationFields?: IField[];
   refetchDetail: () => void;
   msg?: string;
+  connectionStatus?: 'connected' | 'disconnected' | 'connecting'; // Added to receive from container
+  // Added from ConversationDetail.tsx (container) pass-through for DmWorkArea
+  userDashboardApps?: { userDashboardApps: any[] }; 
 };
 
 type State = {
@@ -92,14 +96,14 @@ export default class ConversationDetail extends React.Component<Props, State> {
     if (
       current &&
       ncurrent &&
-      current.integration.kind !== ncurrent.integration.kind
+      current.integration?.kind !== ncurrent.integration?.kind // Added optional chaining for kind
     ) {
       resetDmWithQueryCache();
     }
   }
 
   renderContent() {
-    const { loading, currentConversation, msg } = this.props;
+    const { loading, currentConversation, msg, connectionStatus, userDashboardApps, refetchDetail } = this.props;
 
     const toggleSidebar = () => {
       this.setState({ isOpen: !this.state.isOpen })
@@ -148,13 +152,24 @@ export default class ConversationDetail extends React.Component<Props, State> {
 
         if (content) {
           if (currentConversation.integration.kind === "imap") {
-            return <DmWorkArea toggle={toggleSidebar} msg={msg} content={content} {...this.props} />;
+            return (
+              <DmWorkArea
+                currentConversation={currentConversation}
+                refetchDetail={refetchDetail}
+                msg={msg}
+                toggle={toggleSidebar}
+                content={content} // DmWorkArea takes content for imap
+                userDashboardApps={userDashboardApps}
+                connectionStatus={connectionStatus} // Pass connectionStatus
+              />
+            );
           }
 
           return (
             <WorkArea
               currentConversation={currentConversation}
               content={content}
+              toggle={toggleSidebar} // Pass toggle to simpler WorkArea as well
             />
           );
         }
@@ -165,11 +180,17 @@ export default class ConversationDetail extends React.Component<Props, State> {
         configName: "inboxDirectMessage",
       });
 
-      if (dmConfig) {
-        return <DmWorkArea toggle={toggleSidebar} msg={msg} {...this.props} dmConfig={dmConfig} />;
-      }
-
-      return <DmWorkArea toggle={toggleSidebar} msg={msg} {...this.props} />;
+      return (
+        <DmWorkArea
+          currentConversation={currentConversation}
+          refetchDetail={refetchDetail}
+          msg={msg}
+          toggle={toggleSidebar}
+          dmConfig={dmConfig}
+          userDashboardApps={userDashboardApps}
+          connectionStatus={connectionStatus} // Pass connectionStatus
+        />
+      );
     }
 
     return (

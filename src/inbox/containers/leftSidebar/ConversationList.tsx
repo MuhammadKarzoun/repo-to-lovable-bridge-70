@@ -6,13 +6,12 @@ import {
   IConversation,
 } from "@octobots/ui-inbox/src/inbox/types";
 import {
-  getSubdomain,
   router as routerUtils,
   withProps,
 } from "@octobots/ui/src/utils";
-import { queries, subscriptions } from "@octobots/ui-inbox/src/inbox/graphql";
+import { queries } from "@octobots/ui-inbox/src/inbox/graphql";
 
-import ConversationList from "../../components/leftSidebar/ConversationList";
+import ConversationListComponent from "../../components/leftSidebar/ConversationList";
 import { ConversationsTotalCountQueryResponse } from "@octobots/ui-inbox/src/inbox/types";
 import { IUser } from "@octobots/ui/src/auth/types";
 import { InboxManagementActionConsumer } from "../InboxCore";
@@ -41,40 +40,17 @@ type FinalProps = {
 
 const ConversationListContainer: React.FC<FinalProps> = (props) => {
   const {
-    currentUser,
-    queryParams,
-    counts,
     navigate,
     location,
     conversationsQuery,
     totalCountQuery,
-    updateCountsForNewMessage,
+    queryParams,
+    counts,
   } = props;
 
-  React.useEffect(() => {
-    if (!queryParams.isModalOpen) {
-      return conversationsQuery.subscribeToMore({
-        document: gql(subscriptions.conversationClientMessageInserted),
-        variables: {
-          userId: currentUser ? currentUser._id : null,
-        },
-        updateQuery: () => {
-          if (updateCountsForNewMessage) {
-            updateCountsForNewMessage();
-          }
-
-          conversationsQuery.refetch();
-          totalCountQuery.refetch();
-        },
-      });
-    }
-  }, [
-    queryParams.isModalOpen,
-    currentUser,
-    conversationsQuery,
-    totalCountQuery,
-    updateCountsForNewMessage,
-  ]);
+  // useEffect blocks for direct subscriptions (conversationClientMessageInserted, conversationChanged)
+  // were removed in previous phases. This component now relies on Apollo Client cache updates
+  // (triggered by useInboxRealtimeEvents or other mutations) to re-render the list.
 
   const getTotalCount = () => {
     let totalCount = totalCountQuery.conversationsTotalCount || 0;
@@ -103,7 +79,6 @@ const ConversationListContainer: React.FC<FinalProps> = (props) => {
 
   const conversations = conversationsQuery.conversations || [];
 
-  // on change conversation
   const onChangeConversation = (conversation: IConversation) => {
     if (navigate && location) {
       routerUtils.setParams(navigate, location, { _id: conversation._id });
@@ -144,23 +119,6 @@ const ConversationListContainer: React.FC<FinalProps> = (props) => {
     );
   };
 
-  React.useEffect(() => {
-    if (!queryParams.isModalOpen) {
-      return conversationsQuery.subscribeToMore({
-        document: gql(subscriptions.conversationChanged),
-        variables: {
-          _id: conversations.length ? conversations[0]._id : "",
-        },
-        updateQuery: () => {
-          conversationsQuery.refetch();
-        },
-        onError: (error) => {
-          console.error("Subscription error:", error);
-        },
-      });
-    }
-  }, [queryParams.isModalOpen, conversationsQuery, conversations]);
-
   const updatedProps = {
     ...props,
     onLoadMore,
@@ -170,7 +128,7 @@ const ConversationListContainer: React.FC<FinalProps> = (props) => {
     totalCount: getTotalCount(),
   };
 
-  return <ConversationList {...updatedProps} />;
+  return <ConversationListComponent {...updatedProps} />;
 };
 
 const ConversationListContainerWithRefetch = (props) => (

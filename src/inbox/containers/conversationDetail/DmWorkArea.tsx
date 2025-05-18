@@ -1,4 +1,5 @@
 import * as compose from "lodash.flowright";
+import React, { useState, useEffect } from "react";
 
 import {
   AddMessageMutationResponse,
@@ -13,47 +14,46 @@ import {
 import {
   mutations,
   queries,
-  subscriptions
 } from "@octobots/ui-inbox/src/inbox/graphql";
-import { sendDesktopNotification, withProps } from "@octobots/ui/src/utils";
+import { Alert, withProps } from "@octobots/ui/src/utils";
 
 import { AppConsumer } from "coreui/appContext";
-import DmWorkArea from "../../components/conversationDetail/workarea/DmWorkArea";
+import DmWorkAreaComponent from "../../components/conversationDetail/workarea/DmWorkArea";
 import { IUser } from "@octobots/ui/src/auth/types";
-import { NOTIFICATION_TYPE } from "../../constants";
-import React from "react";
+import { isConversationMailKind } from "@octobots/ui-inbox/src/inbox/utils";
+import { useInboxRealtimeEvents } from "../../hooks/useInboxRealtimeEvents";
 import { gql } from "@apollo/client";
 import { graphql } from "@apollo/client/react/hoc";
-import { isConversationMailKind } from "@octobots/ui-inbox/src/inbox/utils";
-import strip from "strip";
-import { Alert } from "@octobots/ui/src/utils";
 
 // messages limit
 let initialLimit = 10;
 
 type Props = {
   currentConversation: IConversation;
-  currentId?: string;
   refetchDetail: () => void;
   dmConfig?: DmConfig;
   content?: any;
   msg?: string;
   toggle?: () => void;
+  userDashboardApps?: { userDashboardApps: any[] }; 
+  connectionStatus?: 'connected' | 'disconnected' | 'connecting'; // Passed from WorkAreaWithHook
+  typingInfo?: string | null; // Passed from WorkAreaWithHook
 };
 
 type FinalProps = {
   currentUser: IUser;
-  messagesQuery: any;
-  messagesTotalCountQuery: any;
+  messagesQuery: any; // Specific type would be MessagesQueryResponse with dynamic key
+  messagesTotalCountQuery: any; // Specific type would be MessagesTotalCountQuery with dynamic key
 } & Props &
-  AddMessageMutationResponse
-  & UpdateMessageMutationResponse;
+  AddMessageMutationResponse &
+  UpdateMessageMutationResponse;
 
-type State = {
+// State for WorkArea class component
+type WorkAreaState = {
   loadingMessages: boolean;
-  typingInfo?: string;
   hideMask: boolean;
-  connectionStatus: 'connected' | 'disconnected' | 'connecting';
+  // Removed state related to direct WebSocket subscriptions like typingInfo, connectionStatus
+  // as these are now passed as props from WorkAreaWithHook.
 };
 
 const getQueryString = (
@@ -77,20 +77,30 @@ const getQueryResult = (queryResponse: object, countQuery?: boolean) => {
     ? "conversationMessagesTotalCount"
     : "conversationMessages";
 
+  // Handle cases where queryResponse might be null or undefined early
+  if (!queryResponse) {
+    return countQuery ? 0 : [];
+  }
+  
   for (const k of Object.keys(queryResponse)) {
     if (k.includes("ConversationMessages")) {
       key = k;
       break;
     }
   }
-
-  return queryResponse[key] || [];
+  
+  // Ensure a default return type if key is not found or value is nullish
+  return queryResponse[key] || (countQuery ? 0 : []);
 };
 
 const getQueryResultKey = (queryResponse: object, countQuery?: boolean) => {
   let key = countQuery
     ? "conversationMessagesTotalCount"
     : "conversationMessages";
+
+  if (!queryResponse) {
+    return key; // Return default key if queryResponse is null/undefined
+  }
 
   for (const k of Object.keys(queryResponse || {})) {
     if (k.includes("ConversationMessages")) {
@@ -102,295 +112,16 @@ const getQueryResultKey = (queryResponse: object, countQuery?: boolean) => {
   return key;
 };
 
-class WorkArea extends React.Component<FinalProps, State> {
-  // Fix 1: Use distinct variables for all subscriptions
-  private messageInsertedSubscription;
-  private messageStatusChangedSubscription;
-  private typingInfoSubscription;
-
-
-  constructor(props) {
+class WorkArea extends React.Component<FinalProps, WorkAreaState> {
+  constructor(props: FinalProps) {
     super(props);
 
     this.state = { 
       loadingMessages: false, 
-      typingInfo: "", 
       hideMask: false,
-      connectionStatus: 'connecting' 
+      // No initial state for typingInfo or connectionStatus here
     };
-
-    this.messageInsertedSubscription = null;
-    this.messageStatusChangedSubscription = null;
-    this.typingInfoSubscription = null;
   }
-
-  componentDidMount() {
-    // Set up initial subscriptions
-    this.setupSubscriptions();
-  }
-
-  componentWillUnmount() {
-    // Fix 3: Properly clean up subscriptions to prevent memory leaks
-    this.cleanupSubscriptions();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { currentUser } = this.props;
-    const { currentId, currentConversation } = nextProps;
-
-    // It is first time or subsequent conversation change
-    if (currentId !== this.props.currentId) {
-      console.log('[DmWorkArea] Conversation changed, updating subscriptions', { 
-        from: this.props.currentId, 
-        to: currentId 
-      });
-      
-      // Clean up existing subscriptions
-      this.cleanupSubscriptions();
-      
-      // Set up new subscriptions
-      this.setupSubscriptions(nextProps);
-    }
-  }
-
-  // Fix 1 & 3: Separate method for subscription setup with error handling
-  setupSubscriptions = (props = this.props) => {
-    const { currentId, currentConversation, messagesQuery, dmConfig, currentUser } = props;
-    
-    if (!currentId) {
-      console.log('[DmWorkArea] No conversation ID, skipping subscription setup');
-      return;
-    }
-
-    try {
-      console.log('[DmWorkArea] Setting up message inserted subscription', { conversationId: currentId });
-      // Message inserted subscription
-      this.messageInsertedSubscription = messagesQuery.subscribeToMore({
-        document: gql(subscriptions.conversationMessageInserted),
-        variables: { _id: currentId },
-        updateQuery: (prev, { subscriptionData }) => {
-          try {
-            if (!subscriptionData?.data) {
-              console.warn('[DmWorkArea] No subscription data received for message insert');
-              return prev;
-            }
-
-            console.log('[DmWorkArea] Message inserted subscription data', subscriptionData.data);
-            const message = subscriptionData.data.conversationMessageInserted;
-            const kind = currentConversation.integration.kind;
-
-            if (message.customerId && message.customerId.length > 0) {
-              this.setState({ hideMask: true });
-            }
-
-            if (!prev) {
-              return prev;
-            }
-
-            // current user"s message is being showed after insert message
-            // mutation. So to prevent from duplication we are ignoring current
-            // user"s messages from subscription
-            const isMessenger = kind === "messenger";
-
-            if (isMessenger && message.userId === currentUser._id) {
-              return prev;
-            }
-
-            if (currentId !== this.props.currentId) {
-              return prev;
-            }
-
-            const messages = getQueryResult(prev);
-
-            // Sometimes it is becoming undefined because of left sidebar query
-            if (!messages) {
-              return prev;
-            }
-
-            // check whether or not already inserted
-            const prevEntry = messages.find(m => m._id === message._id);
-
-            if (prevEntry) {
-              return prev;
-            }
-
-            // add new message to messages list
-            const next = {
-              ...prev,
-              [getListQueryName(dmConfig)]: [...messages, message]
-            };
-
-            // send desktop notification
-            sendDesktopNotification({
-              title: NOTIFICATION_TYPE[kind] || `You have a new ${kind} message`,
-              content: strip(message.content) || ""
-            });
-
-            return next;
-          } catch (error) {
-            console.error('[DmWorkArea] Error in message inserted subscription updateQuery', error);
-            return prev;
-          }
-        },
-        onError: (error) => {
-          // Fix 2: Add proper error handling
-          console.error('[DmWorkArea] Error in message inserted subscription', error);
-          this.setState({ connectionStatus: 'disconnected' });
-        }
-      });
-
-      console.log('[DmWorkArea] Setting up message status changed subscription', { conversationId: currentId });
-      // Message status changed subscription (separate variable)
-      this.messageStatusChangedSubscription = messagesQuery.subscribeToMore({
-        document: gql(subscriptions.conversationMessageStatusChanged),
-        variables: { _id: currentId },
-        updateQuery: (prev, { subscriptionData }) => {
-          try {
-            if (!subscriptionData?.data) {
-              console.warn('[DmWorkArea] No subscription data received for status change');
-              return prev;
-            }
-            
-            console.log('[DmWorkArea] Message status changed subscription data', subscriptionData.data);
-            const message = subscriptionData.data.conversationMessageStatusChanged;
-            const kind = currentConversation.integration.kind;
-
-            if (!prev) {
-              return prev;
-            }
-            
-            // current user"s message is being showed after insert message
-            // mutation. So to prevent from duplication we are ignoring current
-            // user"s messages from subscription
-            const isMessenger = kind === "messenger";
-
-            if (isMessenger && message.userId === currentUser._id) {
-              return prev;
-            }
-
-            if (currentId !== this.props.currentId) {
-              return prev;
-            }
-
-            const messages = getQueryResult(prev);
-
-            // Sometimes it is becoming undefined because of left sidebar query
-            if (!messages) {
-              return prev;
-            }
-
-            // check whether or not already inserted
-            const messageIndex = messages.findIndex((m) => m._id === message._id);
-
-            if (messageIndex === -1) {
-              return prev;
-            }
-
-            // Create a new messages array to ensure reactivity
-            const updatedMessages = [...messages];
-            updatedMessages[messageIndex] = { 
-              ...updatedMessages[messageIndex], 
-              status: message.status, 
-              errorMsg: message.errorMsg 
-            };
-
-            // add new message to messages list
-            const next = {
-              ...prev,
-              [getListQueryName(dmConfig)]: updatedMessages,
-            };
-
-            return next;
-          } catch (error) {
-            console.error('[DmWorkArea] Error in message status changed subscription updateQuery', error);
-            return prev;
-          }
-        },
-        onError: (error) => {
-          console.error('[DmWorkArea] Error in message status changed subscription', error);
-          this.setState({ connectionStatus: 'disconnected' });
-        }
-      });
-
-      console.log('[DmWorkArea] Setting up typing info subscription', { conversationId: currentId });
-      // Typing info subscription (separate variable)
-      this.typingInfoSubscription = messagesQuery.subscribeToMore({
-        document: gql(subscriptions.conversationClientTypingStatusChanged),
-        variables: { _id: currentId },
-        updateQuery: (
-          prev,
-          {
-            subscriptionData
-          }
-        ) => {
-          try {
-            if (!subscriptionData?.data) {
-              return prev;
-            }
-            
-            const { conversationClientTypingStatusChanged } = subscriptionData.data;
-            console.log('[DmWorkArea] Client typing status changed', conversationClientTypingStatusChanged);
-            
-            this.setState({
-              typingInfo: conversationClientTypingStatusChanged.text,
-              connectionStatus: 'connected'
-            });
-            
-            return prev;
-          } catch (error) {
-            console.error('[DmWorkArea] Error in typing info subscription updateQuery', error);
-            return prev;
-          }
-        },
-        onError: (error) => {
-          console.error('[DmWorkArea] Error in typing info subscription', error);
-          this.setState({ connectionStatus: 'disconnected' });
-        }
-      });
-      
-      this.setState({ connectionStatus: 'connected' });
-    } catch (error) {
-      console.error('[DmWorkArea] Error setting up subscriptions', error);
-      this.setState({ connectionStatus: 'disconnected' });
-    }
-  };
-
-  // Fix 3: Separate method to clean up subscriptions
-  cleanupSubscriptions = () => {
-    console.log('[DmWorkArea] Cleaning up subscriptions');
-    
-    // Safely unsubscribe from all subscriptions
-    if (this.messageInsertedSubscription) {
-      try {
-        this.messageInsertedSubscription();
-        console.log('[DmWorkArea] Unsubscribed from message inserted subscription');
-      } catch (error) {
-        console.error('[DmWorkArea] Error unsubscribing from message inserted subscription', error);
-      }
-      this.messageInsertedSubscription = null;
-    }
-
-    if (this.messageStatusChangedSubscription) {
-      try {
-        this.messageStatusChangedSubscription();
-        console.log('[DmWorkArea] Unsubscribed from message status changed subscription');
-      } catch (error) {
-        console.error('[DmWorkArea] Error unsubscribing from message status changed subscription', error);
-      }
-      this.messageStatusChangedSubscription = null;
-    }
-
-    if (this.typingInfoSubscription) {
-      try {
-        this.typingInfoSubscription();
-        console.log('[DmWorkArea] Unsubscribed from typing info subscription');
-      } catch (error) {
-        console.error('[DmWorkArea] Error unsubscribing from typing info subscription', error);
-      }
-      this.typingInfoSubscription = null;
-      this.setState({ typingInfo: "" });
-    }
-  };
 
   addMessage = ({
     variables,
@@ -403,7 +134,7 @@ class WorkArea extends React.Component<FinalProps, State> {
     callback?: (e?) => void;
     kind: string;
   }) => {
-    const { addMessageMutation, currentId, dmConfig } = this.props;
+    const { addMessageMutation, currentConversation, dmConfig } = this.props;
     // immediate ui update =======
     let update;
 
@@ -412,40 +143,48 @@ class WorkArea extends React.Component<FinalProps, State> {
         try {
           const message = conversationMessageAdd;
 
-          let messagesQuery = queries.conversationMessages;
+          let messagesQueryString = queries.conversationMessages; // default
 
           if (dmConfig) {
-            messagesQuery = getQueryString("messagesQuery", dmConfig);
+            messagesQueryString = getQueryString("messagesQuery", dmConfig);
           }
+          
+          const queryName = getListQueryName(dmConfig);
+
 
           const selector = {
-            query: gql(messagesQuery),
+            query: gql(messagesQueryString),
             variables: {
-              conversationId: currentId,
-              limit: initialLimit,
+              conversationId: currentConversation._id,
+              limit: initialLimit, // Ensure initialLimit is correctly scoped or passed
               skip: 0
             }
           };
 
           try {
-            cache.updateQuery(selector, data => {
-              if (!data) return {};
-              
-              const key = getQueryResultKey(data || {});
-              const messages = data ? data[key] : [];
-
-              // check duplications
-              if (messages.find(m => m._id === message._id)) {
-                return data;
-              }
-
-              return { ...data, [key]: [...messages, message] };
-            });
+             const dataInCache = cache.readQuery(selector);
+             if (dataInCache) {
+                const messages = dataInCache[queryName] || [];
+                 // check duplications
+                if (messages.find(m => m._id === message._id)) {
+                  return; // Do not update if message already exists
+                }
+                cache.writeQuery({
+                  ...selector,
+                  data: { ...dataInCache, [queryName]: [...messages, message] },
+                });
+             } else {
+                // If query is not in cache, it might be an issue with variables matching
+                // or it simply hasn't been fetched yet. Forcing a write might be risky
+                // without knowing the exact structure.
+                // For now, we'll assume if it's not there, the optimistic update might not apply cleanly.
+                console.warn('[DmWorkArea] Optimistic update: Query not found in cache for selector:', selector);
+             }
           } catch (e) {
-            console.error('[DmWorkArea] Error updating cache', e);
+            console.error('[DmWorkArea] Error reading/writing query from/to cache for optimistic update', e);
           }
         } catch (error) {
-          console.error('[DmWorkArea] Error in optimistic update', error);
+          console.error('[DmWorkArea] Error in optimistic update logic', error);
         }
       };
     }
@@ -455,10 +194,8 @@ class WorkArea extends React.Component<FinalProps, State> {
         console.log('[DmWorkArea] Message added successfully');
         if (callback) {
           callback();
-
-          // clear saved messages from storage
           localStorage.removeItem("replyToMessage");
-          localStorage.removeItem(currentId || "");
+          localStorage.removeItem(currentConversation._id || "");
         }
       })
       .catch(e => {
@@ -470,10 +207,10 @@ class WorkArea extends React.Component<FinalProps, State> {
   };
 
   loadMoreMessages = () => {
-    const { currentId, messagesTotalCountQuery, messagesQuery, dmConfig } =
+    const { currentConversation, messagesTotalCountQuery, messagesQuery, dmConfig } =
       this.props;
 
-    console.log('[DmWorkArea] Loading more messages', { conversationId: currentId });
+    console.log('[DmWorkArea] Loading more messages', { conversationId: currentConversation._id });
     
     try {
       const conversationMessagesTotalCount = getQueryResult(
@@ -492,7 +229,7 @@ class WorkArea extends React.Component<FinalProps, State> {
 
         messagesQuery.fetchMore({
           variables: {
-            conversationId: currentId,
+            conversationId: currentConversation._id,
             limit: 10,
             skip: conversationMessages.length
           },
@@ -518,10 +255,10 @@ class WorkArea extends React.Component<FinalProps, State> {
               }
 
               console.log('[DmWorkArea] Loaded more messages', { count: fetchedMessages.length });
-
+              const listQueryName = getListQueryName(dmConfig);
               return {
                 ...prev,
-                [getListQueryName(dmConfig)]: [
+                [listQueryName]: [ // Use dynamic list query name
                   ...fetchedMessages,
                   ...prevConversationMessages
                 ]
@@ -554,7 +291,7 @@ class WorkArea extends React.Component<FinalProps, State> {
       variables: { _id: id, content: content },
     })
       .then(() => {
-        if (action == "delete") Alert.success("You successfully deleted the message");
+        if (action === "delete") Alert.success("You successfully deleted the message");
         else Alert.success("You successfully updated the message");
       })
       .catch((e) => {
@@ -564,8 +301,9 @@ class WorkArea extends React.Component<FinalProps, State> {
   }
 
   render() {
-    const { loadingMessages, typingInfo, hideMask, connectionStatus } = this.state;
-    const { messagesQuery, msg } = this.props;
+    const { loadingMessages, hideMask } = this.state;
+    // typingInfo and connectionStatus are now received as props
+    const { messagesQuery, msg, typingInfo, connectionStatus } = this.props;
 
     const conversationMessages = getQueryResult(messagesQuery);
 
@@ -576,19 +314,36 @@ class WorkArea extends React.Component<FinalProps, State> {
       addMessage: this.addMessage,
       loading: messagesQuery.loading || loadingMessages,
       refetchMessages: messagesQuery.refetch,
-      typingInfo,
+      typingInfo, // Pass prop from WorkAreaWithHook
       hideMask,
-      connectionStatus
+      connectionStatus, // Pass prop from WorkAreaWithHook
     };
 
-    return <DmWorkArea updateMsg={this.updateMsg} msg={msg} {...updatedProps} />;
+    return <DmWorkAreaComponent updateMsg={this.updateMsg} msg={msg} {...updatedProps} />;
   }
 }
 
-const generateWithQuery = (props: Props) => {
-  const { dmConfig, currentConversation } = props;
-  const { integration } = currentConversation;
+const WorkAreaWithHook: React.FC<FinalProps> = (props) => {
+  const { currentUser, currentConversation } = props;
 
+  const messengerCustomerId =
+    currentConversation?.integration?.kind === "messenger" && currentConversation?.customer?._id
+      ? currentConversation.customer._id
+      : undefined;
+
+  // useInboxRealtimeEvents provides typingInfo and connectionStatus
+  const { typingInfo, connectionStatus } = useInboxRealtimeEvents({
+    currentUser,
+    currentConversationId: currentConversation._id,
+    messengerCustomerId,
+  });
+
+  // Pass typingInfo and connectionStatus as props to the WorkArea class component
+  return <WorkArea {...props} typingInfo={typingInfo} connectionStatus={connectionStatus} />;
+};
+
+const WithQueryAndHook = (props: Props & { currentUser: IUser }) => {
+  const { dmConfig, currentConversation } = props;
   let listQuery = queries.conversationMessages;
   let countQuery = queries.conversationMessagesTotalCount;
 
@@ -596,60 +351,59 @@ const generateWithQuery = (props: Props) => {
     listQuery = getQueryString("messagesQuery", dmConfig);
     countQuery = getQueryString("countQuery", dmConfig);
   }
+  
+  const ComposedComponent = compose(
+    graphql<
+      Props & { currentUser: IUser },
+      MessagesQueryResponse, // Replace 'any' with specific type if possible
+      { conversationId?: string; limit: number; skip: number; }
+    >(gql(listQuery), {
+      name: "messagesQuery",
+      options: ({ currentConversation: currentConvoDetail, dmConfig: currentDmConfig }) => {
+        const windowHeight = window.innerHeight;
+        // Make sure currentConvoDetail and its properties are checked for existence
+        const isMail = currentConvoDetail ? isConversationMailKind(currentConvoDetail) : false;
+        const isDm = (currentConvoDetail && currentConvoDetail.integration?.kind === "messenger") || currentDmConfig;
 
-  return withProps<Props & { currentUser: IUser }>(
-    compose(
-      graphql<
-        Props,
-        MessagesQueryResponse,
-        { conversationId?: string; limit: number }
-      >(gql(listQuery), {
-        name: "messagesQuery",
-        options: ({ currentId }) => {
-          const windowHeight = window.innerHeight;
-          const isMail = isConversationMailKind(currentConversation);
-          const isDm = integration.kind === "messenger" || dmConfig;
+        initialLimit = !isMail
+          ? Math.round((windowHeight - 330) / 45 + 1)
+          : 10;
 
-          // 330 - height of above and below sections of detail area
-          // 45 -  min height of per message
-          initialLimit = !isMail
-            ? Math.round((windowHeight - 330) / 45 + 1)
-            : 10;
+        return {
+          variables: {
+            conversationId: currentConvoDetail._id,
+            limit: isDm || isMail ? initialLimit : 0, // Ensure 'isDm' is correctly evaluated
+            skip: 0
+          },
+          fetchPolicy: "network-only" // Remains network-only for initial fetch
+        };
+      }
+    }),
+    graphql<Props & { currentUser: IUser }, MessagesTotalCountQuery, { conversationId?: string }>( // Replace 'any'
+      gql(countQuery),
+      {
+        name: "messagesTotalCountQuery",
+        options: ({ currentConversation }) => ({
+          variables: { conversationId: currentConversation._id },
+          fetchPolicy: "network-only"
+        })
+      }
+    ),
+    graphql<Props & { currentUser: IUser }, AddMessageMutationResponse, AddMessageMutationVariables>(
+      gql(mutations.conversationMessageAdd),
+      {
+        name: "addMessageMutation"
+      }
+    ),
+    graphql<Props & { currentUser: IUser }, UpdateMessageMutationResponse, { _id: string, content: any }>(
+      gql(mutations.conversationMessageUpdate),
+      {
+        name: "updateMessageMutation",
+      },
+    )
+  )(WorkAreaWithHook); // This now wraps WorkAreaWithHook
 
-          return {
-            variables: {
-              conversationId: currentId,
-              limit: isDm || isMail ? initialLimit : 0,
-              skip: 0
-            },
-            fetchPolicy: "network-only"
-          };
-        }
-      }),
-      graphql<Props, MessagesTotalCountQuery, { conversationId?: string }>(
-        gql(countQuery),
-        {
-          name: "messagesTotalCountQuery",
-          options: ({ currentId }) => ({
-            variables: { conversationId: currentId },
-            fetchPolicy: "network-only"
-          })
-        }
-      ),
-      graphql<Props, AddMessageMutationResponse, AddMessageMutationVariables>(
-        gql(mutations.conversationMessageAdd),
-        {
-          name: "addMessageMutation"
-        }
-      ),
-      graphql<Props, UpdateMessageMutationResponse, { _id: string, content: any }>(
-        gql(mutations.conversationMessageUpdate),
-        {
-          name: "updateMessageMutation",
-        },
-      ),
-    )(WorkArea)
-  );
+  return <ComposedComponent {...props} />;
 };
 
 let WithQuery;
@@ -659,24 +413,14 @@ export const resetDmWithQueryCache = () => {
 };
 
 const WithConsumer = (props: Props) => {
-  const [isInitial, setIsInitial] = React.useState(true);
-
-  React.useEffect(() => {
-    setIsInitial(false);
-  }, [WithQuery]);
-
   return (
     <AppConsumer>
       {({ currentUser }) => {
         if (!currentUser) {
           return null;
         }
-
-        if (isInitial) {
-          WithQuery = generateWithQuery(props);
-        }
-
-        return <WithQuery {...props} currentUser={currentUser} />;
+        // Ensure Props passed to WithQueryAndHook matches its expected Props type
+        return <WithQueryAndHook {...props} currentUser={currentUser} />;
       }}
     </AppConsumer>
   );
