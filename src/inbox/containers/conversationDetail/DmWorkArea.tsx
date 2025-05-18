@@ -375,7 +375,7 @@ const WithQueryAndHook = (props: Props & { currentUser: IUser }) => {
             limit: isDm || isMail ? initialLimit : 0, // Ensure 'isDm' is correctly evaluated
             skip: 0
           },
-          fetchPolicy: "network-only" // Remains network-only for initial fetch
+          fetchPolicy: "cache-and-network" // CHANGED from network-only
         };
       }
     }),
@@ -385,7 +385,7 @@ const WithQueryAndHook = (props: Props & { currentUser: IUser }) => {
         name: "messagesTotalCountQuery",
         options: ({ currentConversation }) => ({
           variables: { conversationId: currentConversation._id },
-          fetchPolicy: "network-only"
+          fetchPolicy: "cache-and-network" // CHANGED from network-only
         })
       }
     ),

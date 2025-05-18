@@ -169,7 +169,7 @@ const ConversationListContainerWithRouter = withProps<Props>(
         options: ({ queryParams }) => ({
           variables: generateParams(queryParams),
           notifyOnNetworkStatusChange: true,
-          fetchPolicy: "network-only",
+          fetchPolicy: "cache-and-network", // CHANGED from "network-only"
         }),
       }
     ),
@@ -180,6 +180,7 @@ const ConversationListContainerWithRouter = withProps<Props>(
         options: ({ queryParams }) => ({
           notifyOnNetworkStatusChange: true,
           variables: generateOptions(queryParams),
+          fetchPolicy: "cache-and-network", // OPTIONAL: Changed for consistency, was network-only
         }),
       }
     )
