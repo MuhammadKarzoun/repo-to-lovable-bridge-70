@@ -14,6 +14,7 @@ type Props = {
   counts: string;
   paramKey: string;
   icon?: string;
+  iconFor?: string;
   queryParams?: any;
   refetchRequired: string;
   multiple?: boolean;
@@ -124,7 +125,7 @@ export default class FilterList extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { paramKey, icon, multiple, treeView } = this.props;
+    const { paramKey, icon, multiple, treeView, iconFor } = this.props;
     const { counts, fields, loading } = this.state;
 
     if (loading) {
@@ -138,6 +139,7 @@ export default class FilterList extends React.PureComponent<Props, State> {
           paramKey={paramKey}
           counts={counts}
           icon={icon}
+          iconFor={iconFor}
           loading={false}
           searchable={false}
           multiple={multiple}

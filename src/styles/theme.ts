@@ -5,6 +5,7 @@ export const modernColors = {
   primary: '#1F97FF',
   secondary: '#f1b500',
   background: '#F5F8FA',
+  secondBackground: '#E5E7EB',
   sidebarBackground: '#FFFFFF',
   contentBackground: '#FFFFFF',
   textPrimary: '#333333',

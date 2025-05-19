@@ -1,23 +1,24 @@
 import * as compose from "lodash.flowright";
+import React, { useEffect } from "react";
+import { gql } from "@apollo/client";
+import { graphql } from "@apollo/client/react/hoc";
 
 import { Alert, withProps } from "@octobots/ui/src/utils";
 import {
   ConversationDetailQueryResponse,
   MarkAsReadMutationResponse,
+  IConversation,
 } from "@octobots/ui-inbox/src/inbox/types";
 import {
   mutations,
   queries,
-  subscriptions,
 } from "@octobots/ui-inbox/src/inbox/graphql";
 
 import { AppConsumer } from "coreui/appContext";
-import ConversationDetail from "../../components/conversationDetail/ConversationDetail";
+import ConversationDetailComponent from "../../components/conversationDetail/ConversationDetail";
 import { IField } from "@octobots/ui/src/types";
 import { IUser } from "@octobots/ui/src/auth/types";
-import React from "react";
-import { gql } from "@apollo/client";
-import { graphql } from "@apollo/client/react/hoc";
+import { useInboxRealtimeEvents } from "../../hooks/useInboxRealtimeEvents";
 
 export type DashboardApp = {
   _id: string;
@@ -37,120 +38,64 @@ type Props = {
 
 type FinalProps = {
   detailQuery: ConversationDetailQueryResponse;
+  currentUser: IUser;
 } & Props &
-  MarkAsReadMutationResponse & { currentUser: IUser };
+  MarkAsReadMutationResponse;
 
-class DetailContainer extends React.Component<FinalProps> {
-  private prevSubscriptions;
+const DetailContainer: React.FC<FinalProps> = (props) => {
+  const {
+    currentId,
+    detailQuery,
+    markAsReadMutation,
+    currentUser,
+    // userDashboardApps, // Pass through if needed by component
+  } = props;
 
-  constructor(props) {
-    super(props);
+  const conversation = detailQuery.conversationDetail;
+  const messengerCustomerId =
+    conversation?.integration?.kind === "messenger" && conversation?.customer?._id
+      ? conversation.customer._id
+      : undefined;
 
-    this.prevSubscriptions = null;
-  }
+  // useInboxRealtimeEvents hook provides connectionStatus and handles typingInfo internally,
+  // which are then passed to DmWorkArea container, which then passes to DmWorkAreaComponent.
+  // This container (DetailContainer) doesn't directly consume typingInfo.
+  // It does consume connectionStatus to pass down.
+  const { connectionStatus } = useInboxRealtimeEvents({
+    currentUser,
+    currentConversationId: currentId,
+    messengerCustomerId,
+  });
 
-  componentWillReceiveProps(nextProps) {
-    const { currentId, detailQuery } = nextProps;
-
-    // if conversation id changed. then unsubscribe previous subscriptions
-    if (this.prevSubscriptions && this.props.currentId !== currentId) {
-      const { detailHandler, customerHandler } = this.prevSubscriptions;
-
-      if (detailHandler) {
-        detailHandler();
-      }
-
-      if (customerHandler) {
-        customerHandler();
-      }
-
-      this.prevSubscriptions = null;
-    }
-
-    if (detailQuery.loading) {
-      return;
-    }
-
-    if (!detailQuery.conversationDetail) {
-      return;
-    }
-
-    if (this.prevSubscriptions) {
-      return;
-    }
-
-    // Start new subscriptions =============
-    this.prevSubscriptions = {};
-
-    // listen for conversation changes like status, assignee
-    this.prevSubscriptions.detailHandler = detailQuery.subscribeToMore({
-      document: gql(subscriptions.conversationChanged),
-      variables: { _id: currentId },
-      updateQuery: () => {
-        this.props.detailQuery.refetch();
-      },
-    });
-
-    // listen for customer connection
-    const conversation = detailQuery.conversationDetail;
-
-    if (
-      conversation.integration &&
-      conversation.integration.kind === "messenger"
-    ) {
-      const customerId = conversation.customer && conversation.customer._id;
-
-      this.prevSubscriptions.customerHandler = detailQuery.subscribeToMore({
-        document: gql(subscriptions.customerConnectionChanged),
-        variables: { _id: customerId },
-        updateQuery: (prev, { subscriptionData: { data } }) => {
-          const prevConv = prev.conversationDetail;
-          const customerConnection = data.customerConnectionChanged;
-
-          if (prevConv && prevConv.customer._id === customerConnection._id) {
-            this.props.detailQuery.refetch();
-          }
-        },
-      });
-    }
-  }
-
-  render() {
-    const {
-      currentId,
-      detailQuery,
-      markAsReadMutation,
-      currentUser,
-      userDashboardApps,
-    } = this.props;
-
-    const loading = detailQuery.loading;
-    const conversation = detailQuery.conversationDetail;
-
-    // mark as read ============
-    if (!loading && conversation) {
+  useEffect(() => {
+    if (!detailQuery.loading && conversation && currentUser) {
       const readUserIds = conversation.readUserIds || [];
-
       if (!readUserIds.includes(currentUser._id)) {
         markAsReadMutation({
           variables: { _id: conversation._id },
         }).catch((e) => {
+          console.error('[ConversationDetail] Error marking conversation as read', e);
           Alert.error(e.message);
         });
       }
     }
+  }, [detailQuery.loading, conversation, currentUser, markAsReadMutation]);
 
-    const updatedProps = {
-      ...this.props,
-      currentConversationId: currentId,
-      currentConversation: conversation,
-      refetchDetail: detailQuery.refetch,
-      loading,
-    };
+  // Old subscription logic for conversation changes or message status was handled
+  // by useInboxRealtimeEvents hook in Phase 1/2. This component relies on cache updates.
 
-    return <ConversationDetail {...updatedProps} />;
-  }
-}
+  const updatedProps = {
+    ...props,
+    currentConversationId: currentId,
+    currentConversation: conversation,
+    refetchDetail: detailQuery.refetch,
+    loading: detailQuery.loading,
+    connectionStatus, // Pass connectionStatus to ConversationDetailComponent
+    // typingInfo is handled by DmWorkArea container/component
+  };
+
+  return <ConversationDetailComponent {...updatedProps} />;
+};
 
 const WithQuery = withProps<Props & { currentUser: IUser }>(
   compose(
@@ -171,6 +116,8 @@ const WithQuery = withProps<Props & { currentUser: IUser }>(
         options: ({ currentId }) => {
           return {
             refetchQueries: [
+              // Refetching conversationDetailMarkAsRead might be redundant if cache updates directly
+              // for readUserIds. Keeping for now as it was existing logic.
               {
                 query: gql(queries.conversationDetailMarkAsRead),
                 variables: { _id: currentId },
@@ -194,9 +141,12 @@ const WithQuery = withProps<Props & { currentUser: IUser }>(
 const WithConsumer = (props: Props) => {
   return (
     <AppConsumer>
-      {({ currentUser }) => (
-        <WithQuery {...props} currentUser={currentUser || ({} as IUser)} />
-      )}
+      {({ currentUser }) => {
+        if (!currentUser) {
+          return null; 
+        }
+        return <WithQuery {...props} currentUser={currentUser} />;
+      }}
     </AppConsumer>
   );
 };

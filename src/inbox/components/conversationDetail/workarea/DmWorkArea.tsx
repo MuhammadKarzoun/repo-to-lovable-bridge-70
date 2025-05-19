@@ -1,3 +1,4 @@
+
 import React, {
   useState,
   useEffect,
@@ -17,6 +18,7 @@ import {
   RenderConversationWrapper,
   TabButton,
   TabsContainer,
+  ConnectionStatus,
 } from "./styles";
 import ActionBar from "./ActionBar";
 import CallPro from "./callpro/Callpro";
@@ -79,6 +81,8 @@ type Props = {
   updateMsg: (id: string, content: string, action: string) => void;
   hideMask: boolean;
   userDashboardApps?: { userDashboardApps: DashboardApp[] };
+  connectionStatus?: 'connected' | 'disconnected' | 'connecting';
+  toggle?: () => void;
 };
 
 const WorkArea: React.FC<Props> = React.memo((props) => {
@@ -95,6 +99,8 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
     refetchDetail,
     loadMoreMessages,
     userDashboardApps,
+    connectionStatus = 'connected',
+    toggle
   } = props;
 
   const [attachmentPreview, setAttachmentPreview] =
@@ -115,6 +121,7 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
   // Handle scroll to load more messages
   const handleScroll = useCallback(() => {
     if (conversationWrapperRef.current?.scrollTop === 0 && !isLoadingMore) {
+      console.log('[DmWorkArea Component] Loading more messages on scroll');
       setIsLoadingMore(true);
       loadMoreMessages().finally(() => setIsLoadingMore(false));
     }
@@ -248,6 +255,8 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
 
   // Render the RespondBox component
   const renderRespondBox = useCallback(() => {
+    if (!currentConversation?.integration) return null;
+    
     const { kind } = currentConversation.integration;
     const showInternal =
       isMailConversation(kind) ||
@@ -288,10 +297,22 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
     }
   }, [msg, conversationMessages, jumpToReleventDiv]);
 
+  // Render connection status indicator
+  const renderConnectionStatus = useCallback(() => {
+    if (connectionStatus === 'connected') return null;
+    
+    return (
+      <ConnectionStatus status={connectionStatus}>
+        {connectionStatus === 'connecting' ? 'Connecting to server...' : 'Connection lost. Trying to reconnect...'}
+      </ConnectionStatus>
+    );
+  }, [connectionStatus]);
+
   return (
     <>
-      <ActionBar currentConversation={currentConversation} />
-      <TabsContainer>
+      <ActionBar toggle={toggle} currentConversation={currentConversation} />
+      {renderConnectionStatus()}
+      {(userApps && userApps?.length> 0) && <TabsContainer>
         <TabButton
           type="button"
           isActive={tabType?._id === "messages"}
@@ -301,14 +322,15 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
         </TabButton>
         {userApps?.map((userApp: DashboardApp) => (
           <TabButton
+            key={userApp._id}
             type="button"
-            isActive={tabType === userApp}
+            isActive={tabType._id === userApp._id}
             onClick={() => setTabType(userApp)}
           >
             {userApp?.name}
           </TabButton>
         ))}
-      </TabsContainer>
+      </TabsContainer>}
       {tabType._id === "messages" && (
         <>
           <ModernContentBox>
@@ -331,10 +353,11 @@ const WorkArea: React.FC<Props> = React.memo((props) => {
         </>
       )}
 
-      {tabType?._id !== "messages" && (
+      {tabType?._id !== "messages" && tabType?.iframeUrl && (
         <iframe
           src={tabType?.iframeUrl}
           style={{ height: "100%", width: "100%", border: "none" }}
+          title={tabType?.name || "Dashboard App"}
         />
       )}
     </>

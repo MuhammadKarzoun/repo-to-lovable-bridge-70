@@ -108,14 +108,14 @@ type EditorProps = {
   limit?: number;
   mentionSuggestion?: MentionSuggestionParams;
   onCtrlEnter?: () => void;
-  isIntrnalNote?: boolean;
+  isInternalNote?: boolean;
 };
 
 type State = {
   collectedMentions: any;
   templatesState: any;
   hideTemplates: boolean;
-  isIntrnalNote?: boolean;
+  isInternalNote?: boolean;
 };
 
 const Editor = forwardRef(
@@ -131,14 +131,14 @@ const Editor = forwardRef(
       onChange,
       limit,
       onCtrlEnter,
-      isIntrnalNote,
+      isInternalNote,
     } = props;
 
     const [state, setState] = useState<State>({
       collectedMentions: [],
       templatesState: null,
       hideTemplates: props.showMentions,
-      isIntrnalNote: props.isIntrnalNote,
+      isInternalNote: props.isInternalNote,
     });
 
     useEffect(() => {
@@ -242,6 +242,7 @@ const Editor = forwardRef(
         {renderTemplates()}
         <RichTextEditor
           ref={ref}
+          hideToolbar={!shouldUseRichText() && !isInternalNote}
           name={currentConversation}
           placeholder={placeholder}
           integrationKind={integrationKind}

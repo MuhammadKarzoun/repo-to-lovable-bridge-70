@@ -70,7 +70,7 @@ const DateFilter: React.FC<DateFilterProps> = ({ queryParams }) => {
       }
     }
     
-    return 'Date';
+    return '';
   };
 
   return (

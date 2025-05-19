@@ -35,6 +35,7 @@ import styled from "styled-components";
 import { modernColors, typography, spacing } from "../../../styles/theme";
 import Badge from "../../../components/common/Badge";
 import { IIntegration } from '@octobots/ui-inbox/src/settings/integrations/types';
+import Icon from "@octobots/ui/src/components/Icon";
 
 dayjs.extend(relativeTime);
 
@@ -133,10 +134,62 @@ const ConversationItem: React.FC<Props> = (props) => {
     return (
       lastMsgFrom == 'customer' && idle >= idleTimeConfig &&
       <Tip placement="left" text="Idle">
-        <Idle />
+        <Idle>
+          <Icon
+            icon="fire"
+            size={11}
+            color={"#ca244d"}
+            style={{ marginInlineEnd: spacing.xs }}
+          />
+
+          <span>{(dayjs(updatedAt) || ({} as any)).fromNow(true)}</span>
+        </Idle>
       </Tip>
     );
   };
+
+
+  const renderIntegration = (integration: IIntegration) => {
+
+    if (!integration) {
+      return null;
+    }
+
+    const { name, kind } = integration;
+    let icon = "external-link-alt";
+    let color = "#333333";
+    switch (kind) {
+      case "whatsapp":
+        icon = "whatsapp";
+        color = "#25D366";
+        break;
+      case "facebook-messenger":
+        icon = "facebook";
+        color = "#3b5998";
+        break;
+      case "facebook-post":
+        icon = "facebook-official";
+        color = "#3b5998";
+        break;
+      case "instagram-messenger":
+        icon = "instagram";
+        color = "#E1306C";
+        break;
+      case "instagram-post":
+        icon = "instagram";
+        color = "#E1306C";
+        break;
+      default:
+        icon = "earthgrid";
+        break;
+    }
+
+    return (
+      <span >
+        <Icon icon={icon} color={color} size={12} /> <span>{name}</span>
+      </span>
+    );
+  }
 
   const showMessageContent = (kind: string, content: string) => {
     if (kind === "callpro") {
@@ -177,7 +230,7 @@ const ConversationItem: React.FC<Props> = (props) => {
         <FlexContent>
           <MainInfo>
             {isExistingCustomer && (
-              <Avatar 
+              <Avatar
                 customer={customer}
                 size={40}
                 status={customer.isOnline ? 'online' : 'offline'}
@@ -186,7 +239,7 @@ const ConversationItem: React.FC<Props> = (props) => {
             <CustomerInfo>
               <CustomerName>
                 <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {isExistingCustomer && renderFullName(customer)}
+                  {isExistingCustomer && renderFullName(customer, true)}
                 </div>
                 <time>
                   {(dayjs(updatedAt || createdAt) || ({} as any)).fromNow(true)}
@@ -194,8 +247,7 @@ const ConversationItem: React.FC<Props> = (props) => {
               </CustomerName>
 
               <SmallTextOneLine>
-                {brand.name && `${brand.name} via `}
-                {integration.name}
+                {renderIntegration(integration)}
               </SmallTextOneLine>
             </CustomerInfo>
           </MainInfo>
@@ -213,7 +265,7 @@ const ConversationItem: React.FC<Props> = (props) => {
                     placement="top"
                     text={assignedUser.details && assignedUser.details.fullName}
                   >
-                    <Avatar 
+                    <Avatar
                       user={assignedUser}
                       size={24}
                     />
@@ -222,10 +274,12 @@ const ConversationItem: React.FC<Props> = (props) => {
               )}
             </div>
           </MessageContent>
-          <Tags tags={tags} limit={3} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: spacing.xs }}>
+            {isIdleContent(integration, updatedAt, idleTimeConfig || 3, lastMsgFrom)}
+            <Tags tags={tags} limit={3} />
+          </div>
         </FlexContent>
       </RowContent>
-      {isIdleContent(integration, updatedAt, idleTimeConfig || 3, lastMsgFrom)}
     </RowItem>
   );
 };

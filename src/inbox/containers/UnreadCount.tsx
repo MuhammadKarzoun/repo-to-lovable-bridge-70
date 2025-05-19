@@ -1,17 +1,17 @@
+
 import * as compose from 'lodash.flowright';
 
-import { isEnabled, sendDesktopNotification } from '@octobots/ui/src/utils/core';
-import { queries, subscriptions } from '@octobots/ui-inbox/src/inbox/graphql';
+import { isEnabled } from '@octobots/ui/src/utils/core';
+import { queries } from '@octobots/ui-inbox/src/inbox/graphql';
 
 import { IUser } from '@octobots/ui/src/auth/types';
 import React from 'react';
 import { UnreadConversationsTotalCountQueryResponse } from '@octobots/ui-inbox/src/inbox/types';
-import UnreadCount from '../components/UnreadCount';
+import UnreadCountComponent from '../components/UnreadCount';
 import { gql } from '@apollo/client';
 import { graphql } from '@apollo/client/react/hoc';
-import strip from 'strip';
 import withCurrentUser from '@octobots/ui/src/auth/containers/withCurrentUser';
-import { withProps, getSubdomain } from '@octobots/ui/src/utils';
+import { withProps } from '@octobots/ui/src/utils';
 
 type Props = {
   currentUser: IUser;
@@ -22,28 +22,9 @@ type FinalProps = {
 } & Props;
 
 class UnreadCountContainer extends React.Component<FinalProps> {
-  componentWillMount() {
-    const { unreadConversationsCountQuery, currentUser } = this.props;
-
-    unreadConversationsCountQuery &&
-      unreadConversationsCountQuery.subscribeToMore({
-        // listen for all conversation changes
-        document: gql(subscriptions.conversationClientMessageInserted),
-        variables: { userId: currentUser._id },
-        updateQuery: (prev, { subscriptionData: { data } }) => {
-          const { conversationClientMessageInserted } = data;
-          const { content } = conversationClientMessageInserted || {};
-
-          this.props.unreadConversationsCountQuery.refetch();
-
-          // no need to send notification for bot message
-          sendDesktopNotification({
-            title: 'You have a new message',
-            content: strip(content || ''),
-          });
-        },
-      });
-  }
+  // Subscriptions and related lifecycle methods (componentWillMount)
+  // were removed in earlier phases. The unread count is now updated
+  // via Apollo Client cache modifications performed by useInboxRealtimeEvents.
 
   render() {
     const { unreadConversationsCountQuery } = this.props;
@@ -53,12 +34,11 @@ class UnreadCountContainer extends React.Component<FinalProps> {
         unreadConversationsCountQuery.conversationsTotalUnreadCount) ||
       0;
 
-    const props = {
-      ...this.props,
+    const unreadCountProps = {
       unreadConversationsCount,
     };
 
-    return <UnreadCount {...props} />;
+    return <UnreadCountComponent {...unreadCountProps} />;
   }
 }
 
@@ -70,9 +50,9 @@ export default withProps<Props>(
         name: 'unreadConversationsCountQuery',
         options: () => ({
           fetchPolicy: 'network-only',
-          notifyOnNetworkStatusChange: true,
+          notifyOnNetworkStatusChange: true, // Remains true to react to cache updates
         }),
-        skip: !isEnabled('inbox') ? true : false,
+        skip: !isEnabled('inbox'),
       },
     ),
   )(withCurrentUser(UnreadCountContainer)),

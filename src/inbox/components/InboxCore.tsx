@@ -17,12 +17,12 @@ const Sidebar = asyncComponent(
 );
 
 const ModernHeightedWrapper = styled(HeightedWrapper)`
-  background-color: ${modernColors.background};
+  background-color: ${modernColors.contentBackground};
 `;
 
 const ModernContents = styled(Contents)`
-  padding: ${spacing.lg};
-  gap: ${spacing.lg};
+  padding: 0;
+  gap: 1px;
 `;
 
 type Props = {
@@ -33,27 +33,10 @@ type Props = {
 };
 
 const Inbox = (props: Props) => {
-  const { currentConversationId, queryParams, msg, currentUserId } = props;
-
-  const menuInbox = [
-    { title: "Team Inbox", link: "/inbox/index" }, 
-    { title: "My tasks", link: `/taks?assignedUserIds=${currentUserId}` }, 
-    { title: "My tickets", link: `/ticket?assignedUserIds=${currentUserId}` }
-  ];
-  
-  const ReportsFormButton = loadDynamicComponent("reportsCommonFormButton", {
-    serviceName: "inbox",
-    reportTemplateType: "inbox",
-    ...props,
-  });
+  const { currentConversationId, queryParams, msg } = props;
 
   return (
     <ModernHeightedWrapper>
-      <Header
-        title={"Conversation"}
-        queryParams={queryParams}
-        submenu={menuInbox}
-      />
       <ModernContents>
         <Sidebar
           queryParams={queryParams}

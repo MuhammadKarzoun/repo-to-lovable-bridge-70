@@ -6,6 +6,7 @@ import React from 'react';
 type Props = {
   groupText: string;
   toggleName: string;
+  icon?: string;
   manageUrl?: string;
   children: React.ReactNode;
   isOpen: boolean;
